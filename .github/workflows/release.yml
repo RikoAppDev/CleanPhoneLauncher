@@ -133,6 +133,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build Debug APK
         env:
           VERSION_NAME: ${{ needs.version.outputs.version_name }}
@@ -166,6 +169,9 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       # For signed releases (uncomment when you add signing)
       # - name: Decode Keystore
