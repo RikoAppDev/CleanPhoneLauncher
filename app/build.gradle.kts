@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Auto-versioning: reads from environment variables (CI) or falls back to defaults
+val ciVersionCode: Int = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+val ciVersionName: String = System.getenv("VERSION_NAME") ?: "1.0.0"
+
 android {
     namespace = "dev.rikoapp.cleanphonelauncher"
     compileSdk {
@@ -16,10 +20,14 @@ android {
         applicationId = "dev.rikoapp.cleanphonelauncher"
         minSdk = 33
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = ciVersionCode
+        versionName = ciVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Make version info accessible in app at runtime
+        buildConfigField("String", "VERSION_NAME_FULL", "\"$ciVersionName\"")
+        buildConfigField("int", "VERSION_CODE_INT", "$ciVersionCode")
     }
 
     buildTypes {
@@ -37,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

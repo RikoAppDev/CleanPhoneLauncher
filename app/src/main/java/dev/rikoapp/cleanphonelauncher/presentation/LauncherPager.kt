@@ -1,6 +1,5 @@
 package dev.rikoapp.cleanphonelauncher.presentation
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -18,9 +17,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LauncherPager(launcherViewModel: LauncherViewModel = viewModel()) {
+fun LauncherPager(
+    launcherViewModel: LauncherViewModel = viewModel()
+) {
     val context = LocalContext.current
     val pagerState = rememberPagerState(pageCount = { 2 })
     val apps by launcherViewModel.apps.collectAsState()

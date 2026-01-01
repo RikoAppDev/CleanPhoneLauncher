@@ -9,17 +9,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,12 +35,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.rikoapp.cleanphonelauncher.domain.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
+import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PhoneIcon
 
 @Composable
@@ -47,11 +55,22 @@ fun HomeScreen(
     val context = LocalContext.current
     val clockType by clockViewModel.clockType.collectAsState()
     val batteryLevel by clockViewModel.batteryLevel.collectAsState()
-    var showDropdown by remember { mutableStateOf(false) }
+    var showClockTypeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         clockViewModel.loadClockType(context)
         clockViewModel.registerBatteryReceiver(context)
+    }
+
+    if (showClockTypeDialog) {
+        ClockTypeDialog(
+            currentClockType = clockType,
+            onDismiss = { showClockTypeDialog = false },
+            onConfirm = { selectedType ->
+                clockViewModel.setClockType(context, selectedType)
+                showClockTypeDialog = false
+            }
+        )
     }
 
     Column(
@@ -60,11 +79,12 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
             .safeContentPadding()
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(16.dp)
                 .weight(1f),
-            contentAlignment = Alignment.TopCenter
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
@@ -91,7 +111,7 @@ fun HomeScreen(
                                 context.startActivity(Intent(AlarmClock.ACTION_SHOW_ALARMS))
                             }
                         },
-                        onLongClick = { showDropdown = true }
+                        onLongClick = { showClockTypeDialog = true }
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -116,21 +136,11 @@ fun HomeScreen(
                         batteryLevel = batteryLevel
                     )
                 }
-
-                DropdownMenu(
-                    expanded = showDropdown,
-                    onDismissRequest = { showDropdown = false }
-                ) {
-                    ClockType.entries.forEach { type ->
-                        DropdownMenuItem(onClick = {
-                            clockViewModel.setClockType(context, type)
-                            showDropdown = false
-                        }, text = { Text(type.displayName) })
-                    }
-                }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            // TODO: top saved appliacitons
+            LazyColumn() { }
         }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -171,5 +181,22 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeScreenPreview() {
+    CleanPhoneLauncherTheme {
+        HomeScreen(
+            phoneApp = AppData(
+                name = "WhatsApp",
+                packageName = "com.whatsapp"
+            ),
+            cameraApp = AppData(
+                name = "Camera",
+                packageName = "com.google.android.apps.camera"
+            )
+        )
     }
 }
