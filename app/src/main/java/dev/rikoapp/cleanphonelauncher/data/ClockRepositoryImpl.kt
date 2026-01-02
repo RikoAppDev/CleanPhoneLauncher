@@ -1,26 +1,36 @@
-package dev.rikoapp.cleanphonelauncher.presentation
+package dev.rikoapp.cleanphonelauncher.data
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
+import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ClockViewModel : ViewModel() {
+class ClockRepositoryImpl(
+    private val context: Application,
+    private val applicationScope: CoroutineScope
+) : ClockRepository {
 
     private val _clockType = MutableStateFlow(ClockType.ANALOG_WITH_SECONDS)
-    val clockType = _clockType.asStateFlow()
+    override val clockType = _clockType.asStateFlow()
 
     private val _batteryLevel = MutableStateFlow(0)
-    val batteryLevel = _batteryLevel.asStateFlow()
+    override val batteryLevel = _batteryLevel.asStateFlow()
 
-    fun setClockType(context: Context, type: ClockType) {
-        viewModelScope.launch {
+    init {
+        loadClockType()
+        registerBatteryReceiver()
+    }
+
+    override fun setClockType(type: ClockType) {
+        applicationScope.launch {
             val sharedPref = context.getSharedPreferences("clock_settings", Context.MODE_PRIVATE)
             with(sharedPref.edit()) {
                 putString("clock_type", type.name)
@@ -30,15 +40,15 @@ class ClockViewModel : ViewModel() {
         }
     }
 
-    fun loadClockType(context: Context) {
-        viewModelScope.launch {
+    override fun loadClockType() {
+        applicationScope.launch {
             val sharedPref = context.getSharedPreferences("clock_settings", Context.MODE_PRIVATE)
             val typeName = sharedPref.getString("clock_type", ClockType.ANALOG_WITH_SECONDS.name)
             _clockType.value = ClockType.valueOf(typeName ?: ClockType.ANALOG_WITH_SECONDS.name)
         }
     }
 
-    fun registerBatteryReceiver(context: Context) {
+    override fun registerBatteryReceiver() {
         val batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1

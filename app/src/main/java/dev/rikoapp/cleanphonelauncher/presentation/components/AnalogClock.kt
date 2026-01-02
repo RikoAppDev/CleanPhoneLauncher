@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -123,5 +125,13 @@ fun AnalogClock(
             radius = 5f,
             center = center
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun AnalogClockPreview() {
+    CleanPhoneLauncherTheme {
+        AnalogClock(showSeconds = true, batteryLevel = 100)
     }
 }

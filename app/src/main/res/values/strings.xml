@@ -1,4 +1,19 @@
 <resources>
     <string name="app_name">CleanPhoneLauncher</string>
     <string name="clock_type_dialog_title">Select Clock Type</string>
+    <string name="search_apps_placeholder">Search apps...</string>
+    <string name="clear_search_content_description">Clear search</string>
+    <string name="recent_apps">Recent apps</string>
+    <string name="recent_apps_permission_request">Recent apps require usage stats permission to work.</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="add_to_favorites_question">Add to favorites?</string>
+    <string name="remove_from_favorites_question">Remove from favorites?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="clock_type_analog">Analog</string>
+    <string name="clock_type_analog_with_seconds">Analog with seconds</string>
+    <string name="clock_type_digital">Digital</string>
+    <string name="clock_type_digital_with_seconds">Digital with seconds</string>
 </resources>

@@ -1,6 +1,6 @@
 package dev.rikoapp.cleanphonelauncher.presentation.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,20 +16,28 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.rikoapp.cleanphonelauncher.domain.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 
 @Composable
-fun AppListItem(app: AppData) {
+fun AppListItem(
+    app: AppData,
+    onAppClick: () -> Unit,
+    onAppLongClick: () -> Unit
+) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = MaterialTheme.shapes.small)
-            .clickable {
-                val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                context.startActivity(intent)
-            }
+            .combinedClickable(
+                onClick = {
+                    val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                    context.startActivity(intent)
+                    onAppClick()
+                },
+                onLongClick = onAppLongClick
+            )
             .padding(vertical = 12.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
@@ -51,7 +59,9 @@ private fun Preview() {
             app = AppData(
                 name = "WhatsApp",
                 packageName = "com.whatsapp"
-            )
+            ),
+            onAppClick = {},
+            onAppLongClick = {}
         )
     }
 }

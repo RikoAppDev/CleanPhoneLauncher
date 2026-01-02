@@ -1,7 +1,5 @@
-package dev.rikoapp.cleanphonelauncher.presentation
+package dev.rikoapp.cleanphonelauncher.presentation.home
 
-import android.content.Intent
-import android.provider.AlarmClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,61 +12,68 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.rikoapp.cleanphonelauncher.domain.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
+import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
+import dev.rikoapp.cleanphonelauncher.presentation.components.FavoriteDialog
+import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PhoneIcon
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(
-    phoneApp: AppData?,
-    cameraApp: AppData?,
-    clockViewModel: ClockViewModel = viewModel()
+fun HomeScreenRoot(
+    viewModel: HomeViewModel = koinViewModel()
 ) {
-    val context = LocalContext.current
-    val clockType by clockViewModel.clockType.collectAsState()
-    val batteryLevel by clockViewModel.batteryLevel.collectAsState()
-    var showClockTypeDialog by remember { mutableStateOf(false) }
+    val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(Unit) {
-        clockViewModel.loadClockType(context)
-        clockViewModel.registerBatteryReceiver(context)
+    HomeScreen(
+        state = state,
+        onAction = viewModel::onAction
+    )
+}
+
+@Composable
+private fun HomeScreen(
+    state: HomeScreenState,
+    onAction: (HomeScreenAction) -> Unit,
+) {
+    if (state.showClockTypeDialog) {
+        ClockTypeDialog(
+            currentClockType = state.clockType,
+            onDismiss = { onAction(HomeScreenAction.OnClockTypeDialogDismiss) },
+            onConfirm = { selectedType ->
+                onAction(HomeScreenAction.OnClockTypeConfirm(selectedType))
+            }
+        )
     }
 
-    if (showClockTypeDialog) {
-        ClockTypeDialog(
-            currentClockType = clockType,
-            onDismiss = { showClockTypeDialog = false },
-            onConfirm = { selectedType ->
-                clockViewModel.setClockType(context, selectedType)
-                showClockTypeDialog = false
+    if (state.showDialogApp != null) {
+        val app = state.showDialogApp
+        FavoriteDialog(
+            app = app,
+            isFavorite = true,
+            onDismiss = { onAction(HomeScreenAction.OnFavoriteDialogDismiss) },
+            onConfirm = {
+                onAction(HomeScreenAction.OnRemoveFavorite(app.packageName))
             }
         )
     }
@@ -77,12 +82,13 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .safeContentPadding()
+            .systemBarsPadding()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
                 .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -91,70 +97,55 @@ fun HomeScreen(
                     .combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {
-                            val pm = context.packageManager
-                            val clockIntent = listOf(
-                                "com.google.android.deskclock",
-                                "com.sec.android.app.clockpackage",
-                                "com.sonymobile.digitalclock",
-                                "com.htc.android.worldclock",
-                                "com.motorola.blur.alarmclock",
-                                "com.lge.clock",
-                                "com.android.deskclock"
-                            ).firstNotNullOfOrNull { pkgName ->
-                                pm.getLaunchIntentForPackage(pkgName)
-                            } ?: Intent(AlarmClock.ACTION_SHOW_ALARMS)
-
-                            try {
-                                context.startActivity(clockIntent)
-                            } catch (_: Exception) {
-                                context.startActivity(Intent(AlarmClock.ACTION_SHOW_ALARMS))
-                            }
-                        },
-                        onLongClick = { showClockTypeDialog = true }
+                        onClick = { onAction(HomeScreenAction.OnClockClick) },
+                        onLongClick = { onAction(HomeScreenAction.OnClockLongClick) }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                when (clockType) {
+                when (state.clockType) {
                     ClockType.ANALOG -> AnalogClock(
                         showSeconds = false,
-                        batteryLevel = batteryLevel
+                        batteryLevel = state.batteryLevel
                     )
 
                     ClockType.ANALOG_WITH_SECONDS -> AnalogClock(
                         showSeconds = true,
-                        batteryLevel = batteryLevel
+                        batteryLevel = state.batteryLevel
                     )
 
                     ClockType.DIGITAL -> DigitalClock(
                         showSeconds = false,
-                        batteryLevel = batteryLevel
+                        batteryLevel = state.batteryLevel
                     )
 
                     ClockType.DIGITAL_WITH_SECONDS -> DigitalClock(
                         showSeconds = true,
-                        batteryLevel = batteryLevel
+                        batteryLevel = state.batteryLevel
                     )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // TODO: top saved appliacitons
-            LazyColumn() { }
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                items(state.favoriteAppsData) { app ->
+                    AppListItem(
+                        app = app,
+                        onAppClick = { /* No action needed for click on favorite app here */ },
+                        onAppLongClick = { onAction(HomeScreenAction.OnFavoriteAppLongClick(app)) }
+                    )
+                }
+            }
         }
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            phoneApp?.let { app ->
+            state.phoneApp?.let { app ->
                 IconButton(
-                    onClick = {
-                        val intent =
-                            context.packageManager.getLaunchIntentForPackage(app.packageName)
-                        context.startActivity(intent)
-                    },
+                    onClick = { onAction(HomeScreenAction.OnPhoneAppClick(app)) },
                     modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
@@ -164,13 +155,9 @@ fun HomeScreen(
                     )
                 }
             }
-            cameraApp?.let { app ->
+            state.cameraApp?.let { app ->
                 IconButton(
-                    onClick = {
-                        val intent =
-                            context.packageManager.getLaunchIntentForPackage(app.packageName)
-                        context.startActivity(intent)
-                    },
+                    onClick = { onAction(HomeScreenAction.OnCameraAppClick(app)) },
                     modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
@@ -189,14 +176,28 @@ fun HomeScreen(
 private fun HomeScreenPreview() {
     CleanPhoneLauncherTheme {
         HomeScreen(
-            phoneApp = AppData(
-                name = "WhatsApp",
-                packageName = "com.whatsapp"
+            state = HomeScreenState(
+                allApps = listOf(
+                    AppData(name = "WhatsApp", packageName = "com.whatsapp"),
+                    AppData(name = "Camera", packageName = "com.google.android.apps.camera"),
+                    AppData(name = "Discord", packageName = "com.discord")
+                ),
+                phoneApp = AppData(
+                    name = "WhatsApp",
+                    packageName = "com.whatsapp"
+                ),
+                cameraApp = AppData(
+                    name = "Camera",
+                    packageName = "com.google.android.apps.camera"
+                ),
+                clockType = ClockType.DIGITAL_WITH_SECONDS,
+                batteryLevel = 75,
+                favoriteAppsData = listOf(
+                    AppData(name = "WhatsApp", packageName = "com.whatsapp"),
+                    AppData(name = "Discord", packageName = "com.discord")
+                )
             ),
-            cameraApp = AppData(
-                name = "Camera",
-                packageName = "com.google.android.apps.camera"
-            )
+            onAction = {}
         )
     }
 }

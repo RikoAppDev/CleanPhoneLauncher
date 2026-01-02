@@ -1,33 +1,40 @@
-package dev.rikoapp.cleanphonelauncher.presentation
+package dev.rikoapp.cleanphonelauncher.data
 
-import android.content.Context
+import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.MediaStore
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dev.rikoapp.cleanphonelauncher.domain.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LauncherViewModel : ViewModel() {
+class InstalledAppsRepositoryImpl(
+    private val context: Application,
+    private val applicationScope: CoroutineScope
+) : InstalledAppsRepository {
 
     private val _apps = MutableStateFlow<List<AppData>>(emptyList())
-    val apps = _apps.asStateFlow()
+    override val apps = _apps.asStateFlow()
 
     private val _phoneApp = MutableStateFlow<AppData?>(null)
-    val phoneApp = _phoneApp.asStateFlow()
+    override val phoneApp = _phoneApp.asStateFlow()
 
     private val _cameraApp = MutableStateFlow<AppData?>(null)
-    val cameraApp = _cameraApp.asStateFlow()
+    override val cameraApp = _cameraApp.asStateFlow()
 
-    fun getInstalledApps(context: Context) {
-        viewModelScope.launch {
+    init {
+        getInstalledApps()
+    }
+
+    override fun getInstalledApps() {
+        applicationScope.launch {
             _apps.value = withContext(Dispatchers.IO) {
                 val pm = context.packageManager
                 val allApps =
@@ -43,12 +50,12 @@ class LauncherViewModel : ViewModel() {
                     }
                 }.sortedBy { it.name.toUpperCase(Locale.current) }
             }
-            findCoreApps(context)
+            findCoreApps()
         }
     }
 
-    private fun findCoreApps(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
+    override fun findCoreApps() {
+        applicationScope.launch(Dispatchers.IO) {
             val pm = context.packageManager
 
             // Find phone app

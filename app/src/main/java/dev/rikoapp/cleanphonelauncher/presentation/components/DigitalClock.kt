@@ -14,8 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -65,5 +67,13 @@ fun DigitalClock(
             fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onBackground
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DigitalClockPreview() {
+    CleanPhoneLauncherTheme {
+        DigitalClock(showSeconds = true, batteryLevel = 100)
     }
 }

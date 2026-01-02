@@ -1,0 +1,34 @@
+package dev.rikoapp.cleanphonelauncher.presentation.applist
+
+import androidx.compose.foundation.text.input.TextFieldState
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import kotlin.text.indexOf
+
+data class AppListScreenState(
+    val allApps: List<AppData> = emptyList(),
+    val searchText: TextFieldState = TextFieldState(),
+    val showDialogApp: AppData? = null,
+    val favoriteAppPackageNames: Set<String> = emptySet(),
+    val recentApps: List<AppData> = emptyList(),
+    val hasUsageStatsPermission: Boolean = false,
+    val isActive: Boolean = false
+) {
+    val filteredApps: List<AppData>
+        get() = if (searchText.text.isBlank()) {
+            allApps
+        } else {
+            allApps
+                .filter { it.name.contains(searchText.text, ignoreCase = true) }
+                .sortedWith(
+                    compareBy<AppData> {
+                        it.name.indexOf(
+                            searchText.text.toString(),
+                            ignoreCase = true
+                        )
+                    }
+                        .thenBy { it.name.length }
+                )
+        }
+
+    fun isFavorite(app: AppData): Boolean = favoriteAppPackageNames.contains(app.packageName)
+}
