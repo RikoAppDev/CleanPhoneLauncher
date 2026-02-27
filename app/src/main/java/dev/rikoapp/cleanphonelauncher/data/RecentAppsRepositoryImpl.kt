@@ -27,6 +27,7 @@ class RecentAppsRepositoryImpl(
         checkUsageStatsPermission()
     }
 
+    @Suppress("DEPRECATION")
     override fun checkUsageStatsPermission() {
         val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOps.unsafeCheckOpNoThrow(

@@ -7,7 +7,8 @@ import dev.rikoapp.cleanphonelauncher.data.database.entities.FavoriteAppEntity
 
 @Database(
     entities = [FavoriteAppEntity::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class CleanPhoneLauncherDatabase : RoomDatabase() {
     abstract val favoriteAppDao: FavoriteAppDao

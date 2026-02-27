@@ -113,11 +113,18 @@ class AppListViewModel(
             }
 
             is AppListScreenAction.OnActiveStateChanged -> {
-                _state.update { it.copy(isActive = action.isActive) }
+                _state.update {
+                    if (action.isActive) {
+                        it.copy(isActive = true)
+                    } else {
+                        it.copy(isActive = false, searchText = TextFieldState(""))
+                    }
+                }
             }
 
             AppListScreenAction.OnResume -> {
                 recentAppsRepository.checkUsageStatsPermission()
+                _state.update { it.copy(searchText = TextFieldState("")) }
             }
         }
     }
