@@ -120,6 +120,18 @@ private fun AppListScreen(
 ) {
     val alphabet = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+    // Number of items the LazyColumn renders before the app list (recent-apps header/divider or
+    // the permission prompt). Needed so alphabet fast-scroll lands on the correct row.
+    val leadingItemCount = if (state.searchText.text.isBlank()) {
+        if (state.hasUsageStatsPermission) {
+            if (state.recentApps.isNotEmpty()) state.recentApps.size + 2 else 0
+        } else {
+            1
+        }
+    } else {
+        0
+    }
+
     if (state.showDialogApp != null) {
         FavoriteDialog(
             app = state.showDialogApp,
@@ -279,7 +291,7 @@ private fun AppListScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .pointerInput(Unit) {
+                        .pointerInput(state.allApps, leadingItemCount) {
                             detectVerticalDragGestures { change, _ ->
                                 val y = change.position.y
                                 val letterIndex = (y / (size.height / alphabet.length))
@@ -289,7 +301,7 @@ private fun AppListScreen(
                                     onAction(AppListScreenAction.OnAlphabetScroll(alphabet[letterIndex]))
                                     val letter = alphabet[letterIndex]
                                     val index = if (letter == '#') {
-                                        state.allApps.indexOfFirst { !it.name[0].isLetter() }
+                                        state.allApps.indexOfFirst { it.name.firstOrNull()?.isLetter() != true }
                                     } else {
                                         state.allApps.indexOfFirst {
                                             it.name.startsWith(
@@ -300,7 +312,7 @@ private fun AppListScreen(
                                     }
                                     if (index != -1) {
                                         coroutineScope.launch {
-                                            listState.scrollToItem(index)
+                                            listState.scrollToItem(index + leadingItemCount)
                                         }
                                     }
                                 }
@@ -329,7 +341,7 @@ private fun AppListScreen(
                                 }
                                 if (index != -1) {
                                     coroutineScope.launch {
-                                        listState.animateScrollToItem(index)
+                                        listState.animateScrollToItem(index + leadingItemCount)
                                     }
                                 }
                             }

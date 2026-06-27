@@ -44,7 +44,9 @@ class ClockRepositoryImpl(
         applicationScope.launch {
             val sharedPref = context.getSharedPreferences("clock_settings", Context.MODE_PRIVATE)
             val typeName = sharedPref.getString("clock_type", ClockType.ANALOG_WITH_SECONDS.name)
-            _clockType.value = ClockType.valueOf(typeName ?: ClockType.ANALOG_WITH_SECONDS.name)
+            // Guard against a stored value that no longer maps to a ClockType (e.g. after a rename)
+            _clockType.value = ClockType.entries.firstOrNull { it.name == typeName }
+                ?: ClockType.ANALOG_WITH_SECONDS
         }
     }
 
@@ -53,7 +55,10 @@ class ClockRepositoryImpl(
             override fun onReceive(context: Context?, intent: Intent?) {
                 val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
                 val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-                _batteryLevel.value = (level * 100 / scale.toFloat()).toInt()
+                // Avoid divide-by-zero / garbage values when battery info is unavailable
+                if (level >= 0 && scale > 0) {
+                    _batteryLevel.value = (level * 100 / scale.toFloat()).toInt().coerceIn(0, 100)
+                }
             }
         }
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)

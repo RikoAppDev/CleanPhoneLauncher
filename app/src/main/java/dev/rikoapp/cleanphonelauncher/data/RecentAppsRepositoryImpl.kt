@@ -57,7 +57,9 @@ class RecentAppsRepositoryImpl(
                     endTime
                 )
 
+            // queryUsageStats can return null (e.g. permission revoked mid-flight)
             _recentApps.value = usageStats
+                .orEmpty()
                 .filter { it.lastTimeUsed > 0 }
                 .sortedByDescending { it.lastTimeUsed }
                 .mapNotNull { stats ->

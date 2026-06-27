@@ -10,6 +10,12 @@ plugins {
 val ciVersionCode: Int = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
 val ciVersionName: String = System.getenv("VERSION_NAME") ?: "1.0.0"
 
+// Release signing: enabled only when a keystore + password are provided via env (CI secrets).
+// Locally (no secrets) we fall back to debug signing so the project still builds.
+val releaseKeystoreFile = file(System.getenv("KEYSTORE_FILE") ?: "release-keystore.jks")
+val hasReleaseSigning =
+    releaseKeystoreFile.exists() && !System.getenv("KEYSTORE_PASSWORD").isNullOrBlank()
+
 android {
     namespace = "dev.rikoapp.cleanphonelauncher"
     compileSdk {
@@ -30,6 +36,17 @@ android {
         buildConfigField("int", "VERSION_CODE_INT", "$ciVersionCode")
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = releaseKeystoreFile
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -37,7 +54,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            // Use the real upload key in CI; fall back to debug for local release builds.
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {
