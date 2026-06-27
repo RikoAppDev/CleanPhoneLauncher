@@ -132,7 +132,7 @@ private fun HomeScreen(
                 items(state.favoriteAppsData) { app ->
                     AppListItem(
                         app = app,
-                        onAppClick = { /* No action needed for click on favorite app here */ },
+                        onAppClick = { onAction(HomeScreenAction.OnFavoriteAppClick(app)) },
                         onAppLongClick = { onAction(HomeScreenAction.OnFavoriteAppLongClick(app)) }
                     )
                 }

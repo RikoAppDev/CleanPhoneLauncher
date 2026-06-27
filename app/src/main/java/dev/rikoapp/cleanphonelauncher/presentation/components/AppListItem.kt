@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -25,17 +24,14 @@ fun AppListItem(
     onAppClick: () -> Unit,
     onAppLongClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = MaterialTheme.shapes.small)
             .combinedClickable(
-                onClick = {
-                    val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                    context.startActivity(intent)
-                    onAppClick()
-                },
+                // Launching is delegated to the ViewModel (guarded against uninstalled apps);
+                // the composable must not call startActivity directly.
+                onClick = onAppClick,
                 onLongClick = onAppLongClick
             )
             .padding(vertical = 12.dp, horizontal = 16.dp),

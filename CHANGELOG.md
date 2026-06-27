@@ -5,6 +5,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+### Fixed
+- **Tap-to-launch crash & double launch:** the list item called `startActivity` directly with a possibly-`null` intent, crashing when an app was uninstalled and launching every app twice. Launching now goes solely through the guarded ViewModel path; home-screen favorites use the same path.
+
 ## [1.0.2]
 
 ### Added

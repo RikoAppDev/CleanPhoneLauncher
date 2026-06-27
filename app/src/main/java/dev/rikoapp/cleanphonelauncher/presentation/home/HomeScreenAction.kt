@@ -8,6 +8,7 @@ sealed class HomeScreenAction {
     object OnClockLongClick : HomeScreenAction()
     object OnClockTypeDialogDismiss : HomeScreenAction()
     data class OnClockTypeConfirm(val selectedType: ClockType) : HomeScreenAction()
+    data class OnFavoriteAppClick(val app: AppData) : HomeScreenAction()
     data class OnFavoriteAppLongClick(val app: AppData) : HomeScreenAction()
     object OnFavoriteDialogDismiss : HomeScreenAction()
     data class OnRemoveFavorite(val packageName: String) : HomeScreenAction()

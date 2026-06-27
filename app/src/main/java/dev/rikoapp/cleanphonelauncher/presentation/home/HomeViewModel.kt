@@ -109,6 +109,10 @@ class HomeViewModel(
                 _state.update { it.copy(showClockTypeDialog = false) }
             }
 
+            is HomeScreenAction.OnFavoriteAppClick -> {
+                launchApp(action.app)
+            }
+
             is HomeScreenAction.OnFavoriteAppLongClick -> {
                 _state.update { it.copy(showDialogApp = action.app) }
             }
