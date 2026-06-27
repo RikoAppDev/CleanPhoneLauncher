@@ -157,6 +157,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: version
     if: needs.version.outputs.should_release == 'true'
+    env:
+      # Surface secrets as env so steps can branch on their presence
+      # (the `secrets` context is not allowed directly in `if:` expressions).
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -177,10 +181,8 @@ jobs:
       # the build then falls back to debug signing, which is fine for the GitHub APK
       # but NOT acceptable for Play Store uploads).
       - name: Decode Keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        env:
-          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
-        run: echo "$ENCODED_KEYSTORE" | base64 -d > "$GITHUB_WORKSPACE/app/release-keystore.jks"
+        if: env.KEYSTORE_BASE64 != ''
+        run: echo "$KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/app/release-keystore.jks"
 
       - name: Build Release APK
         env:
@@ -313,6 +315,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [version, build-release, github-release]
     if: needs.version.outputs.should_release == 'true'
+    env:
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
     steps:
       - name: Download Release AAB
         uses: actions/download-artifact@v4
@@ -327,7 +331,7 @@ jobs:
             > ./whatsnew/whatsnew-en-US.txt
 
       - name: Deploy to Play Store (internal track)
-        if: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON != '' }}
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
@@ -339,6 +343,6 @@ jobs:
           whatsNewDirectory: ./whatsnew
 
       - name: Play deploy skipped notice
-        if: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON == '' }}
+        if: env.PLAY_SERVICE_ACCOUNT_JSON == ''
         run: echo "⏭️  PLAY_STORE_SERVICE_ACCOUNT_JSON secret not set — skipping Play Store upload."
 

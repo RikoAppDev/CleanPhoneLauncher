@@ -5,10 +5,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.0.2]
+
 ### Added
 - **App long-press menu in the drawer:** long-pressing an app now opens a menu with **Add/Remove favorite**, **App info** (opens system app settings) and **Uninstall**, instead of only the favorite toggle.
-
-## [1.0.2]
 
 ### Fixed
 - **Recent apps crash:** `UsageStatsManager.queryUsageStats()` can return `null`; calling `.filter` on it threw an NPE. Now null-safe.
