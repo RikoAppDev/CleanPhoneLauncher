@@ -14,6 +14,7 @@ Fixed in the current change set:
 | 6 | 🟠 Bug | Alphabet scroll ignored the recent-apps header/divider rows, jumping to the wrong list position. | Added `leadingItemCount` offset to `scrollToItem`. |
 | 7 | 🔴 **Release blocker** | The `release` build type was signed with the **debug** keystore — Google Play rejects debug-signed bundles outright. | Env-driven release signing config; CI signs with the real upload key, local builds fall back to debug. |
 | 8 | 🟢 CI | Play Store deploy job was commented out. | Enabled (self-skips until secrets are set); keystore decode + signing env wired into `release.yml`. |
+| 9 | 🔴 Bug | App list never refreshed: newly installed apps didn't appear, and clicking an app uninstalled since load could crash. | `PACKAGE_ADDED/REMOVED/REPLACED` broadcast receiver re-loads the list; `launchApp` wrapped in try/catch + triggers a refresh. |
 
 Both `assembleDebug` and `assembleRelease` build green.
 
@@ -53,8 +54,7 @@ Change `track: internal` → `alpha` / `beta` / `production` in `release.yml` wh
 ## 🔭 Next up (known issues & improvements)
 
 ### Correctness / robustness
-- [ ] **App list doesn't refresh on install/uninstall.** `InstalledAppsRepositoryImpl` loads once; add a `PACKAGE_ADDED` / `PACKAGE_REMOVED` broadcast receiver to keep the list live.
-- [ ] **Battery receiver is never unregistered.** Acceptable for an always-running launcher, but consider lifecycle-aware registration to be tidy.
+- [ ] **Broadcast receivers are never unregistered** (battery + package). Acceptable for an always-running launcher, but consider lifecycle-aware registration to be tidy.
 - [ ] **Clocks don't react to system time / timezone changes.** The 1s tick loop only re-reads the clock; listen for `ACTION_TIME_CHANGED` / `ACTION_TIMEZONE_CHANGED`.
 - [ ] **Clock persistence is fire-and-forget SharedPreferences.** Consider DataStore for the (small) settings surface.
 

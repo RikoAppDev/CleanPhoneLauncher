@@ -1,7 +1,10 @@
 package dev.rikoapp.cleanphonelauncher.data
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.provider.MediaStore
 import androidx.compose.ui.text.intl.Locale
@@ -31,6 +34,26 @@ class InstalledAppsRepositoryImpl(
 
     init {
         getInstalledApps()
+        registerPackageReceiver()
+    }
+
+    /**
+     * Keep the app list in sync when packages are installed, removed or updated, so newly
+     * installed apps appear and uninstalled ones disappear without restarting the launcher.
+     */
+    private fun registerPackageReceiver() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                getInstalledApps()
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        }
+        context.registerReceiver(receiver, filter)
     }
 
     override fun getInstalledApps() {

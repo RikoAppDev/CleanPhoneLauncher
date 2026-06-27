@@ -138,7 +138,11 @@ class HomeViewModel(
         val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
         intent?.let {
             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(it)
+            try {
+                context.startActivity(it)
+            } catch (_: Exception) {
+                installedAppsRepository.getInstalledApps()
+            }
         }
     }
 }

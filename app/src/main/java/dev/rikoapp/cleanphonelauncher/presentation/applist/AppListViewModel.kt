@@ -131,9 +131,15 @@ class AppListViewModel(
 
     private fun launchApp(app: AppData) {
         val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+        // Intent is null (and launch is a no-op) if the app was uninstalled since the list loaded;
+        // the try/catch guards the brief window where the activity is already gone.
         intent?.let {
             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(it)
+            try {
+                context.startActivity(it)
+            } catch (_: Exception) {
+                installedAppsRepository.getInstalledApps()
+            }
         }
     }
 }
