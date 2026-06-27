@@ -5,6 +5,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+### Added
+- **App long-press menu in the drawer:** long-pressing an app now opens a menu with **Add/Remove favorite**, **App info** (opens system app settings) and **Uninstall**, instead of only the favorite toggle.
+
 ## [1.0.2]
 
 ### Fixed

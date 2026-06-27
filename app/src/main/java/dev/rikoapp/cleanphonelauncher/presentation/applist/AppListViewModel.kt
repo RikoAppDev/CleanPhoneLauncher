@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
@@ -87,6 +88,16 @@ class AppListViewModel(
                 }
             }
 
+            is AppListScreenAction.OnAppInfoClick -> {
+                openAppInfo(action.app)
+                _state.update { it.copy(showDialogApp = null) }
+            }
+
+            is AppListScreenAction.OnUninstallClick -> {
+                requestUninstall(action.app)
+                _state.update { it.copy(showDialogApp = null) }
+            }
+
             AppListScreenAction.OnGrantPermissionClick -> {
                 val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -126,6 +137,30 @@ class AppListViewModel(
                 recentAppsRepository.checkUsageStatsPermission()
                 _state.update { it.copy(searchText = TextFieldState("")) }
             }
+        }
+    }
+
+    private fun openAppInfo(app: AppData) {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            "package:${app.packageName}".toUri()
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            // App details unavailable (e.g. app removed) — nothing to do.
+        }
+    }
+
+    private fun requestUninstall(app: AppData) {
+        val intent = Intent(
+            Intent.ACTION_DELETE,
+            "package:${app.packageName}".toUri()
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            // Uninstall flow could not be started — ignore.
         }
     }
 

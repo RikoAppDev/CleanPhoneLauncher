@@ -8,6 +8,11 @@
     <string name="grant_permission">Grant permission</string>
     <string name="add_to_favorites_question">Add to favorites?</string>
     <string name="remove_from_favorites_question">Remove from favorites?</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="app_info">App info</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="close">Close</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>

@@ -1,0 +1,96 @@
+package dev.rikoapp.cleanphonelauncher.presentation.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import dev.rikoapp.cleanphonelauncher.R
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
+
+/**
+ * Long-press menu for an app in the drawer: toggle favorite, open system app info,
+ * or uninstall. Each option dismisses the dialog via its own callback.
+ */
+@Composable
+fun AppOptionsDialog(
+    app: AppData,
+    isFavorite: Boolean,
+    onDismiss: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onAppInfo: () -> Unit,
+    onUninstall: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(app.name) },
+        text = {
+            Column {
+                OptionRow(
+                    text = stringResource(
+                        if (isFavorite) R.string.remove_from_favorites
+                        else R.string.add_to_favorites
+                    ),
+                    onClick = onToggleFavorite
+                )
+                OptionRow(
+                    text = stringResource(R.string.app_info),
+                    onClick = onAppInfo
+                )
+                OptionRow(
+                    text = stringResource(R.string.uninstall),
+                    onClick = onUninstall
+                )
+            }
+        },
+        shape = MaterialTheme.shapes.medium,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(R.string.close),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun OptionRow(
+    text: String,
+    onClick: () -> Unit
+) {
+    Text(
+        text = text,
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp)
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun AppOptionsDialogPreview() {
+    CleanPhoneLauncherTheme {
+        AppOptionsDialog(
+            app = AppData(name = "WhatsApp", packageName = "com.whatsapp"),
+            isFavorite = false,
+            onDismiss = {},
+            onToggleFavorite = {},
+            onAppInfo = {},
+            onUninstall = {}
+        )
+    }
+}

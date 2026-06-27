@@ -7,6 +7,8 @@ sealed class AppListScreenAction {
     data class OnAppLongClick(val app: AppData) : AppListScreenAction()
     object OnDialogDismiss : AppListScreenAction()
     data class OnFavoriteAction(val app: AppData, val isFavorite: Boolean) : AppListScreenAction()
+    data class OnAppInfoClick(val app: AppData) : AppListScreenAction()
+    data class OnUninstallClick(val app: AppData) : AppListScreenAction()
     object OnGrantPermissionClick : AppListScreenAction()
     data class OnAlphabetScroll(val letter: Char) : AppListScreenAction()
     data class OnAlphabetClick(val letter: Char) : AppListScreenAction()

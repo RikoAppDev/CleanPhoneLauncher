@@ -58,7 +58,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
-import dev.rikoapp.cleanphonelauncher.presentation.components.FavoriteDialog
+import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import kotlinx.coroutines.CoroutineScope
@@ -133,18 +133,21 @@ private fun AppListScreen(
     }
 
     if (state.showDialogApp != null) {
-        FavoriteDialog(
-            app = state.showDialogApp,
-            isFavorite = state.isFavorite(state.showDialogApp),
+        val app = state.showDialogApp
+        AppOptionsDialog(
+            app = app,
+            isFavorite = state.isFavorite(app),
             onDismiss = { onAction(AppListScreenAction.OnDialogDismiss) },
-            onConfirm = {
+            onToggleFavorite = {
                 onAction(
                     AppListScreenAction.OnFavoriteAction(
-                        app = state.showDialogApp,
-                        isFavorite = state.isFavorite(state.showDialogApp)
+                        app = app,
+                        isFavorite = state.isFavorite(app)
                     )
                 )
-            }
+            },
+            onAppInfo = { onAction(AppListScreenAction.OnAppInfoClick(app)) },
+            onUninstall = { onAction(AppListScreenAction.OnUninstallClick(app)) }
         )
     }
 
