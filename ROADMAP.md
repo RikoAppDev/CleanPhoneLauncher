@@ -1,24 +1,6 @@
 # CleanPhoneLauncher — Roadmap
 
-## ✅ This release — bug fixes & release hardening
-
-Fixed in the current change set:
-
-| # | Type | Issue | Fix |
-|---|------|-------|-----|
-| 1 | 🔴 Crash | `UsageStatsManager.queryUsageStats()` can return `null`; calling `.filter` on it threw an NPE and could crash the app list. | Null-safe via `.orEmpty()` in `RecentAppsRepositoryImpl`. |
-| 2 | 🔴 Crash | `ClockType.valueOf(stored)` threw `IllegalArgumentException` if a persisted clock-type name no longer maps to an enum (e.g. after a rename). | Safe lookup via `ClockType.entries.firstOrNull { … } ?: ANALOG_WITH_SECONDS`. |
-| 3 | 🟠 Bug | Battery calc divided by `scale` without guarding `scale <= 0`, producing garbage `Int.MAX_VALUE`-style values when battery info was unavailable. | Guard `level >= 0 && scale > 0`, result `coerceIn(0, 100)`. |
-| 4 | 🟠 Crash | Alphabet fast-scroll read `it.name[0]` — `StringIndexOutOfBoundsException` for any app with an empty label. | `it.name.firstOrNull()?.isLetter() != true`. |
-| 5 | 🟠 Bug | Alphabet drag gesture was keyed on `pointerInput(Unit)`, capturing the **first (empty)** app list — fast-scroll drag never worked. | Re-keyed on `state.allApps` so the gesture rebinds when data loads. |
-| 6 | 🟠 Bug | Alphabet scroll ignored the recent-apps header/divider rows, jumping to the wrong list position. | Added `leadingItemCount` offset to `scrollToItem`. |
-| 7 | 🔴 **Release blocker** | The `release` build type was signed with the **debug** keystore — Google Play rejects debug-signed bundles outright. | Env-driven release signing config; CI signs with the real upload key, local builds fall back to debug. |
-| 8 | 🟢 CI | Play Store deploy job was commented out. | Enabled (self-skips until secrets are set); keystore decode + signing env wired into `release.yml`. |
-| 9 | 🔴 Bug | App list never refreshed: newly installed apps didn't appear, and clicking an app uninstalled since load could crash. | `PACKAGE_ADDED/REMOVED/REPLACED` broadcast receiver re-loads the list; `launchApp` wrapped in try/catch + triggers a refresh. |
-
-Both `assembleDebug` and `assembleRelease` build green.
-
----
+> Forward-looking plan only. For what already shipped, see [CHANGELOG.md](CHANGELOG.md).
 
 ## 🚀 Releasing to Google Play (one-time setup)
 
