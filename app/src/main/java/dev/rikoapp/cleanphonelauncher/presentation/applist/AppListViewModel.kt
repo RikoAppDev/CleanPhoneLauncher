@@ -152,9 +152,12 @@ class AppListViewModel(
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun requestUninstall(app: AppData) {
+        // ACTION_UNINSTALL_PACKAGE pairs with the REQUEST_DELETE_PACKAGES permission so the
+        // system shows the uninstall dialog instead of silently denying the request.
         val intent = Intent(
-            Intent.ACTION_DELETE,
+            Intent.ACTION_UNINSTALL_PACKAGE,
             "package:${app.packageName}".toUri()
         ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {

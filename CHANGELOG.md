@@ -6,6 +6,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 ## [Unreleased]
 
 ### Fixed
+- **Uninstall did nothing:** tapping Uninstall silently returned to the home screen because the app lacked the `REQUEST_DELETE_PACKAGES` permission, so the system denied the request. Added the permission and switched to `ACTION_UNINSTALL_PACKAGE`, which now shows the system uninstall dialog.
+
+## [1.0.3]
+
+### Fixed
 - **Tap-to-launch crash & double launch:** the list item called `startActivity` directly with a possibly-`null` intent, crashing when an app was uninstalled and launching every app twice. Launching now goes solely through the guarded ViewModel path; home-screen favorites use the same path.
 
 ## [1.0.2]
