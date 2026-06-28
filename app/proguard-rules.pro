@@ -16,6 +16,10 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep line numbers for readable crash reports (paired with Crashlytics mapping upload).
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Enum constant names are persisted to SharedPreferences via .name and read back via
+# entries.firstOrNull { it.name == ... }, so they must keep their original names.
+-keepclassmembers enum dev.rikoapp.cleanphonelauncher.** { *; }

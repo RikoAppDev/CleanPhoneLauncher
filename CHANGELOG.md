@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.6.1]
+
+### Changed
+- Enabled **R8 minification and resource shrinking** for release builds (smaller, obfuscated APK/AAB). ProGuard keep rules preserve enum names used for settings persistence; Crashlytics mapping is uploaded for readable crash reports.
+
 ## [1.6.0]
 
 ### Changed
