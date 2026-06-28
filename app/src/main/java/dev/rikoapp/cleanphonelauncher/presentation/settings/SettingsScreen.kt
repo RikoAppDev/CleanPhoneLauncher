@@ -1,5 +1,6 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -232,9 +233,13 @@ private fun ColorCircle(
 private fun swatchColor(style: AppColorStyle): Color {
     return when (style) {
         AppColorStyle.DYNAMIC -> {
-            val context = LocalContext.current
-            if (isSystemInDarkTheme()) dynamicDarkColorScheme(context).primary
-            else dynamicLightColorScheme(context).primary
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val context = LocalContext.current
+                if (isSystemInDarkTheme()) dynamicDarkColorScheme(context).primary
+                else dynamicLightColorScheme(context).primary
+            } else {
+                MaterialTheme.colorScheme.onBackground
+            }
         }
 
         AppColorStyle.MONO -> MaterialTheme.colorScheme.onBackground

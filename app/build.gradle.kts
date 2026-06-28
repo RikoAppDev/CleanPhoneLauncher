@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId = "dev.rikoapp.cleanphonelauncher"
-        minSdk = 33
+        minSdk = 26
         targetSdk = 36
         versionCode = ciVersionCode
         versionName = ciVersionName

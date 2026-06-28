@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.MediaStore
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
@@ -79,8 +80,12 @@ class InstalledAppsRepositoryImpl(
         applicationScope.launch {
             _apps.value = withContext(Dispatchers.IO) {
                 val pm = context.packageManager
-                val allApps =
+                val allApps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(0L))
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.getInstalledApplications(0)
+                }
 
                 allApps.mapNotNull {
                     if (pm.getLaunchIntentForPackage(it.packageName) != null) {

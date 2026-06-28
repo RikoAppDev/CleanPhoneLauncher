@@ -5,12 +5,17 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
-## [1.7.0]
+## [1.6.0]
+
+### Changed
+- **Lowered `minSdk` to 26 (Android 8.0)** — the launcher now installs on far more devices. Dynamic (Material You) colour and a few newer APIs are guarded with version checks and graceful fallbacks.
+
+## [1.5.2]
 
 ### Added
 - Unit tests for `SettingsViewModel` and the app-override data source (kotlinx-coroutines-test).
 
-## [1.6.0]
+## [1.5.1]
 
 ### Changed
 - Battery and package broadcast receivers are now **lifecycle-aware** (registered while the app is foregrounded via `ProcessLifecycleOwner`, unregistered in the background) and use `RECEIVER_NOT_EXPORTED`, so they are no longer leaked.

@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/RikoAppDev/CleanPhoneLauncher/releases"><img src="https://img.shields.io/github/v/release/RikoAppDev/CleanPhoneLauncher?style=flat-square" alt="Release"></a>
   <a href="https://github.com/RikoAppDev/CleanPhoneLauncher/actions"><img src="https://img.shields.io/github/actions/workflow/status/RikoAppDev/CleanPhoneLauncher/release.yml?style=flat-square" alt="Build Status"></a>
-  <img src="https://img.shields.io/badge/Android-13%2B-green?style=flat-square" alt="Android 13+">
+  <img src="https://img.shields.io/badge/Android-8%2B-green?style=flat-square" alt="Android 8+">
   <img src="https://img.shields.io/badge/Kotlin-2.4-purple?style=flat-square" alt="Kotlin">
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License">
 </p>
@@ -167,7 +167,7 @@ app/src/main/java/dev/rikoapp/cleanphonelauncher/
 
 ## 📋 Requirements
 
-- **Android 13** (API 33) or higher
+- **Android 8** (API 26) or higher
 - **Android Studio** Ladybug or newer
 
 ## 🚀 Installation
