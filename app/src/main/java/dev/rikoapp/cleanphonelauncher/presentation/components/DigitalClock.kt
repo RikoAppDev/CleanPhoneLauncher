@@ -6,11 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -19,9 +14,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
-import java.util.Calendar
 
 @Composable
 fun DigitalClock(
@@ -29,14 +22,7 @@ fun DigitalClock(
     showSeconds: Boolean = true,
     batteryLevel: Int
 ) {
-    var calendar by remember { mutableStateOf(Calendar.getInstance()) }
-
-    LaunchedEffect(showSeconds) {
-        while (true) {
-            calendar = Calendar.getInstance()
-            delay(1000)
-        }
-    }
+    val calendar = rememberClockTime(showSeconds)
 
     val locale = LocalConfiguration.current.locales[0]
     val timeFormat = if (showSeconds) "HH:mm:ss" else "HH:mm"

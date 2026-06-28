@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.5.0]
+
+### Changed
+- Clocks now react to system **time and timezone changes**, and the no-seconds clock updates once a minute via `ACTION_TIME_TICK` instead of waking every second (more battery-friendly).
+
 ## [1.4.0]
 
 ### Added
