@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.7.0]
+
+### Added
+- Unit tests for `SettingsViewModel` and the app-override data source (kotlinx-coroutines-test).
+
 ## [1.6.0]
 
 ### Changed
