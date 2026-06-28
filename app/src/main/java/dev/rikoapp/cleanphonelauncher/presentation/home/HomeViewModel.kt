@@ -13,6 +13,7 @@ import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
+import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.model.FavoriteApp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,7 @@ class HomeViewModel(
     private val installedAppsRepository: InstalledAppsRepository,
     private val clockRepository: ClockRepository,
     private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
+    private val notificationCountRepository: NotificationCountRepository,
     private val appActions: AppActions
 ) : ViewModel() {
 
@@ -53,8 +55,12 @@ class HomeViewModel(
                 Triple(clockType, batteryLevel, favoriteApps)
             }
 
-            // Now, combine the results of the two combined flows
-            combine(appFlows, otherFlows) { appData, otherData ->
+            // Now, combine the results of the two combined flows with notification counts
+            combine(
+                appFlows,
+                otherFlows,
+                notificationCountRepository.counts
+            ) { appData, otherData, notificationCounts ->
                 val (allApps, phoneApp, cameraApp) = appData
                 val (clockType, batteryLevel, favoriteApps) = otherData
 
@@ -69,7 +75,8 @@ class HomeViewModel(
                         cameraApp = cameraApp,
                         clockType = clockType,
                         batteryLevel = batteryLevel,
-                        favoriteAppsData = favoriteAppsData
+                        favoriteAppsData = favoriteAppsData,
+                        notificationCounts = notificationCounts
                     )
                 }
             }.collect()

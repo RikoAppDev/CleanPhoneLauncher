@@ -213,7 +213,8 @@ private fun HomeScreen(
                                             if (!reorderMode) {
                                                 onAction(HomeScreenAction.OnFavoriteAppLongClick(app))
                                             }
-                                        }
+                                        },
+                                        badgeCount = state.notificationCounts[app.packageName] ?: 0
                                     )
                                 }
                                 if (reorderMode) {

@@ -3,12 +3,14 @@ package dev.rikoapp.cleanphonelauncher.data.di
 import dev.rikoapp.cleanphonelauncher.data.AndroidAppActions
 import dev.rikoapp.cleanphonelauncher.data.ClockRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.InstalledAppsRepositoryImpl
+import dev.rikoapp.cleanphonelauncher.data.NotificationCountRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.RecentAppsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.SettingsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.database.di.databaseModule
 import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
+import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import org.koin.core.module.dsl.singleOf
@@ -23,4 +25,5 @@ val dataModule = module {
     singleOf(::RecentAppsRepositoryImpl) bind RecentAppsRepository::class
     singleOf(::AndroidAppActions) bind AppActions::class
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
+    singleOf(::NotificationCountRepositoryImpl) bind NotificationCountRepository::class
 }

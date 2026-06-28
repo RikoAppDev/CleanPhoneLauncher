@@ -1,10 +1,13 @@
 package dev.rikoapp.cleanphonelauncher.presentation.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +25,8 @@ import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTh
 fun AppListItem(
     app: AppData,
     onAppClick: () -> Unit,
-    onAppLongClick: () -> Unit
+    onAppLongClick: () -> Unit,
+    badgeCount: Int = 0
 ) {
     Row(
         modifier = Modifier
@@ -42,6 +46,19 @@ fun AppListItem(
             fontSize = 18.sp,
             fontFamily = FontFamily.Monospace
         )
+        if (badgeCount > 0) {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = if (badgeCount > 99) "99+" else badgeCount.toString(),
+                color = MaterialTheme.colorScheme.background,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground)
+                    .padding(horizontal = 7.dp, vertical = 2.dp)
+            )
+        }
     }
 }
 

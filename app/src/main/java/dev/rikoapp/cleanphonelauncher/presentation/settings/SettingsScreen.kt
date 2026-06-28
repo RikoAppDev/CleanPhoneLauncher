@@ -1,6 +1,8 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,6 +66,7 @@ private fun SettingsScreen(
     BackHandler { onClose() }
 
     val fg = MaterialTheme.colorScheme.onBackground
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -147,6 +150,64 @@ private fun SettingsScreen(
                 checked = state.crashReportingEnabled,
                 onCheckedChange = { onAction(SettingsScreenAction.OnCrashReportingToggled(it)) }
             )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SectionLabel(stringResource(R.string.settings_notifications))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.notification_badges),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.notification_badges_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            SelectableChip(
+                text = stringResource(R.string.grant_access),
+                selected = false,
+                onClick = {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }
+                }
+            )
+        }
+
+        if (state.hiddenApps.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            SectionLabel(stringResource(R.string.hidden_apps_section))
+            state.hiddenApps.forEach { app ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = app.name,
+                        color = fg,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    SelectableChip(
+                        text = stringResource(R.string.unhide),
+                        selected = false,
+                        onClick = { onAction(SettingsScreenAction.OnUnhideApp(app.packageName)) }
+                    )
+                }
+            }
         }
 
         if (BuildConfig.DEBUG) {

@@ -7,4 +7,5 @@ sealed class SettingsScreenAction {
     data class OnThemeModeSelected(val mode: ThemeMode) : SettingsScreenAction()
     data class OnColorStyleSelected(val style: AppColorStyle) : SettingsScreenAction()
     data class OnCrashReportingToggled(val enabled: Boolean) : SettingsScreenAction()
+    data class OnUnhideApp(val packageName: String) : SettingsScreenAction()
 }

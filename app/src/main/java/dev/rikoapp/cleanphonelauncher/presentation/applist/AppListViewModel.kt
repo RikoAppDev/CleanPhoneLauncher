@@ -10,6 +10,7 @@ import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
+import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.model.FavoriteApp
@@ -26,6 +27,7 @@ class AppListViewModel(
     private val recentAppsRepository: RecentAppsRepository,
     private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
     private val localAppOverrideDataSource: LocalAppOverrideDataSource,
+    private val notificationCountRepository: NotificationCountRepository,
     private val appActions: AppActions
 ) : ViewModel() {
 
@@ -39,8 +41,12 @@ class AppListViewModel(
                 localFavoriteAppDataSource.getFavoriteApps(),
                 recentAppsRepository.recentApps,
                 recentAppsRepository.hasUsageStatsPermission,
-                localAppOverrideDataSource.getOverrides()
-            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission, overrides ->
+                combine(
+                    localAppOverrideDataSource.getOverrides(),
+                    notificationCountRepository.counts
+                ) { overrides, counts -> overrides to counts }
+            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission, overridesAndCounts ->
+                val (overrides, notificationCounts) = overridesAndCounts
                 val hiddenSet = overrides.filter { it.hidden }.map { it.packageName }.toSet()
                 val nameMap = overrides.mapNotNull { o -> o.customName?.let { o.packageName to it } }.toMap()
                 fun applyName(app: AppData) =
@@ -59,7 +65,8 @@ class AppListViewModel(
                             .toSet(),
                         recentApps = recentApps.map(::applyName)
                             .filter { app -> app.packageName !in hiddenSet },
-                        hasUsageStatsPermission = hasUsageStatsPermission
+                        hasUsageStatsPermission = hasUsageStatsPermission,
+                        notificationCounts = notificationCounts
                     )
                 }
             }.collect()

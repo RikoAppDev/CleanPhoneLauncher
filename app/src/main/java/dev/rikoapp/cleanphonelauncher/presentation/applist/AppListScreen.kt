@@ -310,7 +310,8 @@ private fun AppListScreen(
                     AppListItem(
                         app = app,
                         onAppClick = { onAction(AppListScreenAction.OnAppClick(app)) },
-                        onAppLongClick = { onAction(AppListScreenAction.OnAppLongClick(app)) }
+                        onAppLongClick = { onAction(AppListScreenAction.OnAppLongClick(app)) },
+                        badgeCount = state.badgeCount(app)
                     )
                 }
 

@@ -28,6 +28,11 @@
     <string name="settings_theme">Theme</string>
     <string name="settings_color">Color</string>
     <string name="settings_privacy">Privacy</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="notification_badges">Notification badges</string>
+    <string name="notification_badges_desc">Show unread notification counts on apps. Requires notification access.</string>
+    <string name="grant_access">Grant access</string>
+    <string name="hidden_apps_section">Hidden apps</string>
     <string name="settings_crash_reporting">Send crash reports</string>
     <string name="settings_crash_reporting_desc">Off by default. Sends anonymous crash diagnostics via Firebase to help fix bugs.</string>
     <string name="settings_test_crash">Force test crash (debug)</string>

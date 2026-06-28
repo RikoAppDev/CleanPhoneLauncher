@@ -1,12 +1,17 @@
 package dev.rikoapp.cleanphonelauncher
 
+import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
+import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
+import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppOverride
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenAction
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -30,6 +35,27 @@ class SettingsViewModelTest {
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
     }
 
+    private class FakeInstalledAppsRepository : InstalledAppsRepository {
+        override val apps = MutableStateFlow<List<AppData>>(emptyList())
+        override val phoneApp = MutableStateFlow<AppData?>(null)
+        override val cameraApp = MutableStateFlow<AppData?>(null)
+        override fun getInstalledApps() {}
+        override fun findCoreApps() {}
+    }
+
+    private class FakeAppOverrideDataSource : LocalAppOverrideDataSource {
+        val overrides = MutableStateFlow<List<AppOverride>>(emptyList())
+        override fun getOverrides(): Flow<List<AppOverride>> = overrides
+        override suspend fun setHidden(packageName: String, hidden: Boolean) {}
+        override suspend fun setCustomName(packageName: String, customName: String?) {}
+    }
+
+    private fun viewModel() = SettingsViewModel(
+        FakeSettingsRepository(),
+        FakeInstalledAppsRepository(),
+        FakeAppOverrideDataSource()
+    )
+
     private val dispatcher = StandardTestDispatcher()
 
     @Before
@@ -44,7 +70,7 @@ class SettingsViewModelTest {
 
     @Test
     fun initialState_reflectsRepository() = runTest(dispatcher) {
-        val vm = SettingsViewModel(FakeSettingsRepository())
+        val vm = viewModel()
         advanceUntilIdle()
         assertEquals(ThemeMode.SYSTEM, vm.state.value.themeMode)
         assertEquals(AppColorStyle.DYNAMIC, vm.state.value.colorStyle)
@@ -53,7 +79,7 @@ class SettingsViewModelTest {
 
     @Test
     fun selectingThemeAndColor_updatesState() = runTest(dispatcher) {
-        val vm = SettingsViewModel(FakeSettingsRepository())
+        val vm = viewModel()
         vm.onAction(SettingsScreenAction.OnThemeModeSelected(ThemeMode.DARK))
         vm.onAction(SettingsScreenAction.OnColorStyleSelected(AppColorStyle.BLUE))
         advanceUntilIdle()
@@ -63,7 +89,7 @@ class SettingsViewModelTest {
 
     @Test
     fun togglingCrashReporting_updatesState() = runTest(dispatcher) {
-        val vm = SettingsViewModel(FakeSettingsRepository())
+        val vm = viewModel()
         vm.onAction(SettingsScreenAction.OnCrashReportingToggled(true))
         advanceUntilIdle()
         assertEquals(true, vm.state.value.crashReportingEnabled)

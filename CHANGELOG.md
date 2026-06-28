@@ -5,6 +5,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.7.0]
+
+### Added
+- **Notification badges:** unread notification counts shown on apps in the drawer and on home favorites. Opt-in via Settings → Notifications → Grant access (uses a notification listener; no badges until access is granted).
+- **Hidden apps in Settings:** a "Hidden apps" section in Settings lists hidden apps with an Unhide action (in addition to the drawer's "Show hidden apps" row).
+
 ## [1.6.1]
 
 ### Changed
