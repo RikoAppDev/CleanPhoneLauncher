@@ -5,7 +5,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
-## [1.1.0]
+## [1.0.5]
 
 ### Added
 - **Home favorites long-press menu:** long-pressing a favorite on the home screen now opens the same options menu (Remove favorite / App info / Uninstall) as the app drawer, instead of only offering to remove the favorite.
@@ -19,6 +19,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ### CI
 - Added a `concurrency` guard so overlapping pushes can't race two releases.
+- Made keystore base64 decoding tolerant of CR/whitespace so signed release builds don't fail.
 
 ## [1.0.4]
 
