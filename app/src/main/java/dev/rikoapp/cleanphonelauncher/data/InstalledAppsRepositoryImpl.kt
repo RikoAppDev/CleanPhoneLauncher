@@ -9,6 +9,10 @@ import android.content.pm.PackageManager
 import android.provider.MediaStore
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +37,6 @@ class InstalledAppsRepositoryImpl(
     override val cameraApp = _cameraApp.asStateFlow()
 
     init {
-        getInstalledApps()
         registerPackageReceiver()
     }
 
@@ -49,7 +52,27 @@ class InstalledAppsRepositoryImpl(
             addAction(Intent.ACTION_PACKAGE_REPLACED)
             addDataScheme("package")
         }
-        context.registerReceiver(receiver, filter)
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            private var registered = false
+
+            override fun onStart(owner: LifecycleOwner) {
+                if (!registered) {
+                    ContextCompat.registerReceiver(
+                        context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED
+                    )
+                    registered = true
+                }
+                getInstalledApps()
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                if (registered) {
+                    context.unregisterReceiver(receiver)
+                    registered = false
+                }
+            }
+        })
     }
 
     override fun getInstalledApps() {

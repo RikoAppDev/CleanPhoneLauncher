@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import kotlinx.coroutines.CoroutineScope
@@ -51,15 +55,37 @@ class ClockRepositoryImpl(
 
     override fun registerBatteryReceiver() {
         val batteryReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-                val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-                if (level >= 0 && scale > 0) {
-                    _batteryLevel.value = (level * 100 / scale.toFloat()).toInt().coerceIn(0, 100)
-                }
-            }
+            override fun onReceive(context: Context?, intent: Intent?) = updateBatteryLevel(intent)
         }
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        context.registerReceiver(batteryReceiver, filter)
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            private var registered = false
+
+            override fun onStart(owner: LifecycleOwner) {
+                if (!registered) {
+                    val sticky = ContextCompat.registerReceiver(
+                        context, batteryReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED
+                    )
+                    registered = true
+                    updateBatteryLevel(sticky)
+                }
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                if (registered) {
+                    context.unregisterReceiver(batteryReceiver)
+                    registered = false
+                }
+            }
+        })
+    }
+
+    private fun updateBatteryLevel(intent: Intent?) {
+        val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+        if (level >= 0 && scale > 0) {
+            _batteryLevel.value = (level * 100 / scale.toFloat()).toInt().coerceIn(0, 100)
+        }
     }
 }
