@@ -19,7 +19,7 @@ val hasReleaseSigning =
 android {
     namespace = "dev.rikoapp.cleanphonelauncher"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
@@ -97,6 +97,9 @@ dependencies {
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    // Drag & drop reordering
+    implementation(libs.reorderable)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -7,4 +7,5 @@ interface LocalFavoriteAppDataSource {
     fun getFavoriteApps(): Flow<List<FavoriteApp>>
     suspend fun upsertFavoriteApp(app: FavoriteApp)
     suspend fun deleteFavoriteApp(app: FavoriteApp)
+    suspend fun reorderFavoriteApps(orderedPackageNames: List<String>)
 }

@@ -130,6 +130,12 @@ class HomeViewModel(
                 }
             }
 
+            is HomeScreenAction.OnReorderFavorites -> {
+                viewModelScope.launch {
+                    localFavoriteAppDataSource.reorderFavoriteApps(action.orderedPackageNames)
+                }
+            }
+
             is HomeScreenAction.OnAppInfoClick -> {
                 appActions.openAppInfo(action.app.packageName)
                 _state.update { it.copy(showDialogApp = null) }

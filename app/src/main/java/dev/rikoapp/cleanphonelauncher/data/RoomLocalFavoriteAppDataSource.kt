@@ -1,6 +1,7 @@
 package dev.rikoapp.cleanphonelauncher.data
 
 import dev.rikoapp.cleanphonelauncher.data.database.dao.FavoriteAppDao
+import dev.rikoapp.cleanphonelauncher.data.database.entities.FavoriteAppEntity
 import dev.rikoapp.cleanphonelauncher.data.database.mappers.toFavoriteApp
 import dev.rikoapp.cleanphonelauncher.data.database.mappers.toFavoriteAppEntity
 import dev.rikoapp.cleanphonelauncher.domain.model.FavoriteApp
@@ -19,10 +20,21 @@ class RoomLocalFavoriteAppDataSource(
     }
 
     override suspend fun upsertFavoriteApp(app: FavoriteApp) {
-        favoriteAppDao.upsert(app.toFavoriteAppEntity())
+        favoriteAppDao.upsert(
+            FavoriteAppEntity(
+                packageName = app.packageName,
+                position = favoriteAppDao.nextPosition()
+            )
+        )
     }
 
     override suspend fun deleteFavoriteApp(app: FavoriteApp) {
         favoriteAppDao.delete(app.toFavoriteAppEntity())
+    }
+
+    override suspend fun reorderFavoriteApps(orderedPackageNames: List<String>) {
+        orderedPackageNames.forEachIndexed { index, packageName ->
+            favoriteAppDao.updatePosition(packageName, index)
+        }
     }
 }

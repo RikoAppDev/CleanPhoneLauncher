@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.1.0]
+
+### Added
+- **Reorder home favorites:** long-press the home background to enter reorder mode, then drag the handle next to a favorite to reorder it. Tap the background or press back to finish. The order is saved and restored across restarts.
+
+### Changed
+- Raised `compileSdk` to 37 (required by updated AndroidX dependencies).
+
 ## [1.0.5]
 
 ### Added

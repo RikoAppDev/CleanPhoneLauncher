@@ -13,6 +13,8 @@
     <string name="app_info">App info</string>
     <string name="uninstall">Uninstall</string>
     <string name="close">Close</string>
+    <string name="reorder_favorite">Reorder favorite</string>
+    <string name="reorder_hint">Drag to reorder · tap to finish</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>

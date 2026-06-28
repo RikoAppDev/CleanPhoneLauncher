@@ -1,7 +1,10 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +19,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
@@ -36,8 +49,11 @@ import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.DragHandleIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PhoneIcon
 import org.koin.androidx.compose.koinViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun HomeScreenRoot(
@@ -56,6 +72,10 @@ private fun HomeScreen(
     state: HomeScreenState,
     onAction: (HomeScreenAction) -> Unit,
 ) {
+    var reorderMode by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = reorderMode) { reorderMode = false }
+
     if (state.showClockTypeDialog) {
         ClockTypeDialog(
             currentClockType = state.clockType,
@@ -82,6 +102,12 @@ private fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = { reorderMode = true },
+                    onTap = { if (reorderMode) reorderMode = false }
+                )
+            }
             .systemBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -125,16 +151,82 @@ private fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+
+            if (reorderMode) {
+                Text(
+                    text = stringResource(R.string.reorder_hint),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            val haptics = LocalHapticFeedback.current
+            var favorites by remember(state.favoriteAppsData) {
+                mutableStateOf(state.favoriteAppsData)
+            }
+            val lazyListState = rememberLazyListState()
+            val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+                favorites = favorites.toMutableList().apply { add(to.index, removeAt(from.index)) }
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
-                items(state.favoriteAppsData) { app ->
-                    AppListItem(
-                        app = app,
-                        onAppClick = { onAction(HomeScreenAction.OnFavoriteAppClick(app)) },
-                        onAppLongClick = { onAction(HomeScreenAction.OnFavoriteAppLongClick(app)) }
-                    )
+                items(favorites, key = { it.packageName }) { app ->
+                    ReorderableItem(reorderState, key = app.packageName) { isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 6.dp else 0.dp)
+                        Surface(
+                            shadowElevation = elevation,
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    AppListItem(
+                                        app = app,
+                                        onAppClick = {
+                                            if (reorderMode) {
+                                                reorderMode = false
+                                            } else {
+                                                onAction(HomeScreenAction.OnFavoriteAppClick(app))
+                                            }
+                                        },
+                                        onAppLongClick = {
+                                            if (!reorderMode) {
+                                                onAction(HomeScreenAction.OnFavoriteAppLongClick(app))
+                                            }
+                                        }
+                                    )
+                                }
+                                if (reorderMode) {
+                                    IconButton(
+                                        onClick = {},
+                                        modifier = Modifier.draggableHandle(
+                                            onDragStopped = {
+                                                onAction(
+                                                    HomeScreenAction.OnReorderFavorites(
+                                                        favorites.map { it.packageName }
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = DragHandleIcon,
+                                            contentDescription = stringResource(R.string.reorder_favorite),
+                                            tint = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
