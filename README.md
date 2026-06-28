@@ -12,7 +12,7 @@
   <a href="https://github.com/RikoAppDev/CleanPhoneLauncher/releases"><img src="https://img.shields.io/github/v/release/RikoAppDev/CleanPhoneLauncher?style=flat-square" alt="Release"></a>
   <a href="https://github.com/RikoAppDev/CleanPhoneLauncher/actions"><img src="https://img.shields.io/github/actions/workflow/status/RikoAppDev/CleanPhoneLauncher/release.yml?style=flat-square" alt="Build Status"></a>
   <img src="https://img.shields.io/badge/Android-13%2B-green?style=flat-square" alt="Android 13+">
-  <img src="https://img.shields.io/badge/Kotlin-2.3-purple?style=flat-square" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Kotlin-2.4-purple?style=flat-square" alt="Kotlin">
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License">
 </p>
 
@@ -21,11 +21,14 @@
 ## ✨ Features
 
 - 🎯 **Minimalist design** - Clean interface without distracting elements
-- ⏰ **Customizable clock** - Choose between analog and digital clock
-- ⭐ **Favorite apps** - Quick access to your most used applications
+- ⏰ **Customizable clock** - Analog or digital, with or without seconds
+- ⭐ **Favorite apps** - Quick access, with drag-and-drop reordering
+- 🔎 **Searchable app drawer** - Instant search with alphabet fast-scroll
+- 🗂️ **App options** - Long-press for App info or to uninstall
+- 🎨 **Theming** - System/Light/Dark + dynamic (Material You) or accent colors
 - 📱 **Quick shortcuts** - Phone and camera always within reach
 - 🔋 **Battery display** - Battery status overview right on the home screen
-- 🌙 **Dark mode** - Automatic dark mode support
+- 🔒 **Private by design** - No ads, no tracking; optional opt-in crash reporting
 - 🚀 **Fast and smooth** - Optimized for the best performance
 
 ## 📸 Screenshots
@@ -153,13 +156,14 @@ app/src/main/java/dev/rikoapp/cleanphonelauncher/
 
 | Technology | Usage |
 |------------|-------|
-| **Kotlin 2.3** | Main programming language |
+| **Kotlin 2.4** | Main programming language |
 | **Jetpack Compose** | Modern declarative UI |
-| **Material 3** | Design system |
+| **Material 3** | Design system (dynamic color) |
 | **Room** | Local SQLite database |
 | **Koin** | Dependency Injection |
 | **Coroutines & Flow** | Asynchronous operations |
 | **ViewModel** | UI state management |
+| **Firebase Crashlytics** | Optional, opt-in crash reporting |
 
 ## 📋 Requirements
 
@@ -199,8 +203,7 @@ cd CleanPhoneLauncher
 
 ### Branch Structure
 
-- `main` - Stable production version
-- `develop` - Development branch
+- `main` - Protected production branch; pushes build, release and deploy automatically. Force-pushes and deletions are blocked, and CI (lint, tests, build) is required.
 
 ### Commit Conventions
 
@@ -220,7 +223,7 @@ The project has a fully automated CI/CD pipeline:
 - ✅ **Automatic versioning** based on commit messages
 - ✅ **Automatic GitHub Releases** with APK and AAB
 - ✅ **Lint checks and tests** on every PR
-- 🔮 **Play Store deployment** (ready to activate)
+- ✅ **Play Store deployment** to the internal testing track
 
 More information in [CI_CD_SETUP.md](.github/CI_CD_SETUP.md).
 

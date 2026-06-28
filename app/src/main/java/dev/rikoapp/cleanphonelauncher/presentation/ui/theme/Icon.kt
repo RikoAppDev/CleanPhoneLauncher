@@ -21,3 +21,7 @@ val PhoneIcon: ImageVector
 val DragHandleIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.ic_drag_handle)
+
+val SettingsIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_settings)

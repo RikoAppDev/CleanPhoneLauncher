@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 // Auto-versioning: reads from environment variables (CI) or falls back to defaults
@@ -91,6 +93,7 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.firebase.crashlytics)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

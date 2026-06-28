@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,8 +37,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -59,8 +62,10 @@ import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
+import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -99,14 +104,25 @@ fun AppListScreenRoot(
         }
     }
 
-    AppListScreen(
-        state = state,
-        onAction = viewModel::onAction,
-        focusRequester = focusRequester,
-        focusManager = focusManager,
-        coroutineScope = coroutineScope,
-        listState = listState
-    )
+    var showSettings by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AppListScreen(
+            state = state,
+            onAction = viewModel::onAction,
+            focusRequester = focusRequester,
+            focusManager = focusManager,
+            coroutineScope = coroutineScope,
+            listState = listState,
+            onOpenSettings = {
+                focusManager.clearFocus()
+                showSettings = true
+            }
+        )
+        if (showSettings) {
+            SettingsScreenRoot(onClose = { showSettings = false })
+        }
+    }
 }
 
 @Composable
@@ -116,7 +132,8 @@ private fun AppListScreen(
     focusRequester: FocusRequester = remember { FocusRequester() },
     focusManager: FocusManager = LocalFocusManager.current,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    listState: LazyListState = rememberLazyListState()
+    listState: LazyListState = rememberLazyListState(),
+    onOpenSettings: () -> Unit = {}
 ) {
     val alphabet = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -155,11 +172,16 @@ private fun AppListScreen(
             .background(MaterialTheme.colorScheme.background)
             .safeContentPadding()
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         TextField(
             state = state.searchText,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .weight(1f)
                 .focusRequester(focusRequester),
             placeholder = { Text(text = stringResource(R.string.search_apps_placeholder)) },
             trailingIcon = {
@@ -196,6 +218,14 @@ private fun AppListScreen(
                 cursorColor = MaterialTheme.colorScheme.onBackground
             )
         )
+            IconButton(onClick = onOpenSettings) {
+                Icon(
+                    imageVector = SettingsIcon,
+                    contentDescription = stringResource(R.string.open_settings),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.Top

@@ -140,6 +140,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Decode google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" | tr -cd 'A-Za-z0-9+/=' | base64 -d > app/google-services.json
+
       - name: Build Debug APK
         env:
           VERSION_NAME: ${{ needs.version.outputs.version_name }}
@@ -180,6 +185,11 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Decode google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" | tr -cd 'A-Za-z0-9+/=' | base64 -d > app/google-services.json
 
       # Decode the upload keystore from a base64 secret (skipped if not configured —
       # the build then falls back to debug signing, which is fine for the GitHub APK

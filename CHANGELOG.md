@@ -5,6 +5,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.2.0]
+
+### Added
+- **Settings screen** (open via the gear in the app drawer): choose **theme mode** (System / Light / Dark) and **color style** (Dynamic Material You, Monochrome, or an accent colour).
+- **Optional crash reporting** via Firebase Crashlytics — **off by default**, opt-in from Settings.
+
+### Fixed
+- Lint `NonObservableLocale` errors in the clocks (locale is now read observably).
+
 ## [1.1.1]
 
 ### CI

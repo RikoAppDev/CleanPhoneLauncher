@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -23,7 +24,6 @@ import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTh
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 fun AnalogClock(
@@ -33,6 +33,7 @@ fun AnalogClock(
 ) {
     var calendar by remember { mutableStateOf(Calendar.getInstance()) }
     val onBackgroundColor = MaterialTheme.colorScheme.onBackground
+    val locale = LocalConfiguration.current.locales[0]
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -44,7 +45,7 @@ fun AnalogClock(
     val hours = calendar.get(Calendar.HOUR)
     val minutes = calendar.get(Calendar.MINUTE)
     val seconds = calendar.get(Calendar.SECOND)
-    val dayOfMonth = SimpleDateFormat("d", Locale.getDefault()).format(calendar.time)
+    val dayOfMonth = SimpleDateFormat("d", locale).format(calendar.time)
 
     Canvas(modifier = modifier.size(200.dp)) {
         val center = Offset(size.width / 2, size.height / 2)

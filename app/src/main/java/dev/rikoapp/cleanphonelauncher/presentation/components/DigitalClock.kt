@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -21,7 +22,6 @@ import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTh
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 fun DigitalClock(
@@ -38,9 +38,10 @@ fun DigitalClock(
         }
     }
 
+    val locale = LocalConfiguration.current.locales[0]
     val timeFormat = if (showSeconds) "HH:mm:ss" else "HH:mm"
-    val time = SimpleDateFormat(timeFormat, Locale.getDefault()).format(calendar.time)
-    val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+    val time = SimpleDateFormat(timeFormat, locale).format(calendar.time)
+    val dateFormat = SimpleDateFormat("EEE, MMM d", locale)
     val date = dateFormat.format(calendar.time)
 
     Column(

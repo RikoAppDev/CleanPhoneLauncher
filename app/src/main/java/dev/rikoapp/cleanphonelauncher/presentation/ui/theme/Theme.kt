@@ -9,6 +9,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
+import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 
 private val DarkColorScheme = darkColorScheme(
     primary = Color.White,
@@ -38,18 +40,35 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun CleanPhoneLauncherTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    colorStyle: AppColorStyle = AppColorStyle.DYNAMIC,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor -> {
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+
+    val base = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = when (colorStyle) {
+        AppColorStyle.DYNAMIC -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        AppColorStyle.MONO -> base
+
+        else -> {
+            val accent = colorStyle.accent ?: base.onBackground
+            base.copy(
+                primary = accent,
+                secondary = accent,
+                tertiary = accent,
+                onBackground = accent,
+                onSurface = accent
+            )
+        }
     }
 
     MaterialTheme(
