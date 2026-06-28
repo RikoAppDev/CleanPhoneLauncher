@@ -8,9 +8,21 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics)
 }
 
-// Auto-versioning: reads from environment variables (CI) or falls back to defaults
+// Auto-versioning: CI sets VERSION_NAME/VERSION_CODE; local builds derive the name from git
+// (e.g. "1.2.0-3-g1a2b3c-dirty") so a dev build is clearly distinguishable from a store release.
+fun localGitVersionName(): String = try {
+    ProcessBuilder("git", "describe", "--tags", "--always", "--dirty")
+        .redirectErrorStream(true)
+        .start()
+        .inputStream.bufferedReader().readText().trim()
+        .removePrefix("v")
+        .ifEmpty { "1.0.0-dev" }
+} catch (e: Exception) {
+    "1.0.0-dev"
+}
+
 val ciVersionCode: Int = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
-val ciVersionName: String = System.getenv("VERSION_NAME") ?: "1.0.0"
+val ciVersionName: String = System.getenv("VERSION_NAME") ?: localGitVersionName()
 
 // Release signing: enabled only when a keystore + password are provided via env (CI secrets).
 // Locally (no secrets) we fall back to debug signing so the project still builds.

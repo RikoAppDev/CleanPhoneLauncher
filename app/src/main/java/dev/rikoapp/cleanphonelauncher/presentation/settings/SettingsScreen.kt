@@ -159,6 +159,17 @@ private fun SettingsScreen(
                     .padding(vertical = 8.dp)
             )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        Text(
+            text = if (BuildConfig.DEBUG) {
+                "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+            } else {
+                "v${BuildConfig.VERSION_NAME}"
+            },
+            color = fg.copy(alpha = 0.5f),
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 

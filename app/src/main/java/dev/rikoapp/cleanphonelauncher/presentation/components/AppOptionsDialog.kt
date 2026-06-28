@@ -25,7 +25,10 @@ fun AppOptionsDialog(
     onDismiss: () -> Unit,
     onToggleFavorite: () -> Unit,
     onAppInfo: () -> Unit,
-    onUninstall: () -> Unit
+    onUninstall: () -> Unit,
+    isHidden: Boolean = false,
+    onRename: (() -> Unit)? = null,
+    onToggleHidden: (() -> Unit)? = null
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -39,6 +42,17 @@ fun AppOptionsDialog(
                     ),
                     onClick = onToggleFavorite
                 )
+                if (onRename != null) {
+                    OptionRow(text = stringResource(R.string.rename), onClick = onRename)
+                }
+                if (onToggleHidden != null) {
+                    OptionRow(
+                        text = stringResource(
+                            if (isHidden) R.string.unhide else R.string.hide
+                        ),
+                        onClick = onToggleHidden
+                    )
+                }
                 OptionRow(
                     text = stringResource(R.string.app_info),
                     onClick = onAppInfo

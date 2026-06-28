@@ -62,6 +62,7 @@ import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
+import dev.rikoapp.cleanphonelauncher.presentation.components.RenameDialog
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
@@ -162,9 +163,28 @@ private fun AppListScreen(
                 )
             },
             onAppInfo = { onAction(AppListScreenAction.OnAppInfoClick(app)) },
-            onUninstall = { onAction(AppListScreenAction.OnUninstallClick(app)) }
+            onUninstall = { onAction(AppListScreenAction.OnUninstallClick(app)) },
+            isHidden = state.isHidden(app),
+            onRename = { onAction(AppListScreenAction.OnRenameClick(app)) },
+            onToggleHidden = {
+                if (state.isHidden(app)) {
+                    onAction(AppListScreenAction.OnUnhideApp(app))
+                } else {
+                    onAction(AppListScreenAction.OnHideApp(app))
+                }
+            }
         )
     }
+
+    state.showRenameApp?.let { app ->
+        RenameDialog(
+            currentName = app.name,
+            onDismiss = { onAction(AppListScreenAction.OnRenameDismiss) },
+            onConfirm = { newName -> onAction(AppListScreenAction.OnRenameConfirm(app, newName)) }
+        )
+    }
+
+    var showHidden by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -292,6 +312,33 @@ private fun AppListScreen(
                         onAppClick = { onAction(AppListScreenAction.OnAppClick(app)) },
                         onAppLongClick = { onAction(AppListScreenAction.OnAppLongClick(app)) }
                     )
+                }
+
+                if (state.searchText.text.isBlank() && state.hiddenApps.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = if (showHidden) {
+                                stringResource(R.string.hide_hidden_apps)
+                            } else {
+                                stringResource(R.string.show_hidden_apps, state.hiddenApps.size)
+                            },
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showHidden = !showHidden }
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
+                    }
+                    if (showHidden) {
+                        items(state.hiddenApps) { app ->
+                            AppListItem(
+                                app = app,
+                                onAppClick = { onAction(AppListScreenAction.OnAppClick(app)) },
+                                onAppLongClick = { onAction(AppListScreenAction.OnAppLongClick(app)) }
+                            )
+                        }
+                    }
                 }
             }
             BoxWithConstraints(

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
+import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
@@ -24,6 +25,7 @@ class AppListViewModel(
     private val installedAppsRepository: InstalledAppsRepository,
     private val recentAppsRepository: RecentAppsRepository,
     private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
+    private val localAppOverrideDataSource: LocalAppOverrideDataSource,
     private val appActions: AppActions
 ) : ViewModel() {
 
@@ -36,14 +38,27 @@ class AppListViewModel(
                 installedAppsRepository.apps,
                 localFavoriteAppDataSource.getFavoriteApps(),
                 recentAppsRepository.recentApps,
-                recentAppsRepository.hasUsageStatsPermission
-            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission ->
+                recentAppsRepository.hasUsageStatsPermission,
+                localAppOverrideDataSource.getOverrides()
+            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission, overrides ->
+                val hiddenSet = overrides.filter { it.hidden }.map { it.packageName }.toSet()
+                val nameMap = overrides.mapNotNull { o -> o.customName?.let { o.packageName to it } }.toMap()
+                fun applyName(app: AppData) =
+                    nameMap[app.packageName]?.let { app.copy(name = it) } ?: app
+
+                val renamed = allApps.map(::applyName)
                 _state.update {
                     it.copy(
-                        allApps = allApps,
+                        allApps = renamed
+                            .filter { app -> app.packageName !in hiddenSet }
+                            .sortedBy { app -> app.name.uppercase() },
+                        hiddenApps = renamed
+                            .filter { app -> app.packageName in hiddenSet }
+                            .sortedBy { app -> app.name.uppercase() },
                         favoriteAppPackageNames = favoriteApps.map { fav -> fav.packageName }
                             .toSet(),
-                        recentApps = recentApps,
+                        recentApps = recentApps.map(::applyName)
+                            .filter { app -> app.packageName !in hiddenSet },
                         hasUsageStatsPermission = hasUsageStatsPermission
                     )
                 }
@@ -97,6 +112,38 @@ class AppListViewModel(
             is AppListScreenAction.OnUninstallClick -> {
                 appActions.requestUninstall(action.app.packageName)
                 _state.update { it.copy(showDialogApp = null) }
+            }
+
+            is AppListScreenAction.OnHideApp -> {
+                viewModelScope.launch {
+                    localAppOverrideDataSource.setHidden(action.app.packageName, true)
+                    _state.update { it.copy(showDialogApp = null) }
+                }
+            }
+
+            is AppListScreenAction.OnUnhideApp -> {
+                viewModelScope.launch {
+                    localAppOverrideDataSource.setHidden(action.app.packageName, false)
+                    _state.update { it.copy(showDialogApp = null) }
+                }
+            }
+
+            is AppListScreenAction.OnRenameClick -> {
+                _state.update { it.copy(showDialogApp = null, showRenameApp = action.app) }
+            }
+
+            is AppListScreenAction.OnRenameConfirm -> {
+                viewModelScope.launch {
+                    localAppOverrideDataSource.setCustomName(
+                        action.app.packageName,
+                        action.newName.trim().ifBlank { null }
+                    )
+                    _state.update { it.copy(showRenameApp = null) }
+                }
+            }
+
+            AppListScreenAction.OnRenameDismiss -> {
+                _state.update { it.copy(showRenameApp = null) }
             }
 
             AppListScreenAction.OnGrantPermissionClick -> {

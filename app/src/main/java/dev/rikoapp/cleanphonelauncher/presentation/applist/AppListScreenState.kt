@@ -6,13 +6,17 @@ import kotlin.text.indexOf
 
 data class AppListScreenState(
     val allApps: List<AppData> = emptyList(),
+    val hiddenApps: List<AppData> = emptyList(),
     val searchText: TextFieldState = TextFieldState(),
     val showDialogApp: AppData? = null,
+    val showRenameApp: AppData? = null,
     val favoriteAppPackageNames: Set<String> = emptySet(),
     val recentApps: List<AppData> = emptyList(),
     val hasUsageStatsPermission: Boolean = false,
     val isActive: Boolean = false
 ) {
+    fun isHidden(app: AppData): Boolean = hiddenApps.any { it.packageName == app.packageName }
+
     val filteredApps: List<AppData>
         get() = if (searchText.text.isBlank()) {
             allApps

@@ -5,6 +5,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.3.0]
+
+### Added
+- **Hide apps** from the drawer (long-press → Hide). A "Show hidden apps" row at the bottom of the list reveals them so you can unhide.
+- **Rename apps** (long-press → Rename) with a custom label.
+- **App version** shown at the bottom of Settings (with the build code in debug builds).
+
+### Changed
+- Local builds now derive their version name from git (e.g. `1.2.0-3-g1a2b3c`), so a dev build is clearly distinguishable from a store release.
+
 ## [1.2.0]
 
 ### Added
