@@ -1,9 +1,13 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
+import android.app.Activity
+import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +38,9 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +50,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
+import dev.rikoapp.cleanphonelauncher.data.WidgetHostManager
+import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
+import org.koin.compose.koinInject
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
@@ -67,6 +77,83 @@ private fun SettingsScreen(
 
     val fg = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
+
+    val widgetManager: WidgetHostManager = koinInject()
+    val settingsRepository: SettingsRepository = koinInject()
+    val widgetId by settingsRepository.widgetId.collectAsState()
+    var pendingWidgetId by remember { mutableStateOf(-1) }
+
+    val configureWidgetLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            settingsRepository.setWidgetId(pendingWidgetId)
+        } else {
+            widgetManager.deleteId(pendingWidgetId)
+        }
+    }
+
+    fun confirmOrConfigure(id: Int) {
+        val info = widgetManager.getInfo(id)
+        if (info?.configure != null) {
+            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
+                component = info.configure
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+            }
+            runCatching { configureWidgetLauncher.launch(intent) }
+                .onFailure { settingsRepository.setWidgetId(id) }
+        } else {
+            settingsRepository.setWidgetId(id)
+        }
+    }
+
+    val bindWidgetLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) confirmOrConfigure(pendingWidgetId)
+        else widgetManager.deleteId(pendingWidgetId)
+    }
+
+    val pickWidgetLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
+        when {
+            result.resultCode != Activity.RESULT_OK -> if (id != -1) widgetManager.deleteId(id)
+            id == -1 -> Unit
+            else -> {
+                val info = widgetManager.getInfo(id)
+                pendingWidgetId = id
+                if (info != null && widgetManager.bindIfAllowed(id, info)) {
+                    confirmOrConfigure(id)
+                } else {
+                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                        if (info != null) {
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
+                        }
+                    }
+                    runCatching { bindWidgetLauncher.launch(intent) }
+                        .onFailure { widgetManager.deleteId(id) }
+                }
+            }
+        }
+    }
+
+    fun addWidget() {
+        val id = widgetManager.allocateId()
+        pendingWidgetId = id
+        val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_PICK).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+        }
+        runCatching { pickWidgetLauncher.launch(intent) }
+            .onFailure { widgetManager.deleteId(id) }
+    }
+
+    fun removeWidget() {
+        if (widgetId != -1) widgetManager.deleteId(widgetId)
+        settingsRepository.setWidgetId(-1)
+    }
 
     Column(
         modifier = Modifier
@@ -182,6 +269,33 @@ private fun SettingsScreen(
                         )
                     }
                 }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        SectionLabel(stringResource(R.string.settings_widget))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.home_widget),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.home_widget_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            SelectableChip(
+                text = stringResource(
+                    if (widgetId == -1) R.string.add_widget else R.string.remove_widget
+                ),
+                selected = false,
+                onClick = { if (widgetId == -1) addWidget() else removeWidget() }
             )
         }
 

@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.8.0]
+
+### Added
+- **Home screen widget:** add a single app widget shown on the home screen above your favorites, via Settings → Widget → Add widget (pick, bind and configure flow). Remove it from the same place.
+
 ## [1.7.0]
 
 ### Added
