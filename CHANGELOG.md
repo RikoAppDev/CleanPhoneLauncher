@@ -5,6 +5,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.4.0]
+
+### Added
+- **Swipe up** on the home screen to open the app drawer.
+- **Double-tap** the home screen to lock the device (asks you to enable device admin the first time).
+
 ## [1.3.0]
 
 ### Added

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,13 +58,15 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun HomeScreenRoot(
+    onSwipeUp: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
     HomeScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        onSwipeUp = onSwipeUp
     )
 }
 
@@ -71,6 +74,7 @@ fun HomeScreenRoot(
 private fun HomeScreen(
     state: HomeScreenState,
     onAction: (HomeScreenAction) -> Unit,
+    onSwipeUp: () -> Unit = {},
 ) {
     var reorderMode by remember { mutableStateOf(false) }
 
@@ -105,8 +109,16 @@ private fun HomeScreen(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = { reorderMode = true },
+                    onDoubleTap = { onAction(HomeScreenAction.OnDoubleTapHome) },
                     onTap = { if (reorderMode) reorderMode = false }
                 )
+            }
+            .pointerInput(Unit) {
+                var totalDrag = 0f
+                detectVerticalDragGestures(
+                    onDragStart = { totalDrag = 0f },
+                    onDragEnd = { if (totalDrag < -120f) onSwipeUp() }
+                ) { _, dragAmount -> totalDrag += dragAmount }
             }
             .systemBarsPadding()
             .padding(16.dp),

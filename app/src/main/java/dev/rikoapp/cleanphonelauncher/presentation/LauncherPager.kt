@@ -55,7 +55,11 @@ fun LauncherPager() {
         modifier = Modifier.fillMaxSize(),
     ) {
         when (it) {
-            0 -> HomeScreenRoot()
+            0 -> HomeScreenRoot(
+                onSwipeUp = {
+                    coroutineScope.launch { pagerState.animateScrollToPage(1) }
+                }
+            )
 
             1 -> AppListScreenRoot(
                 isActive = pagerState.currentPage == 1

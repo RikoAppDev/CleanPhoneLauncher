@@ -1,9 +1,13 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
 import android.app.Application
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
+import dev.rikoapp.cleanphonelauncher.LockDeviceAdminReceiver
 import androidx.lifecycle.viewModelScope
 import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
@@ -152,6 +156,30 @@ class HomeViewModel(
 
             is HomeScreenAction.OnCameraAppClick -> {
                 launchApp(action.app)
+            }
+
+            HomeScreenAction.OnDoubleTapHome -> {
+                lockScreen()
+            }
+        }
+    }
+
+    private fun lockScreen() {
+        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val admin = ComponentName(context, LockDeviceAdminReceiver::class.java)
+        if (dpm.isAdminActive(admin)) {
+            dpm.lockNow()
+        } else {
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
+                .putExtra(
+                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                    context.getString(dev.rikoapp.cleanphonelauncher.R.string.device_admin_explanation)
+                )
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            try {
+                context.startActivity(intent)
+            } catch (_: Exception) {
             }
         }
     }
