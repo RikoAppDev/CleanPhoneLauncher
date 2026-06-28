@@ -120,8 +120,6 @@ private fun AppListScreen(
 ) {
     val alphabet = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    // Number of items the LazyColumn renders before the app list (recent-apps header/divider or
-    // the permission prompt). Needed so alphabet fast-scroll lands on the correct row.
     val leadingItemCount = if (state.searchText.text.isBlank()) {
         if (state.hasUsageStatsPermission) {
             if (state.recentApps.isNotEmpty()) state.recentApps.size + 2 else 0

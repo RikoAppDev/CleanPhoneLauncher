@@ -4,9 +4,9 @@ import android.app.Application
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
@@ -23,7 +23,8 @@ class AppListViewModel(
     private val context: Application,
     private val installedAppsRepository: InstalledAppsRepository,
     private val recentAppsRepository: RecentAppsRepository,
-    private val localFavoriteAppDataSource: LocalFavoriteAppDataSource
+    private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
+    private val appActions: AppActions
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppListScreenState())
@@ -89,12 +90,12 @@ class AppListViewModel(
             }
 
             is AppListScreenAction.OnAppInfoClick -> {
-                openAppInfo(action.app)
+                appActions.openAppInfo(action.app.packageName)
                 _state.update { it.copy(showDialogApp = null) }
             }
 
             is AppListScreenAction.OnUninstallClick -> {
-                requestUninstall(action.app)
+                appActions.requestUninstall(action.app.packageName)
                 _state.update { it.copy(showDialogApp = null) }
             }
 
@@ -140,44 +141,9 @@ class AppListViewModel(
         }
     }
 
-    private fun openAppInfo(app: AppData) {
-        val intent = Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            "package:${app.packageName}".toUri()
-        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            // App details unavailable (e.g. app removed) — nothing to do.
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun requestUninstall(app: AppData) {
-        // ACTION_UNINSTALL_PACKAGE pairs with the REQUEST_DELETE_PACKAGES permission so the
-        // system shows the uninstall dialog instead of silently denying the request.
-        val intent = Intent(
-            Intent.ACTION_UNINSTALL_PACKAGE,
-            "package:${app.packageName}".toUri()
-        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            // Uninstall flow could not be started — ignore.
-        }
-    }
-
     private fun launchApp(app: AppData) {
-        val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-        // Intent is null (and launch is a no-op) if the app was uninstalled since the list loaded;
-        // the try/catch guards the brief window where the activity is already gone.
-        intent?.let {
-            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            try {
-                context.startActivity(it)
-            } catch (_: Exception) {
-                installedAppsRepository.getInstalledApps()
-            }
+        if (!appActions.launch(app.packageName)) {
+            installedAppsRepository.getInstalledApps()
         }
     }
 }

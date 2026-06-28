@@ -31,8 +31,8 @@ import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
+import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
-import dev.rikoapp.cleanphonelauncher.presentation.components.FavoriteDialog
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
@@ -68,13 +68,13 @@ private fun HomeScreen(
 
     if (state.showDialogApp != null) {
         val app = state.showDialogApp
-        FavoriteDialog(
+        AppOptionsDialog(
             app = app,
             isFavorite = true,
             onDismiss = { onAction(HomeScreenAction.OnFavoriteDialogDismiss) },
-            onConfirm = {
-                onAction(HomeScreenAction.OnRemoveFavorite(app.packageName))
-            }
+            onToggleFavorite = { onAction(HomeScreenAction.OnRemoveFavorite(app.packageName)) },
+            onAppInfo = { onAction(HomeScreenAction.OnAppInfoClick(app)) },
+            onUninstall = { onAction(HomeScreenAction.OnUninstallClick(app)) }
         )
     }
 

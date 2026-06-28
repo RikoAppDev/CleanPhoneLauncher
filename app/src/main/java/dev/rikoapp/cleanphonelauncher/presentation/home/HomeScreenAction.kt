@@ -12,6 +12,8 @@ sealed class HomeScreenAction {
     data class OnFavoriteAppLongClick(val app: AppData) : HomeScreenAction()
     object OnFavoriteDialogDismiss : HomeScreenAction()
     data class OnRemoveFavorite(val packageName: String) : HomeScreenAction()
+    data class OnAppInfoClick(val app: AppData) : HomeScreenAction()
+    data class OnUninstallClick(val app: AppData) : HomeScreenAction()
     data class OnPhoneAppClick(val app: AppData) : HomeScreenAction()
     data class OnCameraAppClick(val app: AppData) : HomeScreenAction()
 }

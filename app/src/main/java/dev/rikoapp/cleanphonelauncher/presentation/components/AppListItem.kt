@@ -29,8 +29,6 @@ fun AppListItem(
             .fillMaxWidth()
             .clip(shape = MaterialTheme.shapes.small)
             .combinedClickable(
-                // Launching is delegated to the ViewModel (guarded against uninstalled apps);
-                // the composable must not call startActivity directly.
                 onClick = onAppClick,
                 onLongClick = onAppLongClick
             )

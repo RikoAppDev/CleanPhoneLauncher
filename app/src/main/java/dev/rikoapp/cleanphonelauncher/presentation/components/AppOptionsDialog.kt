@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -17,10 +18,6 @@ import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 
-/**
- * Long-press menu for an app in the drawer: toggle favorite, open system app info,
- * or uninstall. Each option dismisses the dialog via its own callback.
- */
 @Composable
 fun AppOptionsDialog(
     app: AppData,
@@ -75,8 +72,9 @@ private fun OptionRow(
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier
             .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp)
+            .padding(horizontal = 12.dp, vertical = 14.dp)
     )
 }
 

@@ -1,5 +1,6 @@
 package dev.rikoapp.cleanphonelauncher.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +25,12 @@ fun LauncherPager() {
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     var isFirstResume by remember { mutableStateOf(true) }
+
+    BackHandler {
+        if (pagerState.currentPage != 0) {
+            coroutineScope.launch { pagerState.animateScrollToPage(0) }
+        }
+    }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

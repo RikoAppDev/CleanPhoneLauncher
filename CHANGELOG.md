@@ -5,6 +5,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.1.0]
+
+### Added
+- **Home favorites long-press menu:** long-pressing a favorite on the home screen now opens the same options menu (Remove favorite / App info / Uninstall) as the app drawer, instead of only offering to remove the favorite.
+
+### Fixed
+- **Back from the app list now returns to home.** Back was globally swallowed (to stop the launcher being hidden); it now scrolls to the home page from the drawer and is only a no-op when already on home.
+
+### Changed
+- App options menu rows now have a rounded, padded ripple instead of a sharp full-bleed rectangle.
+- Extracted launch / app-info / uninstall handling into a shared `AppActions` helper so both screens use one implementation.
+
+### CI
+- Added a `concurrency` guard so overlapping pushes can't race two releases.
+
+## [1.0.4]
+
 ### Fixed
 - **Uninstall did nothing:** tapping Uninstall silently returned to the home screen because the app lacked the `REQUEST_DELETE_PACKAGES` permission, so the system denied the request. Added the permission and switched to `ACTION_UNINSTALL_PACKAGE`, which now shows the system uninstall dialog.
 

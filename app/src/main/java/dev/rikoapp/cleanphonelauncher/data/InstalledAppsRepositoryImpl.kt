@@ -37,10 +37,6 @@ class InstalledAppsRepositoryImpl(
         registerPackageReceiver()
     }
 
-    /**
-     * Keep the app list in sync when packages are installed, removed or updated, so newly
-     * installed apps appear and uninstalled ones disappear without restarting the launcher.
-     */
     private fun registerPackageReceiver() {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {

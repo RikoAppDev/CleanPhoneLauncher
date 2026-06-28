@@ -5,6 +5,7 @@ import android.content.Intent
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
@@ -21,7 +22,8 @@ class HomeViewModel(
     private val context: Application,
     private val installedAppsRepository: InstalledAppsRepository,
     private val clockRepository: ClockRepository,
-    private val localFavoriteAppDataSource: LocalFavoriteAppDataSource
+    private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
+    private val appActions: AppActions
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeScreenState())
@@ -128,6 +130,16 @@ class HomeViewModel(
                 }
             }
 
+            is HomeScreenAction.OnAppInfoClick -> {
+                appActions.openAppInfo(action.app.packageName)
+                _state.update { it.copy(showDialogApp = null) }
+            }
+
+            is HomeScreenAction.OnUninstallClick -> {
+                appActions.requestUninstall(action.app.packageName)
+                _state.update { it.copy(showDialogApp = null) }
+            }
+
             is HomeScreenAction.OnPhoneAppClick -> {
                 launchApp(action.app)
             }
@@ -139,14 +151,8 @@ class HomeViewModel(
     }
 
     private fun launchApp(app: AppData) {
-        val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-        intent?.let {
-            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            try {
-                context.startActivity(it)
-            } catch (_: Exception) {
-                installedAppsRepository.getInstalledApps()
-            }
+        if (!appActions.launch(app.packageName)) {
+            installedAppsRepository.getInstalledApps()
         }
     }
 }
