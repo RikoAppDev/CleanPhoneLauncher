@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.1.1]
+
+### CI
+- Fixed the Play Store deploy: release-notes file must be named `whatsnew-en-US` (no extension) so the language code parses.
+
 ## [1.1.0]
 
 ### Added

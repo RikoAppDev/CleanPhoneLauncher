@@ -332,7 +332,7 @@ jobs:
         run: |
           mkdir -p ./whatsnew
           echo "Version ${{ needs.version.outputs.version_name }} — bug fixes and stability improvements." \
-            > ./whatsnew/whatsnew-en-US.txt
+            > ./whatsnew/whatsnew-en-US
 
       - name: Deploy to Play Store (internal track)
         if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
