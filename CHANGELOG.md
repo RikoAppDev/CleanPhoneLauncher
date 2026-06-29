@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.10.0]
+
+### Added
+- **Searchable widget picker.** Adding a widget now opens an in-app picker with a search box and app icons (grouped by app), instead of the plain system list — so you can find a widget by typing its name or its app.
+
 ## [1.9.0]
 
 ### Added

@@ -31,6 +31,9 @@ class WidgetHostManager(context: Application) {
 
     fun getInfo(id: Int): AppWidgetProviderInfo? = appWidgetManager.getAppWidgetInfo(id)
 
+    fun installedProviders(): List<AppWidgetProviderInfo> =
+        runCatching { appWidgetManager.installedProviders }.getOrDefault(emptyList())
+
     fun updateSize(id: Int, widthDp: Int, heightDp: Int) {
         val options = Bundle().apply {
             putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)

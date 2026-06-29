@@ -41,6 +41,8 @@
     <string name="widgets_done">Done</string>
     <string name="widgets_hint">Drag the handle to reorder · drag the bottom edge to resize · tap Done to finish</string>
     <string name="widget_reconfigure">Configure widget</string>
+    <string name="widget_picker_title">Choose a widget</string>
+    <string name="widget_search">Search widgets</string>
     <string name="settings_crash_reporting">Send crash reports</string>
     <string name="settings_crash_reporting_desc">Off by default. Sends anonymous crash diagnostics via Firebase to help fix bugs.</string>
     <string name="settings_test_crash">Force test crash (debug)</string>

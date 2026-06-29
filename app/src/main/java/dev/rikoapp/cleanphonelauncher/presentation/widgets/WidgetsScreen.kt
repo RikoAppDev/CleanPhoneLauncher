@@ -2,6 +2,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.widgets
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -106,56 +107,34 @@ fun WidgetsScreenRoot(
         }
     }
 
-    val pickLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
-        when {
-            result.resultCode != Activity.RESULT_OK -> {
-                if (id != -1) viewModel.discardAllocation(id)
-                onWidgetFlowActive(false)
-            }
-
-            id == -1 -> onWidgetFlowActive(false)
-
-            else -> {
-                val info = widgetManager.getInfo(id)
-                pendingWidgetId = id
-                if (info != null && widgetManager.bindIfAllowed(id, info)) {
-                    confirmOrConfigure(id)
-                } else {
-                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-                        if (info != null) {
-                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
-                        }
-                    }
-                    runCatching { bindLauncher.launch(intent) }
-                        .onFailure {
-                            viewModel.discardAllocation(id)
-                            onWidgetFlowActive(false)
-                        }
-                }
-            }
-        }
-    }
-
     val reconfigureLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { onWidgetFlowActive(false) }
 
+    var showPicker by remember { mutableStateOf(false) }
+
     fun addWidget() {
+        showPicker = true
+    }
+
+    fun startWidget(info: AppWidgetProviderInfo) {
+        showPicker = false
         onWidgetFlowActive(true)
         val id = widgetManager.allocateId()
         pendingWidgetId = id
-        val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_PICK).apply {
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-        }
-        runCatching { pickLauncher.launch(intent) }
-            .onFailure {
-                widgetManager.deleteId(id)
-                onWidgetFlowActive(false)
+        if (widgetManager.bindIfAllowed(id, info)) {
+            confirmOrConfigure(id)
+        } else {
+            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider)
             }
+            runCatching { bindLauncher.launch(intent) }
+                .onFailure {
+                    widgetManager.deleteId(id)
+                    onWidgetFlowActive(false)
+                }
+        }
     }
 
     fun reconfigure(id: Int) {
@@ -184,6 +163,13 @@ fun WidgetsScreenRoot(
         onReconfigure = ::reconfigure,
         isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null }
     )
+
+    if (showPicker) {
+        WidgetPickerDialog(
+            onPick = ::startWidget,
+            onDismiss = { showPicker = false }
+        )
+    }
 }
 
 @Composable
