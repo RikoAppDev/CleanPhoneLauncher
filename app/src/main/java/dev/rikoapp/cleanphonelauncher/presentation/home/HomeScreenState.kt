@@ -12,6 +12,5 @@ data class HomeScreenState(
     val showClockTypeDialog: Boolean = false,
     val favoriteAppsData: List<AppData> = emptyList(), // Resolved favorite apps
     val showDialogApp: AppData? = null,
-    val notificationCounts: Map<String, Int> = emptyMap(),
-    val widgetId: Int = -1
+    val notificationCounts: Map<String, Int> = emptyMap()
 )

@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.9.0]
+
+### Added
+- **Dedicated widgets screen** to the left of the home screen. Swipe right from home to reach it. Add **multiple** widgets, tap **Edit** to reorder them (drag handle), **resize** each one (drag the bottom edge), **reconfigure** or **remove** them.
+
+### Changed
+- **The home screen now shows only the clock and your favorites** — widgets live on their own screen. The launcher is now a three-pane layout: widgets ← home → app drawer, with home in the middle.
+
 ## [1.8.1]
 
 ### Fixed

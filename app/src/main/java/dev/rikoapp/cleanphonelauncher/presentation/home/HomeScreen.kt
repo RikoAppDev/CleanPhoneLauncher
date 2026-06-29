@@ -47,7 +47,6 @@ import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
-import dev.rikoapp.cleanphonelauncher.presentation.components.WidgetSlot
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
@@ -164,11 +163,6 @@ private fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-
-            WidgetSlot(
-                widgetId = state.widgetId,
-                modifier = Modifier.fillMaxWidth()
-            )
 
             if (reorderMode) {
                 Text(

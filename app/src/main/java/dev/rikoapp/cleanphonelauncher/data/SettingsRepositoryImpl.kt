@@ -33,9 +33,6 @@ class SettingsRepositoryImpl(
     )
     override val crashReportingEnabled = _crashReportingEnabled.asStateFlow()
 
-    private val _widgetId = MutableStateFlow(prefs.getInt(KEY_WIDGET_ID, -1))
-    override val widgetId = _widgetId.asStateFlow()
-
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -66,13 +63,6 @@ class SettingsRepositoryImpl(
         FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = enabled
     }
 
-    override fun setWidgetId(id: Int) {
-        _widgetId.value = id
-        applicationScope.launch {
-            prefs.edit().putInt(KEY_WIDGET_ID, id).apply()
-        }
-    }
-
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
@@ -83,6 +73,5 @@ class SettingsRepositoryImpl(
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_COLOR_STYLE = "color_style"
         private const val KEY_CRASH_REPORTING = "crash_reporting"
-        private const val KEY_WIDGET_ID = "widget_id"
     }
 }

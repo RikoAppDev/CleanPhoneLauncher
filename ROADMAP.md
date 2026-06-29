@@ -20,6 +20,10 @@
 - [ ] **Contacts search** and an optional **web-search fallback** from the drawer search box.
 - [ ] Keyboard "go" on a single search result launches it directly.
 
+### Gestures
+- [ ] **Swipe down on home → open the system status bar / notification shade** (expand quick settings), matching the stock launcher gesture.
+- [ ] **Double-tap to lock the screen** — already ships (double-tap home, via device admin); refine so it matches the Samsung default feel and make the trigger configurable.
+
 ### Polish
 - [ ] **Custom accent colour picker** (free colour, not just the preset swatches).
 - [ ] **Localization** — extract any remaining hard-coded strings and add a Slovak (`sk`) translation; English is the only locale today.

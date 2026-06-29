@@ -20,20 +20,27 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.presentation.applist.AppListScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.home.HomeScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenRoot
+import dev.rikoapp.cleanphonelauncher.presentation.widgets.WidgetsScreenRoot
 import kotlinx.coroutines.launch
+
+private const val WIDGETS_PAGE = 0
+private const val HOME_PAGE = 1
+private const val DRAWER_PAGE = 2
 
 @Composable
 fun LauncherPager() {
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(initialPage = HOME_PAGE, pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     var isFirstResume by remember { mutableStateOf(true) }
     var showSettings by remember { mutableStateOf(false) }
+    var widgetFlowActive by remember { mutableStateOf(false) }
     val settingsOpen by rememberUpdatedState(showSettings)
+    val widgetFlow by rememberUpdatedState(widgetFlowActive)
 
     BackHandler(enabled = !showSettings) {
-        if (pagerState.currentPage != 0) {
-            coroutineScope.launch { pagerState.animateScrollToPage(0) }
+        if (pagerState.currentPage != HOME_PAGE) {
+            coroutineScope.launch { pagerState.animateScrollToPage(HOME_PAGE) }
         }
     }
 
@@ -42,9 +49,9 @@ fun LauncherPager() {
             if (event == Lifecycle.Event.ON_RESUME) {
                 if (isFirstResume) {
                     isFirstResume = false
-                } else if (!settingsOpen) {
+                } else if (!settingsOpen && !widgetFlow) {
                     coroutineScope.launch {
-                        pagerState.scrollToPage(0)
+                        pagerState.scrollToPage(HOME_PAGE)
                     }
                 }
             }
@@ -59,16 +66,20 @@ fun LauncherPager() {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-        ) {
-            when (it) {
-                0 -> HomeScreenRoot(
+        ) { page ->
+            when (page) {
+                WIDGETS_PAGE -> WidgetsScreenRoot(
+                    onWidgetFlowActive = { widgetFlowActive = it }
+                )
+
+                HOME_PAGE -> HomeScreenRoot(
                     onSwipeUp = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(1) }
+                        coroutineScope.launch { pagerState.animateScrollToPage(DRAWER_PAGE) }
                     }
                 )
 
-                1 -> AppListScreenRoot(
-                    isActive = pagerState.currentPage == 1,
+                DRAWER_PAGE -> AppListScreenRoot(
+                    isActive = pagerState.currentPage == DRAWER_PAGE,
                     onOpenSettings = { showSettings = true }
                 )
             }

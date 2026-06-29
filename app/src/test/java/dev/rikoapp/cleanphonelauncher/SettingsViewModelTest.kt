@@ -30,11 +30,9 @@ class SettingsViewModelTest {
         override val themeMode = MutableStateFlow(ThemeMode.SYSTEM)
         override val colorStyle = MutableStateFlow(AppColorStyle.DYNAMIC)
         override val crashReportingEnabled = MutableStateFlow(false)
-        override val widgetId = MutableStateFlow(-1)
         override fun setThemeMode(mode: ThemeMode) { themeMode.value = mode }
         override fun setColorStyle(style: AppColorStyle) { colorStyle.value = style }
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
-        override fun setWidgetId(id: Int) { widgetId.value = id }
     }
 
     private class FakeInstalledAppsRepository : InstalledAppsRepository {
