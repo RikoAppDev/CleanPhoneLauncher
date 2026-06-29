@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -63,7 +62,6 @@ import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.RenameDialog
-import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
@@ -75,6 +73,7 @@ import kotlin.math.roundToInt
 @Composable
 fun AppListScreenRoot(
     isActive: Boolean,
+    onOpenSettings: () -> Unit = {},
     viewModel: AppListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -105,25 +104,18 @@ fun AppListScreenRoot(
         }
     }
 
-    var showSettings by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        AppListScreen(
-            state = state,
-            onAction = viewModel::onAction,
-            focusRequester = focusRequester,
-            focusManager = focusManager,
-            coroutineScope = coroutineScope,
-            listState = listState,
-            onOpenSettings = {
-                focusManager.clearFocus()
-                showSettings = true
-            }
-        )
-        if (showSettings) {
-            SettingsScreenRoot(onClose = { showSettings = false })
+    AppListScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        focusRequester = focusRequester,
+        focusManager = focusManager,
+        coroutineScope = coroutineScope,
+        listState = listState,
+        onOpenSettings = {
+            focusManager.clearFocus()
+            onOpenSettings()
         }
-    }
+    )
 }
 
 @Composable

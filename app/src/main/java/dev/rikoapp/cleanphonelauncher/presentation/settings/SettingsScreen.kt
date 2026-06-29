@@ -110,8 +110,11 @@ private fun SettingsScreen(
     val bindWidgetLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) confirmOrConfigure(pendingWidgetId)
-        else widgetManager.deleteId(pendingWidgetId)
+        if (result.resultCode == Activity.RESULT_OK || widgetManager.getInfo(pendingWidgetId) != null) {
+            confirmOrConfigure(pendingWidgetId)
+        } else {
+            widgetManager.deleteId(pendingWidgetId)
+        }
     }
 
     val pickWidgetLauncher = rememberLauncherForActivityResult(

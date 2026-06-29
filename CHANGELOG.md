@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.8.1]
+
+### Fixed
+- **Adding a home widget now works on Samsung / One UI.** The widget bind dialog returns a "canceled" result on some devices even after you allow access, which caused the launcher to discard the just-bound widget; the bind state is now checked directly. The Settings screen also stays open through the whole pick → bind → configure flow instead of being dismissed mid-way.
+
 ## [1.8.0]
 
 ### Added
