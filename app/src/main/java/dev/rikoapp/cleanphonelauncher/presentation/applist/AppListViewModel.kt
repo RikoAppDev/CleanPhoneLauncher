@@ -1,7 +1,9 @@
 package dev.rikoapp.cleanphonelauncher.presentation.applist
 
 import android.app.Application
+import android.app.SearchManager
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
@@ -168,9 +170,12 @@ class AppListViewModel(
             }
 
             is AppListScreenAction.OnSearchDone -> {
-                action.appToLaunch?.let { app ->
+                val app = action.appToLaunch
+                if (app != null) {
                     launchApp(app)
                     recentAppsRepository.getRecentApps(_state.value.allApps)
+                } else if (action.query.isNotBlank()) {
+                    webSearch(action.query)
                 }
             }
 
@@ -198,6 +203,20 @@ class AppListViewModel(
     private fun launchApp(app: AppData) {
         if (!appActions.launch(app.packageName)) {
             installedAppsRepository.getInstalledApps()
+        }
+    }
+
+    private fun webSearch(query: String) {
+        val webSearchIntent = Intent(Intent.ACTION_WEB_SEARCH).apply {
+            putExtra(SearchManager.QUERY, query)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val launched = runCatching { context.startActivity(webSearchIntent) }.isSuccess
+        if (!launched) {
+            val url = "https://www.google.com/search?q=" + Uri.encode(query)
+            val viewIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { context.startActivity(viewIntent) }
         }
     }
 }

@@ -17,7 +17,7 @@ sealed class AppListScreenAction {
     object OnGrantPermissionClick : AppListScreenAction()
     data class OnAlphabetScroll(val letter: Char) : AppListScreenAction()
     data class OnAlphabetClick(val letter: Char) : AppListScreenAction()
-    data class OnSearchDone(val appToLaunch: AppData?) : AppListScreenAction()
+    data class OnSearchDone(val appToLaunch: AppData?, val query: String = "") : AppListScreenAction()
     object OnClearSearch : AppListScreenAction()
     data class OnActiveStateChanged(val isActive: Boolean) : AppListScreenAction()
     object OnResume : AppListScreenAction()

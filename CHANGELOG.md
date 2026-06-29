@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.12.0]
+
+### Added
+- **Web-search fallback from the drawer search.** Press the keyboard's Done/Search action when your query matches no app and it runs a web search for that text (falls back to a Google search URL if no search app handles it). Matching an app still launches it directly.
+
 ## [1.11.1]
 
 ### Fixed

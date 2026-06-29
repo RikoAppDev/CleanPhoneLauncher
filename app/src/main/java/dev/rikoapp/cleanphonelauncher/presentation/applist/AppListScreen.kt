@@ -218,7 +218,12 @@ private fun AppListScreen(
                 } else {
                     state.recentApps.firstOrNull()
                 }
-                onAction(AppListScreenAction.OnSearchDone(appToLaunch))
+                onAction(
+                    AppListScreenAction.OnSearchDone(
+                        appToLaunch = appToLaunch,
+                        query = state.searchText.text.toString()
+                    )
+                )
                 focusManager.clearFocus()
             },
             lineLimits = TextFieldLineLimits.SingleLine,
