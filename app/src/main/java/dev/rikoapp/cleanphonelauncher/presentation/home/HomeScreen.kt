@@ -1,5 +1,8 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -27,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,10 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import dev.rikoapp.cleanphonelauncher.LockDeviceAdminReceiver
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
@@ -77,8 +83,23 @@ private fun HomeScreen(
     onSwipeUp: () -> Unit = {},
 ) {
     var reorderMode by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     BackHandler(enabled = reorderMode) { reorderMode = false }
+
+    LaunchedEffect(state.requestDeviceAdmin) {
+        if (state.requestDeviceAdmin) {
+            val admin = ComponentName(context, LockDeviceAdminReceiver::class.java)
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
+                .putExtra(
+                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                    context.getString(R.string.device_admin_explanation)
+                )
+            runCatching { context.startActivity(intent) }
+            onAction(HomeScreenAction.OnDeviceAdminRequestHandled)
+        }
+    }
 
     if (state.showClockTypeDialog) {
         ClockTypeDialog(
@@ -117,7 +138,10 @@ private fun HomeScreen(
                 var totalDrag = 0f
                 detectVerticalDragGestures(
                     onDragStart = { totalDrag = 0f },
-                    onDragEnd = { if (totalDrag < -120f) onSwipeUp() }
+                    onDragEnd = {
+                        if (totalDrag < -120f) onSwipeUp()
+                        else if (totalDrag > 120f) onAction(HomeScreenAction.OnSwipeDownHome)
+                    }
                 ) { _, dragAmount -> totalDrag += dragAmount }
             }
             .systemBarsPadding()

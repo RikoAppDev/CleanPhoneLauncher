@@ -18,4 +18,6 @@ sealed class HomeScreenAction {
     data class OnPhoneAppClick(val app: AppData) : HomeScreenAction()
     data class OnCameraAppClick(val app: AppData) : HomeScreenAction()
     object OnDoubleTapHome : HomeScreenAction()
+    object OnSwipeDownHome : HomeScreenAction()
+    object OnDeviceAdminRequestHandled : HomeScreenAction()
 }

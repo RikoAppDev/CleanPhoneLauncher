@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.11.0]
+
+### Added
+- **Swipe down on the home screen to open the notification shade** (system status bar / quick settings), matching the stock launcher gesture.
+
+### Fixed
+- **Double-tap to lock now works.** The "enable device admin" prompt was launched from the application context as a new task, which the system rejects (`Cannot start ADD_DEVICE_ADMIN as a new task`) — so the prompt flashed and vanished and the admin could never be enabled. It is now launched from the activity, so it stays up; once enabled, double-tapping the home screen locks the device.
+
 ## [1.10.0]
 
 ### Added

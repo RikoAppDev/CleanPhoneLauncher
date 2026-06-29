@@ -168,6 +168,22 @@ class HomeViewModel(
             HomeScreenAction.OnDoubleTapHome -> {
                 lockScreen()
             }
+
+            HomeScreenAction.OnSwipeDownHome -> {
+                expandNotificationsPanel()
+            }
+
+            HomeScreenAction.OnDeviceAdminRequestHandled -> {
+                _state.update { it.copy(requestDeviceAdmin = false) }
+            }
+        }
+    }
+
+    private fun expandNotificationsPanel() {
+        runCatching {
+            val service = context.getSystemService("statusbar")
+            val statusBarManager = Class.forName("android.app.StatusBarManager")
+            statusBarManager.getMethod("expandNotificationsPanel").invoke(service)
         }
     }
 
@@ -177,17 +193,7 @@ class HomeViewModel(
         if (dpm.isAdminActive(admin)) {
             dpm.lockNow()
         } else {
-            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
-                .putExtra(
-                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                    context.getString(dev.rikoapp.cleanphonelauncher.R.string.device_admin_explanation)
-                )
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            try {
-                context.startActivity(intent)
-            } catch (_: Exception) {
-            }
+            _state.update { it.copy(requestDeviceAdmin = true) }
         }
     }
 
