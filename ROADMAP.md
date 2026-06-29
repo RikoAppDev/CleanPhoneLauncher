@@ -14,6 +14,9 @@
 - **Widgets:** dedicated screen left of home; multiple widgets; per-widget resize; reorder; reconfigure/remove; searchable in-app picker. *(home now shows only the clock + favorites)*
 - **Gestures:** swipe down on home opens the notification shade; double-tap to lock now uses an **accessibility service** (power-button-style), so fingerprint unlock keeps working.
 - **Search & launch:** keyboard Done launches the top result; **web-search fallback** when nothing matches.
+- **Force-update:** Firebase Remote Config–driven blocking "Update required" screen + optional "Update available" notice.
+- **Localization:** complete Slovak translation.
+- **Play compliance:** dropped `QUERY_ALL_PACKAGES` (uses `<queries>`), accessibility prominent-disclosure dialog, native debug symbols.
 
 ## 🎯 Near term (next few releases)
 
@@ -38,7 +41,7 @@
 
 - [ ] **Baseline Profiles** for faster cold start.
 - [ ] **Instrumented Compose UI / screenshot tests** for the drawer and home (unit coverage exists; on-device coverage doesn't). *(CI would need an emulator job)*
-- [ ] **Firebase BoM** — *deliberately deferred.* The single Crashlytics dependency is pinned and stable; moving to the BoM only pays off with more Firebase libs, and picking the wrong BoM version risks silently downgrading Crashlytics. Revisit when a second Firebase dependency is added.
+- [x] **Firebase BoM** — done. Adding Remote Config (for force-update) made a second Firebase dependency worthwhile, so Crashlytics + Remote Config now share the BoM.
 - [ ] **Settings storage** — still SharedPreferences. DataStore *deliberately deferred*: the surface is tiny and a synchronous theme read at startup avoids a first-frame flicker an async DataStore read would introduce.
 
 ## 🚀 Play Store next steps (manual / product)

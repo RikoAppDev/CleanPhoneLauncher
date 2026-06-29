@@ -9,6 +9,11 @@ import androidx.compose.runtime.getValue
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.presentation.LauncherPager
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
+import dev.rikoapp.cleanphonelauncher.presentation.version.AppViewModel
+import dev.rikoapp.cleanphonelauncher.presentation.version.ForceUpgradeScreen
+import dev.rikoapp.cleanphonelauncher.presentation.version.VersionState
+import dev.rikoapp.cleanphonelauncher.presentation.version.WarnUpgradeDialog
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
@@ -21,8 +26,22 @@ class MainActivity : ComponentActivity() {
             val themeMode by settings.themeMode.collectAsState()
             val colorStyle by settings.colorStyle.collectAsState()
 
+            val appViewModel: AppViewModel = koinViewModel()
+            val versionState by appViewModel.versionState.collectAsState()
+
             CleanPhoneLauncherTheme(themeMode = themeMode, colorStyle = colorStyle) {
-                LauncherPager()
+                when (val state = versionState) {
+                    is VersionState.ForceUpgrade -> ForceUpgradeScreen(storeUrl = state.storeUrl)
+                    else -> {
+                        LauncherPager()
+                        if (state is VersionState.WarnUpgrade) {
+                            WarnUpgradeDialog(
+                                storeUrl = state.storeUrl,
+                                onDismiss = appViewModel::onWarnDismissed
+                            )
+                        }
+                    }
+                }
             }
         }
     }

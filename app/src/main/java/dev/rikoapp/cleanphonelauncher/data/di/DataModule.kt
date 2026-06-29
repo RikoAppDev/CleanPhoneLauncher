@@ -6,6 +6,7 @@ import dev.rikoapp.cleanphonelauncher.data.InstalledAppsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.NotificationCountRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.RecentAppsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.SettingsRepositoryImpl
+import dev.rikoapp.cleanphonelauncher.data.FirebaseVersionCheckRepository
 import dev.rikoapp.cleanphonelauncher.data.WidgetHostManager
 import dev.rikoapp.cleanphonelauncher.data.database.di.databaseModule
 import dev.rikoapp.cleanphonelauncher.domain.AppActions
@@ -14,6 +15,7 @@ import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
+import dev.rikoapp.cleanphonelauncher.domain.VersionCheckRepository
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -28,5 +30,6 @@ val dataModule = module {
     singleOf(::AndroidAppActions) bind AppActions::class
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
     singleOf(::NotificationCountRepositoryImpl) bind NotificationCountRepository::class
+    singleOf(::FirebaseVersionCheckRepository) bind VersionCheckRepository::class
     single { WidgetHostManager(androidApplication()) }
 }

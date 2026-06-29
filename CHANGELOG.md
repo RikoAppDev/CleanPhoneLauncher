@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.15.0]
+
+### Added
+- **Force-update mechanism.** On launch the app checks Firebase Remote Config (`min_required_version_code`, `latest_version_code`, `update_store_url`). If the installed build is below the required minimum, a full-screen **"Update required"** screen blocks the app with a button to the Play Store; if a newer optional version exists, a dismissable **"Update available"** notice is shown (remembered per version). With the keys unset it does nothing.
+
+### Changed
+- Migrated Firebase to the **BoM** so Crashlytics and the new Remote Config dependency stay on aligned, compatible versions.
+
 ## [1.14.0]
 
 ### Changed

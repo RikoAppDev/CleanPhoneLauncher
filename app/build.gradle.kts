@@ -108,9 +108,13 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.config)
+
     // Room
     implementation(libs.androidx.room.runtime)
-    implementation(libs.firebase.crashlytics)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

@@ -68,4 +68,10 @@
     <string name="clock_type_analog_with_seconds">Analógové so sekundami</string>
     <string name="clock_type_digital">Digitálne</string>
     <string name="clock_type_digital_with_seconds">Digitálne so sekundami</string>
+    <string name="force_upgrade_title">Vyžaduje sa aktualizácia</string>
+    <string name="force_upgrade_description">Na pokračovanie je potrebná novšia verzia aplikácie CleanPhoneLauncher. Aktualizujte na najnovšiu verziu.</string>
+    <string name="force_upgrade_button">Aktualizovať</string>
+    <string name="warn_upgrade_title">Dostupná aktualizácia</string>
+    <string name="warn_upgrade_description">Je dostupná novšia verzia aplikácie CleanPhoneLauncher s vylepšeniami a opravami.</string>
+    <string name="warn_upgrade_later">Neskôr</string>
 </resources>

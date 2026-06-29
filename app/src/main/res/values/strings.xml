@@ -68,4 +68,10 @@
     <string name="clock_type_analog_with_seconds">Analog with seconds</string>
     <string name="clock_type_digital">Digital</string>
     <string name="clock_type_digital_with_seconds">Digital with seconds</string>
+    <string name="force_upgrade_title">Update required</string>
+    <string name="force_upgrade_description">A newer version of CleanPhoneLauncher is required to continue. Please update to the latest version.</string>
+    <string name="force_upgrade_button">Update</string>
+    <string name="warn_upgrade_title">Update available</string>
+    <string name="warn_upgrade_description">A newer version of CleanPhoneLauncher is available with improvements and fixes.</string>
+    <string name="warn_upgrade_later">Later</string>
 </resources>
