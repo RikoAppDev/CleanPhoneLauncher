@@ -1,57 +1,53 @@
 # CleanPhoneLauncher — Roadmap
 
 > Forward-looking plan only. For what already shipped, see [CHANGELOG.md](CHANGELOG.md).
+>
+> The 1.0 → 1.8 line delivered the foundations: stable app drawer, favorites with
+> drag-and-drop reorder, hide/rename, a settings screen with theming, optional
+> crash reporting, notification badges, a home widget, gesture shortcuts, and a
+> fully automated signed build → GitHub release → Play (internal track) pipeline.
+> This roadmap is what comes next.
 
-## 🚀 Releasing to Google Play (one-time setup)
+## 🎯 Near term (next few releases)
 
-The pipeline (`.github/workflows/release.yml`) already builds a signed AAB and can push it to the **internal** testing track. To activate it:
+### Widgets
+- [ ] **Resize the home widget** instead of a single fixed size (honour the provider's min/max cells; respect `OPTION_APPWIDGET_*` sizing).
+- [ ] **Multiple widgets** on the home screen, with reordering, rather than one slot.
+- [ ] Graceful empty/error state when a widget's host app is uninstalled (currently the slot can render blank).
 
-### 1. Generate an upload keystore (once, keep it safe & backed up)
-```bash
-keytool -genkey -v -keystore release-keystore.jks -keyalg RSA -keysize 2048 \
-  -validity 10000 -alias upload
-base64 -w0 release-keystore.jks > keystore-base64.txt
-```
+### Search & launch
+- [ ] **App shortcuts** (long-press an app → static/dynamic shortcuts via `LauncherApps` / `ShortcutManager`).
+- [ ] **Contacts search** and an optional **web-search fallback** from the drawer search box.
+- [ ] Keyboard "go" on a single search result launches it directly.
 
-### 2. Add GitHub repo secrets (Settings → Secrets and variables → Actions)
-| Secret | Value |
-|--------|-------|
-| `KEYSTORE_BASE64` | contents of `keystore-base64.txt` |
-| `KEYSTORE_PASSWORD` | keystore password |
-| `KEY_ALIAS` | `upload` |
-| `KEY_PASSWORD` | key password |
-| `PLAY_STORE_SERVICE_ACCOUNT_JSON` | full JSON of a Play service account |
+### Polish
+- [ ] **Custom accent colour picker** (free colour, not just the preset swatches).
+- [ ] **Localization** — extract any remaining hard-coded strings and add a Slovak (`sk`) translation; English is the only locale today.
+- [ ] **Accessibility pass** — verify TalkBack labels/focus order across the drawer, home, and settings.
 
-### 3. Create the Play service account
-Google Cloud Console → enable **Google Play Android Developer API** → create a service account + JSON key → in Play Console (Users & permissions) invite that service-account email and grant release permissions.
+## 🌱 Later / exploratory
 
-### 4. ⚠️ First release must be manual
-Google Play's API can only **update** an app that already has at least one release. Build the first AAB locally (or download it from the GitHub release) and upload it once by hand in the Play Console. After that, every push to `main` auto-deploys to the internal track.
+- [ ] **Backup & restore** of settings (favorites, hidden apps, renames, theme) via export/import — useful before a device switch.
+- [ ] **App drawer organization** — folders or categories, and per-app "hide from search".
+- [ ] **Work profile / private space** apps surfaced correctly (multi-profile `LauncherApps`).
+- [ ] **Icon pack** support and an optional font choice for the clock/labels.
+- [ ] **Configurable gestures** — let the user choose what double-tap / swipe actions do, beyond the current lock/drawer defaults.
 
-### 5. Promote tracks
-Change `track: internal` → `alpha` / `beta` / `production` in `release.yml` when ready, or promote manually in the Console.
+## 🔧 Technical follow-ups
 
----
+- [ ] **Migrate Firebase deps to the BoM** (`firebase-bom`) so Crashlytics/analytics versions stay aligned — noted but deferred.
+- [ ] **Instrumented Compose UI tests** + a couple of **screenshot tests** for the drawer and home; unit coverage exists, on-device UI coverage doesn't yet.
+- [ ] **Baseline Profiles** for faster cold start (the launcher is the first thing the user sees after unlock).
+- [ ] **Settings storage:** still SharedPreferences. DataStore was *deliberately deferred* — the settings surface is tiny and reading theme synchronously at startup avoids a first-frame theme flicker that an async DataStore read would introduce. Revisit only if settings grow or a reactive/async store becomes worth the trade-off.
 
-## 🔭 Next up (known issues & improvements)
+## 🚀 Play Store next steps
 
-### Correctness / robustness
-- [ ] **Broadcast receivers are never unregistered** (battery + package). Acceptable for an always-running launcher, but consider lifecycle-aware registration to be tidy.
-- [ ] **Clocks don't react to system time / timezone changes.** The 1s tick loop only re-reads the clock; listen for `ACTION_TIME_CHANGED` / `ACTION_TIMEZONE_CHANGED`.
-- [ ] **Clock persistence is fire-and-forget SharedPreferences.** Consider DataStore for the (small) settings surface.
+The signed build → GitHub release → Play **internal** track deploy is fully automated on every push to `main`. Remaining manual/product steps:
 
-### Quality / tooling
-- [ ] **Enable R8/minify + resource shrinking** for the release build (smaller download, obfuscation). Currently `isMinifyEnabled = false`.
-- [ ] **ViewModel unit tests.** Only the template `ExampleUnitTest` exists; add coverage for `AppListViewModel` / `HomeViewModel` (skill: android-testing — Turbine + JUnit5 + fakes).
-- [ ] **Lower `minSdk`** (currently 33 / Android 13+) if broader reach matters — most APIs used have older equivalents.
-
-### Features
-- [ ] Per-app rename / hide from drawer.
-- [ ] Reorder favorites (drag & drop) + persist order (the entity currently stores only package name).
-- [ ] Widget / notification-count support.
-- [ ] Theming options (accent color, wallpaper-adaptive).
-- [ ] Gesture shortcuts (swipe up = drawer, double-tap = lock).
+- [ ] **Update the Play Data Safety form** to declare crash diagnostics (Crashlytics — collected only when the user opts in) and the notification-listener access used for badges, before promoting beyond internal testing.
+- [ ] **Promote the track** when ready: change `track: internal` → `beta` / `production` in `release.yml`, or promote a build manually in the Console.
+- [ ] Consider a **closed beta** group for wider real-device feedback before production.
 
 ---
 
-*Versioning is automatic: `fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING CHANGE` → major. A push to `main` calculates the version, tags it, creates a GitHub release, and (once secrets are set) deploys to Play internal.*
+*Versioning is automatic: `fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING CHANGE` → major. A push to `main` calculates the version, tags it, creates a GitHub release, and deploys to the Play internal track.*
