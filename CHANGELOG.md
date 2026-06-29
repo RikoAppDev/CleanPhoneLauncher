@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.13.0]
+
+### Added
+- **Slovak translation.** The whole UI is now localized to Slovak (`sk`); devices set to Slovak see Slovak text, everything else stays English.
+
 ## [1.12.0]
 
 ### Added

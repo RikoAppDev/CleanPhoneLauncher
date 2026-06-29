@@ -2,55 +2,52 @@
 
 > Forward-looking plan only. For what already shipped, see [CHANGELOG.md](CHANGELOG.md).
 >
-> The 1.0 → 1.8 line delivered the foundations: stable app drawer, favorites with
-> drag-and-drop reorder, hide/rename, a settings screen with theming, optional
-> crash reporting, notification badges, a home widget, gesture shortcuts, and a
-> fully automated signed build → GitHub release → Play (internal track) pipeline.
-> This roadmap is what comes next.
+> The 1.0 → 1.12 line delivered the foundations and most of the original "next up"
+> list: stable app drawer, favorites with reorder, hide/rename, theming, optional
+> crash reporting, notification badges, a dedicated resizable multi-widget screen
+> with a searchable in-app picker, home/drawer gestures (swipe-up drawer,
+> swipe-down notification shade, double-tap lock), web-search fallback, and a
+> fully automated signed build → GitHub release → Play (internal) pipeline.
+
+## ✅ Recently shipped (was on this roadmap)
+
+- **Widgets:** dedicated screen left of home; multiple widgets; per-widget resize; reorder; reconfigure/remove; searchable in-app picker. *(home now shows only the clock + favorites)*
+- **Gestures:** swipe down on home opens the notification shade; double-tap to lock now uses an **accessibility service** (power-button-style), so fingerprint unlock keeps working.
+- **Search & launch:** keyboard Done launches the top result; **web-search fallback** when nothing matches.
 
 ## 🎯 Near term (next few releases)
 
-### Widgets
-- [ ] **Resize the home widget** instead of a single fixed size (honour the provider's min/max cells; respect `OPTION_APPWIDGET_*` sizing).
-- [ ] **Multiple widgets** on the home screen, with reordering, rather than one slot.
-- [ ] Graceful empty/error state when a widget's host app is uninstalled (currently the slot can render blank).
-
 ### Search & launch
-- [ ] **App shortcuts** (long-press an app → static/dynamic shortcuts via `LauncherApps` / `ShortcutManager`).
-- [ ] **Contacts search** and an optional **web-search fallback** from the drawer search box.
-- [ ] Keyboard "go" on a single search result launches it directly.
-
-### Gestures
-- [ ] **Swipe down on home → open the system status bar / notification shade** (expand quick settings), matching the stock launcher gesture.
-- [ ] **Double-tap to lock the screen** — already ships (double-tap home, via device admin); refine so it matches the Samsung default feel and make the trigger configurable.
+- [ ] **App shortcuts** (long-press an app → static/dynamic shortcuts via `LauncherApps` / `ShortcutManager`). *(needs on-device testing)*
+- [ ] **Contacts search** in the drawer (opt-in `READ_CONTACTS`, surface matching contacts alongside apps). *(needs on-device testing)*
 
 ### Polish
 - [ ] **Custom accent colour picker** (free colour, not just the preset swatches).
-- [ ] **Localization** — extract any remaining hard-coded strings and add a Slovak (`sk`) translation; English is the only locale today.
-- [ ] **Accessibility pass** — verify TalkBack labels/focus order across the drawer, home, and settings.
+- [ ] **Localization** — Slovak (`sk`) translation of `strings.xml`.
+- [ ] **Accessibility pass** — verify TalkBack labels / focus order across drawer, home, settings.
+- [ ] **Configurable gestures** — a Settings section to choose what double-tap / swipe-up / swipe-down do (and turn each off).
 
 ## 🌱 Later / exploratory
 
-- [ ] **Backup & restore** of settings (favorites, hidden apps, renames, theme) via export/import — useful before a device switch.
-- [ ] **App drawer organization** — folders or categories, and per-app "hide from search".
+- [ ] **Backup & restore** of settings (favorites, hidden apps, renames, widgets, theme) via export/import JSON.
+- [ ] **App drawer organization** — folders / categories, and per-app "hide from search".
 - [ ] **Work profile / private space** apps surfaced correctly (multi-profile `LauncherApps`).
 - [ ] **Icon pack** support and an optional font choice for the clock/labels.
-- [ ] **Configurable gestures** — let the user choose what double-tap / swipe actions do, beyond the current lock/drawer defaults.
 
 ## 🔧 Technical follow-ups
 
-- [ ] **Migrate Firebase deps to the BoM** (`firebase-bom`) so Crashlytics/analytics versions stay aligned — noted but deferred.
-- [ ] **Instrumented Compose UI tests** + a couple of **screenshot tests** for the drawer and home; unit coverage exists, on-device UI coverage doesn't yet.
-- [ ] **Baseline Profiles** for faster cold start (the launcher is the first thing the user sees after unlock).
-- [ ] **Settings storage:** still SharedPreferences. DataStore was *deliberately deferred* — the settings surface is tiny and reading theme synchronously at startup avoids a first-frame theme flicker that an async DataStore read would introduce. Revisit only if settings grow or a reactive/async store becomes worth the trade-off.
+- [ ] **Baseline Profiles** for faster cold start.
+- [ ] **Instrumented Compose UI / screenshot tests** for the drawer and home (unit coverage exists; on-device coverage doesn't). *(CI would need an emulator job)*
+- [ ] **Firebase BoM** — *deliberately deferred.* The single Crashlytics dependency is pinned and stable; moving to the BoM only pays off with more Firebase libs, and picking the wrong BoM version risks silently downgrading Crashlytics. Revisit when a second Firebase dependency is added.
+- [ ] **Settings storage** — still SharedPreferences. DataStore *deliberately deferred*: the surface is tiny and a synchronous theme read at startup avoids a first-frame flicker an async DataStore read would introduce.
 
-## 🚀 Play Store next steps
+## 🚀 Play Store next steps (manual / product)
 
-The signed build → GitHub release → Play **internal** track deploy is fully automated on every push to `main`. Remaining manual/product steps:
+The signed build → GitHub release → Play **internal** deploy is automated on every push to `main`. Remaining steps need the Play Console or a product decision and can't be done from code:
 
-- [ ] **Update the Play Data Safety form** to declare crash diagnostics (Crashlytics — collected only when the user opts in) and the notification-listener access used for badges, before promoting beyond internal testing.
-- [ ] **Promote the track** when ready: change `track: internal` → `beta` / `production` in `release.yml`, or promote a build manually in the Console.
-- [ ] Consider a **closed beta** group for wider real-device feedback before production.
+- [ ] **Update the Data Safety form** for crash diagnostics (opt-in Crashlytics) and the notification-listener access used for badges.
+- [ ] **Declare accessibility-service use.** Double-tap-to-lock now uses an `AccessibilityService` (`GLOBAL_ACTION_LOCK_SCREEN`). Play scrutinises accessibility use — provide the prominent-disclosure / declaration before promoting beyond internal testing, or gate the feature.
+- [ ] **Promote the track** (`internal` → `beta` / `production` in `release.yml`, or in the Console) when ready; consider a **closed beta** first.
 
 ---
 
