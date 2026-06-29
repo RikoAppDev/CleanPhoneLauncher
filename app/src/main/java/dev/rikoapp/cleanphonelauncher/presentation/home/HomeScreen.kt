@@ -1,8 +1,7 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -45,7 +44,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import dev.rikoapp.cleanphonelauncher.LockDeviceAdminReceiver
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
@@ -87,17 +85,12 @@ private fun HomeScreen(
 
     BackHandler(enabled = reorderMode) { reorderMode = false }
 
-    LaunchedEffect(state.requestDeviceAdmin) {
-        if (state.requestDeviceAdmin) {
-            val admin = ComponentName(context, LockDeviceAdminReceiver::class.java)
-            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
-                .putExtra(
-                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                    context.getString(R.string.device_admin_explanation)
-                )
+    LaunchedEffect(state.requestAccessibility) {
+        if (state.requestAccessibility) {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             runCatching { context.startActivity(intent) }
-            onAction(HomeScreenAction.OnDeviceAdminRequestHandled)
+            onAction(HomeScreenAction.OnAccessibilityRequestHandled)
         }
     }
 

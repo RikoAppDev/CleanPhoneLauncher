@@ -1,13 +1,10 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
 import android.app.Application
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
-import dev.rikoapp.cleanphonelauncher.LockDeviceAdminReceiver
+import dev.rikoapp.cleanphonelauncher.LockAccessibilityService
 import androidx.lifecycle.viewModelScope
 import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.ClockRepository
@@ -173,8 +170,8 @@ class HomeViewModel(
                 expandNotificationsPanel()
             }
 
-            HomeScreenAction.OnDeviceAdminRequestHandled -> {
-                _state.update { it.copy(requestDeviceAdmin = false) }
+            HomeScreenAction.OnAccessibilityRequestHandled -> {
+                _state.update { it.copy(requestAccessibility = false) }
             }
         }
     }
@@ -188,12 +185,8 @@ class HomeViewModel(
     }
 
     private fun lockScreen() {
-        val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val admin = ComponentName(context, LockDeviceAdminReceiver::class.java)
-        if (dpm.isAdminActive(admin)) {
-            dpm.lockNow()
-        } else {
-            _state.update { it.copy(requestDeviceAdmin = true) }
+        if (!LockAccessibilityService.lockScreen()) {
+            _state.update { it.copy(requestAccessibility = true) }
         }
     }
 

@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.11.1]
+
+### Fixed
+- **Double-tap to lock no longer forces a PIN/password to unlock.** It previously locked via a device-admin policy, which Android always follows with a "strong auth" requirement — disabling fingerprint unlock until the PIN is entered. It now locks through an accessibility service (the same way the power button does), so **fingerprint unlock keeps working**. The first double-tap asks you to enable "CleanPhoneLauncher screen lock" in Accessibility settings; the device-admin permission is no longer used.
+
 ## [1.11.0]
 
 ### Added

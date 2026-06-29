@@ -13,5 +13,5 @@ data class HomeScreenState(
     val favoriteAppsData: List<AppData> = emptyList(), // Resolved favorite apps
     val showDialogApp: AppData? = null,
     val notificationCounts: Map<String, Int> = emptyMap(),
-    val requestDeviceAdmin: Boolean = false
+    val requestAccessibility: Boolean = false
 )
