@@ -5,6 +5,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.14.0]
+
+### Changed
+- **Removed the `QUERY_ALL_PACKAGES` permission.** The drawer only ever listed launchable apps, so the launcher now discovers them via a `<queries>` declaration (launcher/dial/camera/widget intents) instead — no broad "all installed apps" access, and no Play sensitive-permission declaration needed.
+- **Double-tap-to-lock now shows a disclosure first.** Before opening Accessibility settings, the app explains that the accessibility service is used only to lock the screen (power-button style) and collects no data, and asks you to continue — meeting Play's prominent-disclosure requirement.
+
+### Build
+- Release bundles now include **native debug symbols** for clearer crash/ANR stack traces.
+
 ## [1.13.0]
 
 ### Added

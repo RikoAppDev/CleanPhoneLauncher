@@ -23,13 +23,14 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,13 +86,29 @@ private fun HomeScreen(
 
     BackHandler(enabled = reorderMode) { reorderMode = false }
 
-    LaunchedEffect(state.requestAccessibility) {
-        if (state.requestAccessibility) {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            runCatching { context.startActivity(intent) }
-            onAction(HomeScreenAction.OnAccessibilityRequestHandled)
-        }
+    if (state.showAccessibilityDisclosure) {
+        AlertDialog(
+            onDismissRequest = { onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss) },
+            title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
+            text = { Text(stringResource(R.string.accessibility_disclosure_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }
+                    onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss)
+                }) {
+                    Text(stringResource(R.string.accessibility_disclosure_continue))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss)
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
     if (state.showClockTypeDialog) {

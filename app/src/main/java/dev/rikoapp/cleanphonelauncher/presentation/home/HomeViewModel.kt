@@ -170,8 +170,8 @@ class HomeViewModel(
                 expandNotificationsPanel()
             }
 
-            HomeScreenAction.OnAccessibilityRequestHandled -> {
-                _state.update { it.copy(requestAccessibility = false) }
+            HomeScreenAction.OnAccessibilityDisclosureDismiss -> {
+                _state.update { it.copy(showAccessibilityDisclosure = false) }
             }
         }
     }
@@ -186,7 +186,7 @@ class HomeViewModel(
 
     private fun lockScreen() {
         if (!LockAccessibilityService.lockScreen()) {
-            _state.update { it.copy(requestAccessibility = true) }
+            _state.update { it.copy(showAccessibilityDisclosure = true) }
         }
     }
 

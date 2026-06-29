@@ -80,22 +80,22 @@ class InstalledAppsRepositoryImpl(
         applicationScope.launch {
             _apps.value = withContext(Dispatchers.IO) {
                 val pm = context.packageManager
-                val allApps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(0L))
+                val launcherIntent = Intent(Intent.ACTION_MAIN)
+                    .addCategory(Intent.CATEGORY_LAUNCHER)
+                val resolveInfos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pm.queryIntentActivities(
+                        launcherIntent,
+                        PackageManager.ResolveInfoFlags.of(0L)
+                    )
                 } else {
                     @Suppress("DEPRECATION")
-                    pm.getInstalledApplications(0)
+                    pm.queryIntentActivities(launcherIntent, 0)
                 }
 
-                allApps.mapNotNull {
-                    if (pm.getLaunchIntentForPackage(it.packageName) != null) {
-                        val appName = it.loadLabel(pm).toString()
-                        val packageName = it.packageName
-                        AppData(appName, packageName)
-                    } else {
-                        null
-                    }
-                }.sortedBy { it.name.toUpperCase(Locale.current) }
+                resolveInfos
+                    .map { AppData(it.loadLabel(pm).toString(), it.activityInfo.packageName) }
+                    .distinctBy { it.packageName }
+                    .sortedBy { it.name.toUpperCase(Locale.current) }
             }
             findCoreApps()
         }
