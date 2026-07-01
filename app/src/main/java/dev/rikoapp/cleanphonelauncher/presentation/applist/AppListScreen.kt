@@ -68,6 +68,7 @@ import dev.rikoapp.cleanphonelauncher.presentation.components.RenameDialog
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PersonIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SearchIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -210,16 +211,34 @@ private fun AppListScreen(
             placeholder = { Text(text = stringResource(R.string.search_apps_placeholder)) },
             trailingIcon = {
                 if (state.searchText.text.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            onAction(AppListScreenAction.OnClearSearch)
-                            focusManager.clearFocus()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = {
+                                onAction(
+                                    AppListScreenAction.OnSearchDone(
+                                        appToLaunch = null,
+                                        query = state.searchText.text.toString()
+                                    )
+                                )
+                                focusManager.clearFocus()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = SearchIcon,
+                                contentDescription = stringResource(R.string.web_search_content_description)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = CloseIcon,
-                            contentDescription = stringResource(R.string.clear_search_content_description)
-                        )
+                        IconButton(
+                            onClick = {
+                                onAction(AppListScreenAction.OnClearSearch)
+                                focusManager.clearFocus()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = CloseIcon,
+                                contentDescription = stringResource(R.string.clear_search_content_description)
+                            )
+                        }
                     }
                 }
             },

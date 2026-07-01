@@ -3,6 +3,7 @@
     <string name="clock_type_dialog_title">Select Clock Type</string>
     <string name="search_apps_placeholder">Search apps...</string>
     <string name="clear_search_content_description">Clear search</string>
+    <string name="web_search_content_description">Search the web</string>
     <string name="recent_apps">Recent apps</string>
     <string name="recent_apps_permission_request">Recent apps require usage stats permission to work.</string>
     <string name="grant_permission">Grant permission</string>

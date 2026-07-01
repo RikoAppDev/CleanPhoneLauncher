@@ -39,6 +39,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -216,14 +217,14 @@ private fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (reorderMode) {
-                Text(
-                    text = stringResource(R.string.reorder_hint),
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
+            Text(
+                text = stringResource(R.string.reorder_hint),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .alpha(if (reorderMode) 1f else 0f)
+            )
 
             val haptics = LocalHapticFeedback.current
             var favorites by remember(state.favoriteAppsData) {
@@ -238,7 +239,8 @@ private fun HomeScreen(
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
+                userScrollEnabled = reorderMode
             ) {
                 items(favorites, key = { it.packageName }) { app ->
                     ReorderableItem(reorderState, key = app.packageName) { isDragging ->

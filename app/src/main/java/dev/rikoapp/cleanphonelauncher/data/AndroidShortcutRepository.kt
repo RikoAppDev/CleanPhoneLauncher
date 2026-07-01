@@ -43,8 +43,8 @@ class AndroidShortcutRepository(
             .take(5)
     }
 
-    override fun launchShortcut(shortcut: AppShortcut) {
-        runCatching {
+    override fun launchShortcut(shortcut: AppShortcut): Boolean {
+        return runCatching {
             launcherApps.startShortcut(
                 shortcut.packageName,
                 shortcut.id,
@@ -52,6 +52,6 @@ class AndroidShortcutRepository(
                 null,
                 Process.myUserHandle()
             )
-        }
+        }.isSuccess
     }
 }

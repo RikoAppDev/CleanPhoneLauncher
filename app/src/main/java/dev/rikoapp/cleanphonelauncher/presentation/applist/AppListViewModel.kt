@@ -108,7 +108,9 @@ class AppListViewModel(
             }
 
             is AppListScreenAction.OnShortcutClick -> {
-                shortcutRepository.launchShortcut(action.shortcut)
+                if (!shortcutRepository.launchShortcut(action.shortcut)) {
+                    appActions.launch(action.shortcut.packageName)
+                }
                 _state.update { it.copy(showDialogApp = null, dialogShortcuts = emptyList()) }
             }
 

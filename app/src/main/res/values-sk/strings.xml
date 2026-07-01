@@ -3,6 +3,7 @@
     <string name="clock_type_dialog_title">Vyberte typ hodín</string>
     <string name="search_apps_placeholder">Hľadať aplikácie…</string>
     <string name="clear_search_content_description">Vymazať vyhľadávanie</string>
+    <string name="web_search_content_description">Hľadať na webe</string>
     <string name="recent_apps">Nedávne aplikácie</string>
     <string name="recent_apps_permission_request">Nedávne aplikácie vyžadujú povolenie na štatistiky používania.</string>
     <string name="grant_permission">Udeliť povolenie</string>
