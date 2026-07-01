@@ -108,6 +108,32 @@ private fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        SectionLabel(stringResource(R.string.settings_setup))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.settings_setup_title),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_setup_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            SelectableChip(
+                text = stringResource(R.string.settings_setup_open),
+                selected = false,
+                onClick = { onAction(SettingsScreenAction.OnRerunSetup) }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         SectionLabel(stringResource(R.string.settings_theme))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ThemeMode.entries.forEach { mode ->

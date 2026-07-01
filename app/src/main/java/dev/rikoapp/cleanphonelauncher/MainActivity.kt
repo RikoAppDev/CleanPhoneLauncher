@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.presentation.LauncherPager
+import dev.rikoapp.cleanphonelauncher.presentation.onboarding.OnboardingScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.version.AppViewModel
 import dev.rikoapp.cleanphonelauncher.presentation.version.ForceUpgradeScreen
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
             val themeMode by settings.themeMode.collectAsState()
             val colorStyle by settings.colorStyle.collectAsState()
             val accentColor by settings.accentColor.collectAsState()
+            val onboardingCompleted by settings.onboardingCompleted.collectAsState()
 
             val appViewModel: AppViewModel = koinViewModel()
             val versionState by appViewModel.versionState.collectAsState()
@@ -36,8 +38,14 @@ class MainActivity : ComponentActivity() {
                 colorStyle = colorStyle,
                 customAccent = Color(accentColor)
             ) {
-                when (val state = versionState) {
-                    is VersionState.ForceUpgrade -> ForceUpgradeScreen(storeUrl = state.storeUrl)
+                val state = versionState
+                when {
+                    state is VersionState.ForceUpgrade ->
+                        ForceUpgradeScreen(storeUrl = state.storeUrl)
+
+                    !onboardingCompleted ->
+                        OnboardingScreenRoot()
+
                     else -> {
                         LauncherPager()
                         if (state is VersionState.WarnUpgrade) {

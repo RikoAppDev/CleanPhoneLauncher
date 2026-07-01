@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.17.0]
+
+### Added
+- **First-run onboarding flow.** A guided setup wizard on first launch: a welcome screen, **set as default home app** (uses the system `ROLE_HOME` request with a settings fallback), opt into optional powers — **recent apps** (usage access), **notification badges**, and **double-tap to lock** (accessibility, with the existing prominent-disclosure dialog) — then a quick **theme + colour** personalization and a done summary. Each permission shows a **live status** (Granted / Grant) that refreshes the moment you return from system settings, every step is **skippable**, and the whole flow is **re-openable anytime from Settings → Setup**.
+
 ## [1.16.0]
 
 ### Added

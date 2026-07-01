@@ -72,6 +72,9 @@ class SettingsViewModel(
                     localAppOverrideDataSource.setHidden(action.packageName, false)
                 }
             }
+
+            is SettingsScreenAction.OnRerunSetup ->
+                settingsRepository.setOnboardingCompleted(false)
         }
     }
 }

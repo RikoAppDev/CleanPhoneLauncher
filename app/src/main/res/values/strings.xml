@@ -78,4 +78,38 @@
     <string name="warn_upgrade_title">Update available</string>
     <string name="warn_upgrade_description">A newer version of CleanPhoneLauncher is available with improvements and fixes.</string>
     <string name="warn_upgrade_later">Later</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Continue</string>
+    <string name="onboarding_grant">Grant</string>
+    <string name="onboarding_status_granted">Granted</string>
+    <string name="onboarding_skip_for_now">Skip for now</string>
+    <string name="onboarding_welcome_title">Welcome to CleanPhoneLauncher</string>
+    <string name="onboarding_welcome_desc">A calm, clutter-free home screen. Let\'s set it up in a few quick steps.</string>
+    <string name="onboarding_welcome_button">Get started</string>
+    <string name="onboarding_default_title">Set as your home app</string>
+    <string name="onboarding_default_desc">Make CleanPhoneLauncher your home screen so it opens every time you press the Home button.</string>
+    <string name="onboarding_default_button">Set as default</string>
+    <string name="onboarding_default_done">CleanPhoneLauncher is your home app</string>
+    <string name="onboarding_permissions_title">Optional powers</string>
+    <string name="onboarding_permissions_desc">Turn on only what you want — you can change these anytime in Settings.</string>
+    <string name="onboarding_perm_usage_title">Recent apps</string>
+    <string name="onboarding_perm_usage_desc">Show your most recently used apps in the app drawer.</string>
+    <string name="onboarding_perm_lock_title">Double-tap to lock</string>
+    <string name="onboarding_perm_lock_desc">Lock the screen by double-tapping the home screen.</string>
+    <string name="onboarding_personalize_title">Make it yours</string>
+    <string name="onboarding_personalize_desc">Pick a look. You can fine-tune everything later in Settings.</string>
+    <string name="onboarding_done_title">You\'re all set</string>
+    <string name="onboarding_done_desc">Enjoy your clean home screen.</string>
+    <string name="onboarding_done_button">Start using launcher</string>
+    <string name="onboarding_done_pending_label">You can finish these later in Settings:</string>
+    <string name="onboarding_done_all_ready">Everything\'s ready to go.</string>
+    <string name="onboarding_pending_default">Set as home app</string>
+
+    <!-- Settings: setup -->
+    <string name="settings_setup">Setup</string>
+    <string name="settings_setup_title">Setup guide</string>
+    <string name="settings_setup_desc">Re-run the first-time setup and permissions</string>
+    <string name="settings_setup_open">Open</string>
 </resources>

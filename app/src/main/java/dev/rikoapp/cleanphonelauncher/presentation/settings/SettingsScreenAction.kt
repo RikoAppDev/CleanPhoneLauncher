@@ -9,4 +9,5 @@ sealed class SettingsScreenAction {
     data class OnAccentColorSelected(val color: Int) : SettingsScreenAction()
     data class OnCrashReportingToggled(val enabled: Boolean) : SettingsScreenAction()
     data class OnUnhideApp(val packageName: String) : SettingsScreenAction()
+    data object OnRerunSetup : SettingsScreenAction()
 }

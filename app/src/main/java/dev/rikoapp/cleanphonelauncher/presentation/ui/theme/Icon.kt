@@ -25,3 +25,31 @@ val DragHandleIcon: ImageVector
 val SettingsIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.ic_settings)
+
+val HomeIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_home)
+
+val CheckIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_check)
+
+val LockIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_lock)
+
+val BellIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_bell)
+
+val BarsIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_bars)
+
+val PaletteIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_palette)
+
+val StarIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_star)

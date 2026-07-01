@@ -6,6 +6,7 @@ import dev.rikoapp.cleanphonelauncher.data.InstalledAppsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.NotificationCountRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.RecentAppsRepositoryImpl
 import dev.rikoapp.cleanphonelauncher.data.SettingsRepositoryImpl
+import dev.rikoapp.cleanphonelauncher.data.SetupStatusChecker
 import dev.rikoapp.cleanphonelauncher.data.FirebaseVersionCheckRepository
 import dev.rikoapp.cleanphonelauncher.data.WidgetHostManager
 import dev.rikoapp.cleanphonelauncher.data.database.di.databaseModule
@@ -31,5 +32,6 @@ val dataModule = module {
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
     singleOf(::NotificationCountRepositoryImpl) bind NotificationCountRepository::class
     singleOf(::FirebaseVersionCheckRepository) bind VersionCheckRepository::class
+    singleOf(::SetupStatusChecker)
     single { WidgetHostManager(androidApplication()) }
 }

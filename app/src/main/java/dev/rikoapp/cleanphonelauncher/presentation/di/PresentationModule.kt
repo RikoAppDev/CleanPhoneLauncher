@@ -2,6 +2,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.di
 
 import dev.rikoapp.cleanphonelauncher.presentation.applist.AppListViewModel
 import dev.rikoapp.cleanphonelauncher.presentation.home.HomeViewModel
+import dev.rikoapp.cleanphonelauncher.presentation.onboarding.OnboardingViewModel
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsViewModel
 import dev.rikoapp.cleanphonelauncher.presentation.version.AppViewModel
 import dev.rikoapp.cleanphonelauncher.presentation.widgets.WidgetsViewModel
@@ -14,4 +15,5 @@ val presentationModule = module {
     viewModelOf(::AppListViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::WidgetsViewModel)
+    viewModelOf(::OnboardingViewModel)
 }

@@ -36,6 +36,9 @@ class SettingsRepositoryImpl(
     private val _accentColor = MutableStateFlow(prefs.getInt(KEY_ACCENT_COLOR, DEFAULT_ACCENT))
     override val accentColor = _accentColor.asStateFlow()
 
+    private val _onboardingCompleted = MutableStateFlow(prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false))
+    override val onboardingCompleted = _onboardingCompleted.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -73,6 +76,13 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setOnboardingCompleted(completed: Boolean) {
+        _onboardingCompleted.value = completed
+        applicationScope.launch {
+            prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply()
+        }
+    }
+
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
@@ -84,6 +94,7 @@ class SettingsRepositoryImpl(
         private const val KEY_COLOR_STYLE = "color_style"
         private const val KEY_CRASH_REPORTING = "crash_reporting"
         private const val KEY_ACCENT_COLOR = "accent_color"
+        private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

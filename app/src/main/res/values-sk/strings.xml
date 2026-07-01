@@ -78,4 +78,38 @@
     <string name="warn_upgrade_title">Dostupná aktualizácia</string>
     <string name="warn_upgrade_description">Je dostupná novšia verzia aplikácie CleanPhoneLauncher s vylepšeniami a opravami.</string>
     <string name="warn_upgrade_later">Neskôr</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Preskočiť</string>
+    <string name="onboarding_next">Pokračovať</string>
+    <string name="onboarding_grant">Povoliť</string>
+    <string name="onboarding_status_granted">Povolené</string>
+    <string name="onboarding_skip_for_now">Zatiaľ preskočiť</string>
+    <string name="onboarding_welcome_title">Vitajte v CleanPhoneLauncher</string>
+    <string name="onboarding_welcome_desc">Pokojná plocha bez neporiadku. Nastavme ju v pár rýchlych krokoch.</string>
+    <string name="onboarding_welcome_button">Začať</string>
+    <string name="onboarding_default_title">Nastaviť ako domovskú aplikáciu</string>
+    <string name="onboarding_default_desc">Nastavte CleanPhoneLauncher ako domovskú obrazovku, aby sa otvárala po stlačení tlačidla Domov.</string>
+    <string name="onboarding_default_button">Nastaviť ako predvolené</string>
+    <string name="onboarding_default_done">CleanPhoneLauncher je vaša domovská aplikácia</string>
+    <string name="onboarding_permissions_title">Voliteľné funkcie</string>
+    <string name="onboarding_permissions_desc">Zapnite len to, čo chcete — kedykoľvek to zmeníte v Nastaveniach.</string>
+    <string name="onboarding_perm_usage_title">Nedávne aplikácie</string>
+    <string name="onboarding_perm_usage_desc">Zobrazovať naposledy použité aplikácie v zásuvke aplikácií.</string>
+    <string name="onboarding_perm_lock_title">Dvojité klepnutie na uzamknutie</string>
+    <string name="onboarding_perm_lock_desc">Uzamknite obrazovku dvojitým klepnutím na plochu.</string>
+    <string name="onboarding_personalize_title">Prispôsobte si to</string>
+    <string name="onboarding_personalize_desc">Vyberte si vzhľad. Všetko doladíte neskôr v Nastaveniach.</string>
+    <string name="onboarding_done_title">Máte hotovo</string>
+    <string name="onboarding_done_desc">Užívajte si čistú plochu.</string>
+    <string name="onboarding_done_button">Spustiť launcher</string>
+    <string name="onboarding_done_pending_label">Tieto môžete dokončiť neskôr v Nastaveniach:</string>
+    <string name="onboarding_done_all_ready">Všetko je pripravené.</string>
+    <string name="onboarding_pending_default">Nastaviť ako domovskú aplikáciu</string>
+
+    <!-- Settings: setup -->
+    <string name="settings_setup">Nastavenie</string>
+    <string name="settings_setup_title">Sprievodca nastavením</string>
+    <string name="settings_setup_desc">Znova spustiť úvodné nastavenie a povolenia</string>
+    <string name="settings_setup_open">Otvoriť</string>
 </resources>
