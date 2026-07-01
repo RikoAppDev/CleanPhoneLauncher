@@ -73,9 +73,10 @@ fun LauncherPager() {
                 )
 
                 HOME_PAGE -> HomeScreenRoot(
-                    onSwipeUp = {
+                    onOpenDrawer = {
                         coroutineScope.launch { pagerState.animateScrollToPage(DRAWER_PAGE) }
-                    }
+                    },
+                    onOpenSettings = { showSettings = true }
                 )
 
                 DRAWER_PAGE -> AppListScreenRoot(

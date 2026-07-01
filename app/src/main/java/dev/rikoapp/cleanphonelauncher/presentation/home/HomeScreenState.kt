@@ -2,6 +2,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.home
 
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 
 data class HomeScreenState(
     val allApps: List<AppData> = emptyList(),
@@ -13,5 +14,8 @@ data class HomeScreenState(
     val favoriteAppsData: List<AppData> = emptyList(), // Resolved favorite apps
     val showDialogApp: AppData? = null,
     val notificationCounts: Map<String, Int> = emptyMap(),
-    val showAccessibilityDisclosure: Boolean = false
+    val showAccessibilityDisclosure: Boolean = false,
+    val swipeUpAction: GestureAction = GestureAction.APP_DRAWER,
+    val swipeDownAction: GestureAction = GestureAction.NOTIFICATIONS,
+    val doubleTapAction: GestureAction = GestureAction.LOCK_SCREEN
 )

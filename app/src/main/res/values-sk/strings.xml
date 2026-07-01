@@ -112,4 +112,15 @@
     <string name="settings_setup_title">Sprievodca nastavením</string>
     <string name="settings_setup_desc">Znova spustiť úvodné nastavenie a povolenia</string>
     <string name="settings_setup_open">Otvoriť</string>
+
+    <!-- Gestures -->
+    <string name="settings_gestures">Gestá</string>
+    <string name="gesture_swipe_up">Potiahnutie nahor</string>
+    <string name="gesture_swipe_down">Potiahnutie nadol</string>
+    <string name="gesture_double_tap">Dvojité klepnutie</string>
+    <string name="gesture_none">Nič</string>
+    <string name="gesture_app_drawer">Otvoriť zásuvku aplikácií</string>
+    <string name="gesture_notifications">Panel upozornení</string>
+    <string name="gesture_lock_screen">Uzamknúť obrazovku</string>
+    <string name="gesture_settings">Otvoriť nastavenia</string>
 </resources>

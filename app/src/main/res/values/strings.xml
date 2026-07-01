@@ -112,4 +112,15 @@
     <string name="settings_setup_title">Setup guide</string>
     <string name="settings_setup_desc">Re-run the first-time setup and permissions</string>
     <string name="settings_setup_open">Open</string>
+
+    <!-- Gestures -->
+    <string name="settings_gestures">Gestures</string>
+    <string name="gesture_swipe_up">Swipe up</string>
+    <string name="gesture_swipe_down">Swipe down</string>
+    <string name="gesture_double_tap">Double-tap</string>
+    <string name="gesture_none">Nothing</string>
+    <string name="gesture_app_drawer">Open app drawer</string>
+    <string name="gesture_notifications">Notification shade</string>
+    <string name="gesture_lock_screen">Lock screen</string>
+    <string name="gesture_settings">Open settings</string>
 </resources>

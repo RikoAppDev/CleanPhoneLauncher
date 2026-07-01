@@ -6,6 +6,7 @@ import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.model.AppOverride
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsScreenAction
 import dev.rikoapp.cleanphonelauncher.presentation.settings.SettingsViewModel
@@ -32,11 +33,17 @@ class SettingsViewModelTest {
         override val crashReportingEnabled = MutableStateFlow(false)
         override val accentColor = MutableStateFlow(0)
         override val onboardingCompleted = MutableStateFlow(true)
+        override val swipeUpAction = MutableStateFlow(GestureAction.APP_DRAWER)
+        override val swipeDownAction = MutableStateFlow(GestureAction.NOTIFICATIONS)
+        override val doubleTapAction = MutableStateFlow(GestureAction.LOCK_SCREEN)
         override fun setThemeMode(mode: ThemeMode) { themeMode.value = mode }
         override fun setColorStyle(style: AppColorStyle) { colorStyle.value = style }
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
         override fun setAccentColor(color: Int) { accentColor.value = color }
         override fun setOnboardingCompleted(completed: Boolean) { onboardingCompleted.value = completed }
+        override fun setSwipeUpAction(action: GestureAction) { swipeUpAction.value = action }
+        override fun setSwipeDownAction(action: GestureAction) { swipeDownAction.value = action }
+        override fun setDoubleTapAction(action: GestureAction) { doubleTapAction.value = action }
     }
 
     private class FakeInstalledAppsRepository : InstalledAppsRepository {

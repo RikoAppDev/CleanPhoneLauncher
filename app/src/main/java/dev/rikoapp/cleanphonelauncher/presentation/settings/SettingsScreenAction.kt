@@ -1,6 +1,7 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 
 sealed class SettingsScreenAction {
@@ -10,4 +11,7 @@ sealed class SettingsScreenAction {
     data class OnCrashReportingToggled(val enabled: Boolean) : SettingsScreenAction()
     data class OnUnhideApp(val packageName: String) : SettingsScreenAction()
     data object OnRerunSetup : SettingsScreenAction()
+    data class OnSwipeUpActionSelected(val action: GestureAction) : SettingsScreenAction()
+    data class OnSwipeDownActionSelected(val action: GestureAction) : SettingsScreenAction()
+    data class OnDoubleTapActionSelected(val action: GestureAction) : SettingsScreenAction()
 }

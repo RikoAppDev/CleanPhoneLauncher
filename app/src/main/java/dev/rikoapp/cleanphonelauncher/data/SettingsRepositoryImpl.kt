@@ -5,6 +5,7 @@ import android.content.Context
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,21 @@ class SettingsRepositoryImpl(
 
     private val _onboardingCompleted = MutableStateFlow(prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false))
     override val onboardingCompleted = _onboardingCompleted.asStateFlow()
+
+    private val _swipeUpAction = MutableStateFlow(
+        prefs.getString(KEY_SWIPE_UP, null).toGestureAction(GestureAction.APP_DRAWER)
+    )
+    override val swipeUpAction = _swipeUpAction.asStateFlow()
+
+    private val _swipeDownAction = MutableStateFlow(
+        prefs.getString(KEY_SWIPE_DOWN, null).toGestureAction(GestureAction.NOTIFICATIONS)
+    )
+    override val swipeDownAction = _swipeDownAction.asStateFlow()
+
+    private val _doubleTapAction = MutableStateFlow(
+        prefs.getString(KEY_DOUBLE_TAP, null).toGestureAction(GestureAction.LOCK_SCREEN)
+    )
+    override val doubleTapAction = _doubleTapAction.asStateFlow()
 
     init {
         applyCrashReporting(_crashReportingEnabled.value)
@@ -83,11 +99,35 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setSwipeUpAction(action: GestureAction) {
+        _swipeUpAction.value = action
+        persistGesture(KEY_SWIPE_UP, action)
+    }
+
+    override fun setSwipeDownAction(action: GestureAction) {
+        _swipeDownAction.value = action
+        persistGesture(KEY_SWIPE_DOWN, action)
+    }
+
+    override fun setDoubleTapAction(action: GestureAction) {
+        _doubleTapAction.value = action
+        persistGesture(KEY_DOUBLE_TAP, action)
+    }
+
+    private fun persistGesture(key: String, action: GestureAction) {
+        applicationScope.launch {
+            prefs.edit().putString(key, action.name).apply()
+        }
+    }
+
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
     private fun String?.toColorStyle() =
         AppColorStyle.entries.firstOrNull { it.name == this } ?: AppColorStyle.DYNAMIC
+
+    private fun String?.toGestureAction(default: GestureAction) =
+        GestureAction.entries.firstOrNull { it.name == this } ?: default
 
     companion object {
         private const val KEY_THEME_MODE = "theme_mode"
@@ -95,6 +135,9 @@ class SettingsRepositoryImpl(
         private const val KEY_CRASH_REPORTING = "crash_reporting"
         private const val KEY_ACCENT_COLOR = "accent_color"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val KEY_SWIPE_UP = "gesture_swipe_up"
+        private const val KEY_SWIPE_DOWN = "gesture_swipe_down"
+        private const val KEY_DOUBLE_TAP = "gesture_double_tap"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

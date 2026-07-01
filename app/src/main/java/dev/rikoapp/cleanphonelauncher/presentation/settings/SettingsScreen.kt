@@ -26,11 +26,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -39,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -54,10 +58,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import org.koin.androidx.compose.koinViewModel
@@ -81,6 +87,30 @@ private fun SettingsScreen(
 
     val fg = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
+    var gestureDialogSlot by remember { mutableStateOf<GestureSlot?>(null) }
+
+    gestureDialogSlot?.let { slot ->
+        val current = when (slot) {
+            GestureSlot.SWIPE_UP -> state.swipeUpAction
+            GestureSlot.SWIPE_DOWN -> state.swipeDownAction
+            GestureSlot.DOUBLE_TAP -> state.doubleTapAction
+        }
+        GestureActionDialog(
+            title = stringResource(slot.labelRes),
+            current = current,
+            onSelect = { chosen ->
+                onAction(
+                    when (slot) {
+                        GestureSlot.SWIPE_UP -> SettingsScreenAction.OnSwipeUpActionSelected(chosen)
+                        GestureSlot.SWIPE_DOWN -> SettingsScreenAction.OnSwipeDownActionSelected(chosen)
+                        GestureSlot.DOUBLE_TAP -> SettingsScreenAction.OnDoubleTapActionSelected(chosen)
+                    }
+                )
+                gestureDialogSlot = null
+            },
+            onDismiss = { gestureDialogSlot = null }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -174,6 +204,25 @@ private fun SettingsScreen(
                 onColorChange = { onAction(SettingsScreenAction.OnAccentColorSelected(it)) }
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SectionLabel(stringResource(R.string.settings_gestures))
+        GestureRow(
+            label = stringResource(R.string.gesture_swipe_up),
+            current = state.swipeUpAction,
+            onClick = { gestureDialogSlot = GestureSlot.SWIPE_UP }
+        )
+        GestureRow(
+            label = stringResource(R.string.gesture_swipe_down),
+            current = state.swipeDownAction,
+            onClick = { gestureDialogSlot = GestureSlot.SWIPE_DOWN }
+        )
+        GestureRow(
+            label = stringResource(R.string.gesture_double_tap),
+            current = state.doubleTapAction,
+            onClick = { gestureDialogSlot = GestureSlot.DOUBLE_TAP }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -481,3 +530,88 @@ private val HueColors = listOf(
     Color(0xFFFF00FF),
     Color(0xFFFF0000)
 )
+
+private enum class GestureSlot(val labelRes: Int) {
+    SWIPE_UP(R.string.gesture_swipe_up),
+    SWIPE_DOWN(R.string.gesture_swipe_down),
+    DOUBLE_TAP(R.string.gesture_double_tap)
+}
+
+@Composable
+private fun GestureRow(label: String, current: GestureAction, onClick: () -> Unit) {
+    val fg = MaterialTheme.colorScheme.onBackground
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            color = fg,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        SelectableChip(
+            text = stringResource(current.displayName),
+            selected = false,
+            onClick = onClick
+        )
+    }
+}
+
+@Composable
+private fun GestureActionDialog(
+    title: String,
+    current: GestureAction,
+    onSelect: (GestureAction) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            GestureAction.entries.forEach { action ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
+                        .selectable(
+                            selected = action == current,
+                            onClick = { onSelect(action) }
+                        )
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RadioButton(
+                        selected = action == current,
+                        onClick = { onSelect(action) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colorScheme.onBackground,
+                            unselectedColor = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
+                    Text(
+                        text = stringResource(action.displayName),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        }
+    }
+}

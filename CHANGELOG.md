@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.18.0]
+
+### Added
+- **Configurable home gestures.** A new **Gestures** section in Settings lets you choose what **swipe up**, **swipe down** and **double-tap** on the home screen do — open the app drawer, pull down the notification shade, lock the screen, open Settings, or nothing. Defaults match the previous behaviour (swipe up → drawer, swipe down → shade, double-tap → lock).
+
 ## [1.17.0]
 
 ### Added

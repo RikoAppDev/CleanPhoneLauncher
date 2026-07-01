@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
+import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
@@ -63,7 +65,8 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun HomeScreenRoot(
-    onSwipeUp: () -> Unit = {},
+    onOpenDrawer: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -71,7 +74,8 @@ fun HomeScreenRoot(
     HomeScreen(
         state = state,
         onAction = viewModel::onAction,
-        onSwipeUp = onSwipeUp
+        onOpenDrawer = onOpenDrawer,
+        onOpenSettings = onOpenSettings
     )
 }
 
@@ -79,10 +83,24 @@ fun HomeScreenRoot(
 private fun HomeScreen(
     state: HomeScreenState,
     onAction: (HomeScreenAction) -> Unit,
-    onSwipeUp: () -> Unit = {},
+    onOpenDrawer: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     var reorderMode by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val runGesture by rememberUpdatedState<(GestureAction) -> Unit>({ action ->
+        when (action) {
+            GestureAction.NONE -> {}
+            GestureAction.APP_DRAWER -> onOpenDrawer()
+            GestureAction.SETTINGS -> onOpenSettings()
+            GestureAction.NOTIFICATIONS -> onAction(HomeScreenAction.OnExpandNotifications)
+            GestureAction.LOCK_SCREEN -> onAction(HomeScreenAction.OnLockScreen)
+        }
+    })
+    val swipeUpAction by rememberUpdatedState(state.swipeUpAction)
+    val swipeDownAction by rememberUpdatedState(state.swipeDownAction)
+    val doubleTapAction by rememberUpdatedState(state.doubleTapAction)
 
     BackHandler(enabled = reorderMode) { reorderMode = false }
 
@@ -140,7 +158,7 @@ private fun HomeScreen(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = { reorderMode = true },
-                    onDoubleTap = { onAction(HomeScreenAction.OnDoubleTapHome) },
+                    onDoubleTap = { runGesture(doubleTapAction) },
                     onTap = { if (reorderMode) reorderMode = false }
                 )
             }
@@ -149,8 +167,8 @@ private fun HomeScreen(
                 detectVerticalDragGestures(
                     onDragStart = { totalDrag = 0f },
                     onDragEnd = {
-                        if (totalDrag < -120f) onSwipeUp()
-                        else if (totalDrag > 120f) onAction(HomeScreenAction.OnSwipeDownHome)
+                        if (totalDrag < -120f) runGesture(swipeUpAction)
+                        else if (totalDrag > 120f) runGesture(swipeDownAction)
                     }
                 ) { _, dragAmount -> totalDrag += dragAmount }
             }
