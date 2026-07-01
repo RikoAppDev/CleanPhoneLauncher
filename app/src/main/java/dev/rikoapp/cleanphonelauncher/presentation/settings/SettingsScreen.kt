@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
@@ -74,12 +75,15 @@ import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.data.SetupStatusChecker
+import dev.rikoapp.cleanphonelauncher.domain.UpdateCheckResult
+import dev.rikoapp.cleanphonelauncher.domain.VersionCheckRepository
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BackIcon
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreenRoot(
@@ -490,6 +494,10 @@ private fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
         val uriHandler = LocalUriHandler.current
+        val versionCheckRepository = koinInject<VersionCheckRepository>()
+        val updateScope = rememberCoroutineScope()
+        var updateChecking by remember { mutableStateOf(false) }
+        var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -505,7 +513,51 @@ private fun SettingsScreen(
                 color = fg.copy(alpha = 0.5f),
                 style = MaterialTheme.typography.bodySmall
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            SelectableChip(
+                text = if (updateChecking) {
+                    stringResource(R.string.settings_checking_update)
+                } else {
+                    stringResource(R.string.settings_check_update)
+                },
+                selected = false,
+                onClick = {
+                    if (!updateChecking) {
+                        updateChecking = true
+                        updateResult = null
+                        updateScope.launch {
+                            updateResult = versionCheckRepository.forceCheck()
+                            updateChecking = false
+                        }
+                    }
+                }
+            )
+            updateResult?.let { result ->
+                Spacer(modifier = Modifier.height(8.dp))
+                when (result) {
+                    is UpdateCheckResult.UpToDate -> Text(
+                        text = stringResource(R.string.settings_up_to_date),
+                        color = fg.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    is UpdateCheckResult.Error -> Text(
+                        text = stringResource(R.string.settings_update_error),
+                        color = fg.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    is UpdateCheckResult.UpdateAvailable -> Text(
+                        text = stringResource(R.string.settings_update_available),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.clickable {
+                            runCatching { uriHandler.openUri(result.storeUrl) }
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.settings_source_link),
                 color = fg.copy(alpha = 0.5f),

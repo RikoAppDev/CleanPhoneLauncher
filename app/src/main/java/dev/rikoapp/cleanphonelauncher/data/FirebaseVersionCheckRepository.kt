@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import dev.rikoapp.cleanphonelauncher.BuildConfig
+import dev.rikoapp.cleanphonelauncher.domain.UpdateCheckResult
 import dev.rikoapp.cleanphonelauncher.domain.VersionCheckRepository
 import dev.rikoapp.cleanphonelauncher.presentation.version.VersionState
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -49,6 +50,33 @@ class FirebaseVersionCheckRepository(
             min > current -> VersionState.ForceUpgrade(url)
             latest > current && prefs.getLong(KEY_WARNED, 0L) < latest -> VersionState.WarnUpgrade(url)
             else -> VersionState.Ok
+        }
+    }
+
+    override suspend fun forceCheck(): UpdateCheckResult {
+        val rc = FirebaseRemoteConfig.getInstance()
+        val fetched = runCatching {
+            rc.setDefaultsAsync(
+                mapOf(
+                    KEY_MIN to 0L,
+                    KEY_LATEST to 0L,
+                    KEY_URL to DEFAULT_STORE_URL
+                )
+            ).await()
+            rc.fetch(0).await()
+            rc.activate().await()
+        }.isSuccess
+
+        if (!fetched) return UpdateCheckResult.Error
+
+        val current = BuildConfig.VERSION_CODE.toLong()
+        val latest = rc.getLong(KEY_LATEST)
+        val url = rc.getString(KEY_URL).ifBlank { DEFAULT_STORE_URL }
+        lastSeenLatest = latest
+        return if (latest > current) {
+            UpdateCheckResult.UpdateAvailable(url)
+        } else {
+            UpdateCheckResult.UpToDate
         }
     }
 

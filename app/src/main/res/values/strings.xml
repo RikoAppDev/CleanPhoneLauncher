@@ -31,6 +31,11 @@
     <string name="settings_title">Settings</string>
     <string name="settings_back">Back</string>
     <string name="settings_source_link">Source code on GitHub</string>
+    <string name="settings_check_update">Check for updates</string>
+    <string name="settings_checking_update">Checking…</string>
+    <string name="settings_up_to_date">You\'re on the latest version.</string>
+    <string name="settings_update_available">Update available — tap to open the store</string>
+    <string name="settings_update_error">Couldn\'t check for updates. Try again later.</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_color">Color</string>
     <string name="settings_privacy">Privacy</string>

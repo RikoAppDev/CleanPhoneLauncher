@@ -31,6 +31,11 @@
     <string name="settings_title">Nastavenia</string>
     <string name="settings_back">Späť</string>
     <string name="settings_source_link">Zdrojový kód na GitHube</string>
+    <string name="settings_check_update">Skontrolovať aktualizácie</string>
+    <string name="settings_checking_update">Kontrolujem…</string>
+    <string name="settings_up_to_date">Máte najnovšiu verziu.</string>
+    <string name="settings_update_available">Dostupná aktualizácia — ťuknutím otvoríte obchod</string>
+    <string name="settings_update_error">Aktualizácie sa nepodarilo skontrolovať. Skúste neskôr.</string>
     <string name="settings_theme">Téma</string>
     <string name="settings_color">Farba</string>
     <string name="settings_privacy">Súkromie</string>

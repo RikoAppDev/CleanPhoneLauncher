@@ -2,6 +2,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.applist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -80,6 +82,7 @@ import kotlin.math.roundToInt
 fun AppListScreenRoot(
     isActive: Boolean,
     onOpenSettings: () -> Unit = {},
+    onDoubleTap: () -> Unit = {},
     viewModel: AppListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -120,7 +123,8 @@ fun AppListScreenRoot(
         onOpenSettings = {
             focusManager.clearFocus()
             onOpenSettings()
-        }
+        },
+        onDoubleTap = onDoubleTap
     )
 }
 
@@ -132,9 +136,11 @@ private fun AppListScreen(
     focusManager: FocusManager = LocalFocusManager.current,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     listState: LazyListState = rememberLazyListState(),
-    onOpenSettings: () -> Unit = {}
+    onOpenSettings: () -> Unit = {},
+    onDoubleTap: () -> Unit = {}
 ) {
     val alphabet = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
 
     val leadingItemCount = if (state.searchText.text.isBlank()) {
         val notifLeading = if (state.notifiedApps.isNotEmpty()) state.notifiedApps.size + 2 else 0
@@ -197,6 +203,9 @@ private fun AppListScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(onDoubleTap = { currentOnDoubleTap() })
+            }
             .safeContentPadding()
     ) {
         Row(

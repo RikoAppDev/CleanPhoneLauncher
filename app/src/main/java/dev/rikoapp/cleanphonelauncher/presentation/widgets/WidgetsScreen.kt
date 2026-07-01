@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +65,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun WidgetsScreenRoot(
     onWidgetFlowActive: (Boolean) -> Unit = {},
+    onDoubleTap: () -> Unit = {},
     viewModel: WidgetsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -164,7 +166,8 @@ fun WidgetsScreenRoot(
         onResize = viewModel::onResize,
         onReorder = viewModel::onReorder,
         onReconfigure = ::reconfigure,
-        isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null }
+        isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null },
+        onDoubleTap = onDoubleTap
     )
 
     if (showPicker) {
@@ -183,16 +186,21 @@ private fun WidgetsScreen(
     onResize: (Int, Int, Int) -> Unit,
     onReorder: (List<Int>) -> Unit,
     onReconfigure: (Int) -> Unit,
-    isReconfigurable: (Int) -> Boolean
+    isReconfigurable: (Int) -> Boolean,
+    onDoubleTap: () -> Unit = {}
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
     var editMode by remember { mutableStateOf(false) }
+    val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
     BackHandler(enabled = editMode) { editMode = false }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(onDoubleTap = { currentOnDoubleTap() })
+            }
             .systemBarsPadding()
             .padding(16.dp)
     ) {
