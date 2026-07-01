@@ -10,14 +10,14 @@ activityCompose = "1.13.0"
 composeBom = "2026.06.00"
 lifecycleViewmodelCompose = "2.11.0"
 roomRuntime = "2.8.4"
-ksp = "2.3.6"
+ksp = "2.3.9"
 koin = "4.2.2"
 reorderable = "3.1.0"
-firebaseBom = "34.3.0"
+firebaseBom = "34.15.0"
 firebaseCrashlytics = "20.0.6"
 googleGmsGoogleServices = "4.5.0"
 googleFirebaseCrashlytics = "3.0.7"
-coroutinesTest = "1.10.2"
+coroutinesTest = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
