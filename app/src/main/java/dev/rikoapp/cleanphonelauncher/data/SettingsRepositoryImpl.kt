@@ -65,6 +65,9 @@ class SettingsRepositoryImpl(
     )
     override val quickActions = _quickActions.asStateFlow()
 
+    private val _quickActionsConfigured = MutableStateFlow(prefs.contains(KEY_QUICK_ACTIONS))
+    override val quickActionsConfigured = _quickActionsConfigured.asStateFlow()
+
     private val _pageIndicatorEnabled = MutableStateFlow(
         prefs.getBoolean(KEY_PAGE_INDICATOR, false)
     )
@@ -154,6 +157,7 @@ class SettingsRepositoryImpl(
 
     override fun setQuickActions(packageNames: List<String>) {
         _quickActions.value = packageNames
+        _quickActionsConfigured.value = true
         applicationScope.launch {
             prefs.edit().putString(KEY_QUICK_ACTIONS, packageNames.joinToString("\n")).apply()
         }

@@ -349,7 +349,7 @@ private fun HomeScreen(
 }
 
 private const val ADD_QUICK_ACTION = -1
-private const val MIN_QUICK_ACTIONS = 2
+private const val MIN_QUICK_ACTIONS = 0
 private const val MAX_QUICK_ACTIONS = 5
 
 @Composable
@@ -364,7 +364,7 @@ private fun QuickActionsRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = if (quickActions.isEmpty()) Arrangement.Center else Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         quickActions.forEachIndexed { index, app ->
@@ -379,7 +379,8 @@ private fun QuickActionsRow(
                 onRemove = { onRemove(index) }
             )
         }
-        if (editMode && quickActions.size < MAX_QUICK_ACTIONS) {
+        // Keep the add affordance reachable even when the user has removed them all.
+        if ((editMode || quickActions.isEmpty()) && quickActions.size < MAX_QUICK_ACTIONS) {
             AddQuickActionButton(onClick = onAdd)
         }
     }

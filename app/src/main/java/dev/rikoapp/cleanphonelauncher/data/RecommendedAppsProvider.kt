@@ -3,6 +3,7 @@ package dev.rikoapp.cleanphonelauncher.data
 import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.AlarmClock
 import android.provider.MediaStore
 import android.provider.Settings
@@ -23,6 +24,7 @@ class RecommendedAppsProvider(private val context: Application) {
     private fun categoryIntents(): List<Pair<Intent, Int>> = listOf(
         Intent(Intent.ACTION_DIAL) to R.drawable.ic_phone,
         Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA) to R.drawable.ic_camera,
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE) to R.drawable.ic_camera,
         Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MESSAGING) to R.drawable.ic_message,
         Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_GALLERY) to R.drawable.ic_image,
         Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_BROWSER) to R.drawable.ic_public,
@@ -42,11 +44,22 @@ class RecommendedAppsProvider(private val context: Application) {
         val pm = context.packageManager
         val map = LinkedHashMap<String, Int>()
         categoryIntents().forEach { (intent, icon) ->
-            val pkg = runCatching {
-                pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
-            }.getOrNull()
-            if (pkg != null && pkg != "android" && pkg !in map) {
-                map[pkg] = icon
+            // queryIntentActivities (no MATCH_DEFAULT_ONLY): the CATEGORY_APP_* activities
+            // don't declare CATEGORY_DEFAULT, so resolveActivity(MATCH_DEFAULT_ONLY) would
+            // miss them. Map every matching package to our icon; earlier categories win.
+            val matches = runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.queryIntentActivities(intent, 0)
+                }
+            }.getOrNull().orEmpty()
+            matches.forEach { info ->
+                val pkg = info.activityInfo?.packageName
+                if (pkg != null && pkg != "android" && pkg !in map) {
+                    map[pkg] = icon
+                }
             }
         }
         return map

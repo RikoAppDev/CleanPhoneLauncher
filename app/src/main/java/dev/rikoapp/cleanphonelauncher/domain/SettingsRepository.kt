@@ -16,6 +16,7 @@ interface SettingsRepository {
     val doubleTapAction: StateFlow<GestureAction>
     val contactsSearchEnabled: StateFlow<Boolean>
     val quickActions: StateFlow<List<String>>
+    val quickActionsConfigured: StateFlow<Boolean>
     val pageIndicatorEnabled: StateFlow<Boolean>
     val notificationDrawerSectionEnabled: StateFlow<Boolean>
     val widgetPageCount: StateFlow<Int>

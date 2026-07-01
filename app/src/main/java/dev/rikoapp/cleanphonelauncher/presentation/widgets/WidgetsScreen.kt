@@ -57,6 +57,7 @@ import dev.rikoapp.cleanphonelauncher.presentation.components.WidgetSlot
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.DragHandleIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
+import dev.rikoapp.cleanphonelauncher.presentation.util.detectDoubleTapNonConsuming
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
@@ -217,60 +218,55 @@ private fun WidgetsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .pointerInput(Unit) {
-                detectTapGestures(onDoubleTap = { currentOnDoubleTap() })
+                detectDoubleTapNonConsuming { currentOnDoubleTap() }
             }
             .systemBarsPadding()
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.widgets_title),
-                color = fg,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f)
-            )
-            if (state.widgets.isNotEmpty()) {
-                TextChip(
-                    text = stringResource(if (editMode) R.string.widgets_done else R.string.widgets_edit),
-                    onClick = { editMode = !editMode }
+        // Controls only show in edit mode; the normal page stays clean. Long-press a
+        // widget (or the empty page) to enter edit mode.
+        if (editMode) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.widget_page_label, pageIndex + 1, pageCount),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            TextChip(
-                text = stringResource(R.string.add_widget),
-                onClick = onAddWidget
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.widget_page_label, pageIndex + 1, pageCount),
-                color = fg.copy(alpha = 0.6f),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.weight(1f)
-            )
-            if (state.widgets.isEmpty() && pageCount > 1) {
                 TextChip(
-                    text = stringResource(R.string.widget_remove_page),
-                    onClick = onRemovePage
+                    text = stringResource(R.string.widgets_done),
+                    onClick = { editMode = false }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
             }
-            TextChip(
-                text = stringResource(R.string.widget_add_page),
-                onClick = onAddPage
-            )
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextChip(
+                    text = stringResource(R.string.add_widget),
+                    onClick = onAddWidget
+                )
+                TextChip(
+                    text = stringResource(R.string.widget_add_page),
+                    onClick = onAddPage
+                )
+                if (state.widgets.isEmpty() && pageCount > 1) {
+                    TextChip(
+                        text = stringResource(R.string.widget_remove_page),
+                        onClick = onRemovePage
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         if (state.widgets.isEmpty()) {
             Box(
@@ -283,7 +279,12 @@ private fun WidgetsScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable(onClick = onAddWidget)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { onAddWidget() },
+                                onLongPress = { editMode = true }
+                            )
+                        }
                         .padding(16.dp)
                 )
             }
@@ -296,6 +297,7 @@ private fun WidgetsScreen(
 
             LazyColumn(
                 state = lazyState,
+                userScrollEnabled = false,
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {

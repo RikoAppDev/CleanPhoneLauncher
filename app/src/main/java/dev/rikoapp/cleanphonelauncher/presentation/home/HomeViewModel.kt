@@ -62,23 +62,31 @@ class HomeViewModel(
                 Triple(swipeUp, swipeDown, doubleTap)
             }
 
+            val quickFlows = combine(
+                settingsRepository.quickActions,
+                settingsRepository.quickActionsConfigured
+            ) { packages, configured -> packages to configured }
+
             // Now, combine the results of the combined flows with notification counts and gestures
             combine(
                 appFlows,
                 otherFlows,
                 notificationCountRepository.counts,
                 gestureFlows,
-                settingsRepository.quickActions
-            ) { appData, otherData, notificationCounts, gestures, quickActionPackages ->
+                quickFlows
+            ) { appData, otherData, notificationCounts, gestures, quickData ->
                 val (allApps, phoneApp, cameraApp) = appData
                 val (clockType, batteryLevel, favoriteApps) = otherData
                 val (swipeUp, swipeDown, doubleTap) = gestures
+                val (quickActionPackages, quickConfigured) = quickData
 
                 val favoriteAppsData = favoriteApps.mapNotNull { favoriteApp ->
                     allApps.find { it.packageName == favoriteApp.packageName }
                 }
 
-                val quickPackages = if (quickActionPackages.size >= MIN_QUICK_ACTIONS) {
+                // Once the user has set quick actions (even to empty) we honour that;
+                // only the unconfigured first-run default falls back to phone + camera.
+                val quickPackages = if (quickConfigured) {
                     quickActionPackages
                 } else {
                     listOfNotNull(phoneApp?.packageName, cameraApp?.packageName)
@@ -253,7 +261,7 @@ class HomeViewModel(
     }
 
     companion object {
-        const val MIN_QUICK_ACTIONS = 2
+        const val MIN_QUICK_ACTIONS = 0
         const val MAX_QUICK_ACTIONS = 5
     }
 }

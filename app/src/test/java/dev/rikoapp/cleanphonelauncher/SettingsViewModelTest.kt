@@ -38,6 +38,7 @@ class SettingsViewModelTest {
         override val doubleTapAction = MutableStateFlow(GestureAction.LOCK_SCREEN)
         override val contactsSearchEnabled = MutableStateFlow(false)
         override val quickActions = MutableStateFlow<List<String>>(emptyList())
+        override val quickActionsConfigured = MutableStateFlow(false)
         override val pageIndicatorEnabled = MutableStateFlow(false)
         override val notificationDrawerSectionEnabled = MutableStateFlow(false)
         override val widgetPageCount = MutableStateFlow(1)
@@ -50,7 +51,7 @@ class SettingsViewModelTest {
         override fun setSwipeDownAction(action: GestureAction) { swipeDownAction.value = action }
         override fun setDoubleTapAction(action: GestureAction) { doubleTapAction.value = action }
         override fun setContactsSearchEnabled(enabled: Boolean) { contactsSearchEnabled.value = enabled }
-        override fun setQuickActions(packageNames: List<String>) { quickActions.value = packageNames }
+        override fun setQuickActions(packageNames: List<String>) { quickActions.value = packageNames; quickActionsConfigured.value = true }
         override fun setPageIndicatorEnabled(enabled: Boolean) { pageIndicatorEnabled.value = enabled }
         override fun setNotificationDrawerSectionEnabled(enabled: Boolean) { notificationDrawerSectionEnabled.value = enabled }
         override fun setWidgetPageCount(count: Int) { widgetPageCount.value = count }
