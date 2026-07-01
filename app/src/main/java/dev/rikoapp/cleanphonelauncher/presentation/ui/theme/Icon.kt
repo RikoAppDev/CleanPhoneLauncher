@@ -60,7 +60,7 @@ val PersonIcon: ImageVector
 
 val BackIcon: ImageVector
     @Composable
-    get() = ImageVector.vectorResource(id = R.drawable.ic_arrow_back)
+    get() = ImageVector.vectorResource(id = R.drawable.ic_chevron_left)
 
 val SearchIcon: ImageVector
     @Composable

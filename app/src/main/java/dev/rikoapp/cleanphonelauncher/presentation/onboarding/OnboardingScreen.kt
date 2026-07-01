@@ -143,9 +143,12 @@ private fun OnboardingScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
-            .padding(20.dp)
+            .padding(vertical = 20.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (!state.isFirstStep) {
                 IconButton(
                     onClick = { onAction(OnboardingScreenAction.OnBack) },
@@ -229,29 +232,31 @@ private fun OnboardingScreen(
                     primaryLabel = stringResource(R.string.onboarding_next),
                     onPrimary = { onAction(OnboardingScreenAction.OnNext) }
                 ) {
-                    PermissionCard(
-                        icon = BarsIcon,
-                        title = stringResource(R.string.onboarding_perm_usage_title),
-                        description = stringResource(R.string.onboarding_perm_usage_desc),
-                        granted = state.hasUsageAccess,
-                        onGrant = { open(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    PermissionCard(
-                        icon = BellIcon,
-                        title = stringResource(R.string.notification_badges),
-                        description = stringResource(R.string.notification_badges_desc),
-                        granted = state.notificationListenerEnabled,
-                        onGrant = { open(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    PermissionCard(
-                        icon = LockIcon,
-                        title = stringResource(R.string.onboarding_perm_lock_title),
-                        description = stringResource(R.string.onboarding_perm_lock_desc),
-                        granted = state.accessibilityLockEnabled,
-                        onGrant = { showAccessibilityDisclosure = true }
-                    )
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                        PermissionCard(
+                            icon = BarsIcon,
+                            title = stringResource(R.string.onboarding_perm_usage_title),
+                            description = stringResource(R.string.onboarding_perm_usage_desc),
+                            granted = state.hasUsageAccess,
+                            onGrant = { open(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        PermissionCard(
+                            icon = BellIcon,
+                            title = stringResource(R.string.notification_badges),
+                            description = stringResource(R.string.notification_badges_desc),
+                            granted = state.notificationListenerEnabled,
+                            onGrant = { open(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        PermissionCard(
+                            icon = LockIcon,
+                            title = stringResource(R.string.onboarding_perm_lock_title),
+                            description = stringResource(R.string.onboarding_perm_lock_desc),
+                            granted = state.accessibilityLockEnabled,
+                            onGrant = { showAccessibilityDisclosure = true }
+                        )
+                    }
                 }
 
                 OnboardingStep.PERSONALIZE -> StepScaffold(
@@ -272,7 +277,9 @@ private fun OnboardingScreen(
                     primaryLabel = stringResource(R.string.onboarding_done_button),
                     onPrimary = { onAction(OnboardingScreenAction.OnFinish) }
                 ) {
-                    DoneSummary(state = state)
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                        DoneSummary(state = state)
+                    }
                 }
             }
         }
@@ -307,7 +314,8 @@ private fun StepScaffold(
                 text = title,
                 color = fg,
                 style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
             Spacer(Modifier.height(12.dp))
             Text(
@@ -315,7 +323,7 @@ private fun StepScaffold(
                 color = fg.copy(alpha = 0.65f),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
             Spacer(Modifier.height(28.dp))
             content()
@@ -326,13 +334,19 @@ private fun StepScaffold(
             onClick = onPrimary,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .height(52.dp)
         ) {
             Text(primaryLabel)
         }
         if (secondaryLabel != null && onSecondary != null) {
             Spacer(Modifier.height(4.dp))
-            TextButton(onClick = onSecondary, modifier = Modifier.fillMaxWidth()) {
+            TextButton(
+                onClick = onSecondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
                 Text(secondaryLabel)
             }
         } else {
@@ -464,10 +478,14 @@ private fun ColumnScope.PersonalizeControls(
         Text(
             text = stringResource(R.string.settings_theme),
             color = fg,
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(horizontal = 20.dp)
         )
         Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             ThemeMode.entries.forEach { mode ->
                 Chip(
                     text = stringResource(mode.displayName),
@@ -482,13 +500,17 @@ private fun ColumnScope.PersonalizeControls(
         Text(
             text = stringResource(R.string.settings_color),
             color = fg,
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(horizontal = 20.dp)
         )
         Spacer(Modifier.height(10.dp))
         Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Spacer(Modifier.width(8.dp))
             AppColorStyle.entries
                 .filter { it != AppColorStyle.CUSTOM }
                 .forEach { style ->
@@ -498,6 +520,7 @@ private fun ColumnScope.PersonalizeControls(
                         onClick = { onAction(OnboardingScreenAction.OnColorStyleSelected(style)) }
                     )
                 }
+            Spacer(Modifier.width(8.dp))
         }
     }
 }

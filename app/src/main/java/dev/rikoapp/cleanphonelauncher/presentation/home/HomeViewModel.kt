@@ -78,7 +78,9 @@ class HomeViewModel(
                     allApps.find { it.packageName == favoriteApp.packageName }
                 }
 
-                val quickPackages = quickActionPackages.ifEmpty {
+                val quickPackages = if (quickActionPackages.size >= MIN_QUICK_ACTIONS) {
+                    quickActionPackages
+                } else {
                     listOfNotNull(phoneApp?.packageName, cameraApp?.packageName)
                 }
                 val quickActions = quickPackages.mapNotNull { pkg ->

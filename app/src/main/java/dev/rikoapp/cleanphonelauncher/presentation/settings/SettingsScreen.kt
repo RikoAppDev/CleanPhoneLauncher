@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -594,6 +595,10 @@ private fun ColorCircle(
 
 @Composable
 private fun swatchColor(style: AppColorStyle, accentColor: Int): Color {
+    // The theme overrides onBackground with the accent when a coloured/custom style is
+    // active, so use a neutral derived from the (never-overridden) background for the
+    // mono swatches — otherwise they'd follow the accent colour.
+    val neutral = if (MaterialTheme.colorScheme.background.luminance() > 0.5f) Color.Black else Color.White
     return when (style) {
         AppColorStyle.DYNAMIC -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -601,13 +606,13 @@ private fun swatchColor(style: AppColorStyle, accentColor: Int): Color {
                 if (isSystemInDarkTheme()) dynamicDarkColorScheme(context).primary
                 else dynamicLightColorScheme(context).primary
             } else {
-                MaterialTheme.colorScheme.onBackground
+                neutral
             }
         }
 
-        AppColorStyle.MONO -> MaterialTheme.colorScheme.onBackground
+        AppColorStyle.MONO -> neutral
         AppColorStyle.CUSTOM -> Color(accentColor)
-        else -> style.accent ?: MaterialTheme.colorScheme.onBackground
+        else -> style.accent ?: neutral
     }
 }
 

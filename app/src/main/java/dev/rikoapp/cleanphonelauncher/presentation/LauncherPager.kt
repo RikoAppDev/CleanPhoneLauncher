@@ -110,7 +110,7 @@ fun LauncherPager() {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = 24.dp)
             )
         }
 

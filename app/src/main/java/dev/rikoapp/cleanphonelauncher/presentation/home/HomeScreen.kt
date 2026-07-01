@@ -280,12 +280,14 @@ private fun HomeScreen(
                                         onAppClick = {
                                             if (reorderMode) {
                                                 reorderMode = false
+                                            } else if (quickEditMode) {
+                                                quickEditMode = false
                                             } else {
                                                 onAction(HomeScreenAction.OnFavoriteAppClick(app))
                                             }
                                         },
                                         onAppLongClick = {
-                                            if (!reorderMode) {
+                                            if (!reorderMode && !quickEditMode) {
                                                 onAction(HomeScreenAction.OnFavoriteAppLongClick(app))
                                             }
                                         },
