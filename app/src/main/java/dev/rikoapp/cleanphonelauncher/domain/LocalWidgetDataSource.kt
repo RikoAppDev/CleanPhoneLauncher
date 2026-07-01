@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface LocalWidgetDataSource {
     fun getWidgets(): Flow<List<HomeWidget>>
     suspend fun addWidget(appWidgetId: Int, heightDp: Int)
-    suspend fun updateHeight(appWidgetId: Int, heightDp: Int)
+    suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int)
     suspend fun reorder(orderedIds: List<Int>)
     suspend fun remove(appWidgetId: Int)
 }

@@ -49,9 +49,13 @@ class WidgetsViewModel(
         }
     }
 
-    fun onResize(appWidgetId: Int, heightDp: Int) {
+    fun onResize(appWidgetId: Int, widthPercent: Int, heightDp: Int) {
         viewModelScope.launch {
-            widgetDataSource.updateHeight(appWidgetId, heightDp.coerceIn(MIN_HEIGHT_DP, MAX_HEIGHT_DP))
+            widgetDataSource.updateSize(
+                appWidgetId,
+                widthPercent.coerceIn(MIN_WIDTH_PERCENT, MAX_WIDTH_PERCENT),
+                heightDp.coerceIn(MIN_HEIGHT_DP, MAX_HEIGHT_DP)
+            )
         }
     }
 
@@ -63,5 +67,7 @@ class WidgetsViewModel(
         const val MIN_HEIGHT_DP = 80
         const val MAX_HEIGHT_DP = 560
         const val DEFAULT_HEIGHT_DP = 180
+        const val MIN_WIDTH_PERCENT = 25
+        const val MAX_WIDTH_PERCENT = 100
     }
 }

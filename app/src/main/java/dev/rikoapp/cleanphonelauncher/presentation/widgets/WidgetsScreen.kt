@@ -10,7 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,9 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.data.WidgetHostManager
 import dev.rikoapp.cleanphonelauncher.presentation.components.WidgetSlot
@@ -56,7 +60,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import kotlin.math.roundToInt
 
 @Composable
 fun WidgetsScreenRoot(
@@ -177,7 +180,7 @@ private fun WidgetsScreen(
     state: WidgetsScreenState,
     onAddWidget: () -> Unit,
     onRemove: (Int) -> Unit,
-    onResize: (Int, Int) -> Unit,
+    onResize: (Int, Int, Int) -> Unit,
     onReorder: (List<Int>) -> Unit,
     onReconfigure: (Int) -> Unit,
     isReconfigurable: (Int) -> Boolean
@@ -248,93 +251,125 @@ private fun WidgetsScreen(
                 items(ordered, key = { it.appWidgetId }) { widget ->
                     ReorderableItem(reorderState, key = widget.appWidgetId) { _ ->
                         val density = LocalDensity.current
-                        var liveHeight by remember(widget.heightDp) { mutableStateOf(widget.heightDp) }
+                        var liveHeight by remember(widget.heightDp) { mutableIntStateOf(widget.heightDp) }
+                        var liveWidthPercent by remember(widget.widthPercent) {
+                            mutableIntStateOf(widget.widthPercent)
+                        }
+                        var containerWidthPx by remember { mutableIntStateOf(0) }
 
+                        // Full-width track so the corner handle can map horizontal drag to a width fraction.
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(liveHeight.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .then(
-                                    if (editMode) Modifier.border(
-                                        width = 1.dp,
-                                        color = fg.copy(alpha = 0.4f),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) else Modifier
-                                )
+                                .onSizeChanged { containerWidthPx = it.width }
                         ) {
-                            WidgetSlot(
-                                appWidgetId = widget.appWidgetId,
-                                heightDp = liveHeight,
-                                modifier = Modifier.matchParentSize()
-                            )
-
-                            if (editMode) {
-                                Box(
-                                    modifier = Modifier
-                                        .matchParentSize()
-                                        .background(Color.Black.copy(alpha = 0.18f))
-                                        .pointerInput(Unit) {}
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(liveWidthPercent / 100f)
+                                    .height(liveHeight.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .then(
+                                        if (editMode) Modifier.border(
+                                            width = 1.dp,
+                                            color = fg.copy(alpha = 0.4f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) else Modifier
+                                    )
+                                    .then(
+                                        if (!editMode) Modifier.pointerInput(widget.appWidgetId) {
+                                            detectTapGestures(onLongPress = { editMode = true })
+                                        } else Modifier
+                                    )
+                            ) {
+                                WidgetSlot(
+                                    appWidgetId = widget.appWidgetId,
+                                    modifier = Modifier.matchParentSize()
                                 )
 
-                                IconButton(
-                                    onClick = {},
-                                    modifier = Modifier
-                                        .align(Alignment.TopStart)
-                                        .draggableHandle(
-                                            onDragStopped = {
-                                                onReorder(ordered.map { it.appWidgetId })
-                                            }
-                                        )
-                                ) {
-                                    Icon(
-                                        imageVector = DragHandleIcon,
-                                        contentDescription = stringResource(R.string.reorder_favorite),
-                                        tint = Color.White
+                                if (editMode) {
+                                    Box(
+                                        modifier = Modifier
+                                            .matchParentSize()
+                                            .background(Color.Black.copy(alpha = 0.18f))
+                                            .pointerInput(Unit) {}
                                     )
-                                }
 
-                                Row(modifier = Modifier.align(Alignment.TopEnd)) {
-                                    if (isReconfigurable(widget.appWidgetId)) {
-                                        IconButton(onClick = { onReconfigure(widget.appWidgetId) }) {
+                                    IconButton(
+                                        onClick = {},
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .draggableHandle(
+                                                onDragStopped = {
+                                                    onReorder(ordered.map { it.appWidgetId })
+                                                }
+                                            )
+                                    ) {
+                                        Icon(
+                                            imageVector = DragHandleIcon,
+                                            contentDescription = stringResource(R.string.reorder_favorite),
+                                            tint = Color.White
+                                        )
+                                    }
+
+                                    Row(modifier = Modifier.align(Alignment.TopEnd)) {
+                                        if (isReconfigurable(widget.appWidgetId)) {
+                                            IconButton(onClick = { onReconfigure(widget.appWidgetId) }) {
+                                                Icon(
+                                                    imageVector = SettingsIcon,
+                                                    contentDescription = stringResource(R.string.widget_reconfigure),
+                                                    tint = Color.White
+                                                )
+                                            }
+                                        }
+                                        IconButton(onClick = { onRemove(widget.appWidgetId) }) {
                                             Icon(
-                                                imageVector = SettingsIcon,
-                                                contentDescription = stringResource(R.string.widget_reconfigure),
+                                                imageVector = CloseIcon,
+                                                contentDescription = stringResource(R.string.remove_widget),
                                                 tint = Color.White
                                             )
                                         }
                                     }
-                                    IconButton(onClick = { onRemove(widget.appWidgetId) }) {
-                                        Icon(
-                                            imageVector = CloseIcon,
-                                            contentDescription = stringResource(R.string.remove_widget),
-                                            tint = Color.White
-                                        )
-                                    }
-                                }
 
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .width(64.dp)
-                                        .height(28.dp)
-                                        .padding(bottom = 6.dp)
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Color.White.copy(alpha = 0.85f))
-                                        .pointerInput(widget.appWidgetId) {
-                                            detectVerticalDragGestures(
-                                                onDragEnd = { onResize(widget.appWidgetId, liveHeight) }
-                                            ) { _, dragAmount ->
-                                                val deltaDp = with(density) { dragAmount.toDp().value }
-                                                liveHeight = (liveHeight + deltaDp)
-                                                    .roundToInt()
-                                                    .coerceIn(
-                                                        WidgetsViewModel.MIN_HEIGHT_DP,
-                                                        WidgetsViewModel.MAX_HEIGHT_DP
-                                                    )
+                                    // Bottom-end corner handle: drag to resize width and height at once.
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(6.dp)
+                                            .size(28.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(Color.White.copy(alpha = 0.85f))
+                                            .pointerInput(widget.appWidgetId) {
+                                                detectDragGestures(
+                                                    onDragEnd = {
+                                                        onResize(
+                                                            widget.appWidgetId,
+                                                            liveWidthPercent,
+                                                            liveHeight
+                                                        )
+                                                    }
+                                                ) { change, dragAmount ->
+                                                    change.consume()
+                                                    val deltaHeightDp = with(density) { dragAmount.y.toDp().value }
+                                                    liveHeight = (liveHeight + deltaHeightDp)
+                                                        .roundToInt()
+                                                        .coerceIn(
+                                                            WidgetsViewModel.MIN_HEIGHT_DP,
+                                                            WidgetsViewModel.MAX_HEIGHT_DP
+                                                        )
+                                                    if (containerWidthPx > 0) {
+                                                        val deltaPercent =
+                                                            dragAmount.x / containerWidthPx * 100f
+                                                        liveWidthPercent = (liveWidthPercent + deltaPercent)
+                                                            .roundToInt()
+                                                            .coerceIn(
+                                                                WidgetsViewModel.MIN_WIDTH_PERCENT,
+                                                                WidgetsViewModel.MAX_WIDTH_PERCENT
+                                                            )
+                                                    }
+                                                }
                                             }
-                                        }
-                                )
+                                    )
+                                }
                             }
                         }
                     }

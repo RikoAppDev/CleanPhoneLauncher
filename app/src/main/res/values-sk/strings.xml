@@ -53,7 +53,7 @@
     <string name="widgets_empty">Ťuknutím pridáte widget</string>
     <string name="widgets_edit">Upraviť</string>
     <string name="widgets_done">Hotovo</string>
-    <string name="widgets_hint">Ťahaním úchytu zmeníte poradie · ťahaním spodného okraja zmeníte veľkosť · ťuknutím na Hotovo dokončíte</string>
+    <string name="widgets_hint">Ťahaním úchytu zmeníte poradie · ťahaním rohu zmeníte šírku a výšku · ťuknutím na Hotovo dokončíte</string>
     <string name="widget_reconfigure">Nastaviť widget</string>
     <string name="widget_picker_title">Vyberte widget</string>
     <string name="widget_search">Hľadať widgety</string>

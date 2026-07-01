@@ -13,7 +13,7 @@ class RoomLocalWidgetDataSource(
 
     override fun getWidgets(): Flow<List<HomeWidget>> =
         widgetDao.getWidgets().map { entities ->
-            entities.map { HomeWidget(it.appWidgetId, it.position, it.heightDp) }
+            entities.map { HomeWidget(it.appWidgetId, it.position, it.heightDp, it.widthPercent) }
         }
 
     override suspend fun addWidget(appWidgetId: Int, heightDp: Int) {
@@ -26,8 +26,8 @@ class RoomLocalWidgetDataSource(
         )
     }
 
-    override suspend fun updateHeight(appWidgetId: Int, heightDp: Int) {
-        widgetDao.updateHeight(appWidgetId, heightDp)
+    override suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int) {
+        widgetDao.updateSize(appWidgetId, widthPercent, heightDp)
     }
 
     override suspend fun reorder(orderedIds: List<Int>) {

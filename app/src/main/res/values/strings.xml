@@ -53,7 +53,7 @@
     <string name="widgets_empty">Tap to add a widget</string>
     <string name="widgets_edit">Edit</string>
     <string name="widgets_done">Done</string>
-    <string name="widgets_hint">Drag the handle to reorder · drag the bottom edge to resize · tap Done to finish</string>
+    <string name="widgets_hint">Drag the handle to reorder · drag the corner to resize width &amp; height · tap Done to finish</string>
     <string name="widget_reconfigure">Configure widget</string>
     <string name="widget_picker_title">Choose a widget</string>
     <string name="widget_search">Search widgets</string>

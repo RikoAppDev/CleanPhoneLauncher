@@ -8,6 +8,7 @@ import dev.rikoapp.cleanphonelauncher.data.database.CleanPhoneLauncherDatabase
 import dev.rikoapp.cleanphonelauncher.data.database.MIGRATION_1_2
 import dev.rikoapp.cleanphonelauncher.data.database.MIGRATION_2_3
 import dev.rikoapp.cleanphonelauncher.data.database.MIGRATION_3_4
+import dev.rikoapp.cleanphonelauncher.data.database.MIGRATION_4_5
 import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalWidgetDataSource
@@ -22,7 +23,7 @@ val databaseModule = module {
             androidApplication(),
             CleanPhoneLauncherDatabase::class.java,
             "CleanPhoneLauncher.db"
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
     }
 
     single { get<CleanPhoneLauncherDatabase>().favoriteAppDao }
