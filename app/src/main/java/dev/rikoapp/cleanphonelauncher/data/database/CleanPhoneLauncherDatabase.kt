@@ -13,7 +13,7 @@ import dev.rikoapp.cleanphonelauncher.data.database.entities.WidgetEntity
 
 @Database(
     entities = [FavoriteAppEntity::class, AppOverrideEntity::class, WidgetEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class CleanPhoneLauncherDatabase : RoomDatabase() {
@@ -53,5 +53,11 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
 val MIGRATION_4_5 = object : Migration(4, 5) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE widgets ADD COLUMN widthPercent INTEGER NOT NULL DEFAULT 100")
+    }
+}
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE widgets ADD COLUMN page INTEGER NOT NULL DEFAULT 0")
     }
 }

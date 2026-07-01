@@ -13,15 +13,18 @@ class RoomLocalWidgetDataSource(
 
     override fun getWidgets(): Flow<List<HomeWidget>> =
         widgetDao.getWidgets().map { entities ->
-            entities.map { HomeWidget(it.appWidgetId, it.position, it.heightDp, it.widthPercent) }
+            entities.map {
+                HomeWidget(it.appWidgetId, it.position, it.heightDp, it.widthPercent, it.page)
+            }
         }
 
-    override suspend fun addWidget(appWidgetId: Int, heightDp: Int) {
+    override suspend fun addWidget(appWidgetId: Int, heightDp: Int, page: Int) {
         widgetDao.upsert(
             WidgetEntity(
                 appWidgetId = appWidgetId,
-                position = widgetDao.nextPosition(),
-                heightDp = heightDp
+                position = widgetDao.nextPosition(page),
+                heightDp = heightDp,
+                page = page
             )
         )
     }
@@ -38,5 +41,9 @@ class RoomLocalWidgetDataSource(
 
     override suspend fun remove(appWidgetId: Int) {
         widgetDao.deleteById(appWidgetId)
+    }
+
+    override suspend fun removePage(page: Int) {
+        widgetDao.shiftPagesAfter(page)
     }
 }

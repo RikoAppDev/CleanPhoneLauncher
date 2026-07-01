@@ -8,5 +8,6 @@ data class WidgetEntity(
     @PrimaryKey val appWidgetId: Int,
     val position: Int = 0,
     val heightDp: Int = 180,
-    val widthPercent: Int = 100
+    val widthPercent: Int = 100,
+    val page: Int = 0
 )

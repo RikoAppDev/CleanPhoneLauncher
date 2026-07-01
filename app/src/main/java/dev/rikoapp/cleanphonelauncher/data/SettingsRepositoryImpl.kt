@@ -75,6 +75,11 @@ class SettingsRepositoryImpl(
     )
     override val notificationDrawerSectionEnabled = _notificationDrawerSectionEnabled.asStateFlow()
 
+    private val _widgetPageCount = MutableStateFlow(
+        prefs.getInt(KEY_WIDGET_PAGE_COUNT, 1).coerceAtLeast(1)
+    )
+    override val widgetPageCount = _widgetPageCount.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -168,6 +173,14 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setWidgetPageCount(count: Int) {
+        val safe = count.coerceAtLeast(1)
+        _widgetPageCount.value = safe
+        applicationScope.launch {
+            prefs.edit().putInt(KEY_WIDGET_PAGE_COUNT, safe).apply()
+        }
+    }
+
     private fun String?.toPackageList(): List<String> =
         this?.split("\n")?.filter { it.isNotBlank() } ?: emptyList()
 
@@ -193,6 +206,7 @@ class SettingsRepositoryImpl(
         private const val KEY_QUICK_ACTIONS = "quick_actions"
         private const val KEY_PAGE_INDICATOR = "page_indicator_enabled"
         private const val KEY_NOTIFICATION_DRAWER_SECTION = "notification_drawer_section_enabled"
+        private const val KEY_WIDGET_PAGE_COUNT = "widget_page_count"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

@@ -32,9 +32,15 @@ class WidgetsViewModel(
         }
     }
 
-    fun onWidgetBound(appWidgetId: Int) {
+    fun onWidgetBound(appWidgetId: Int, page: Int) {
         viewModelScope.launch {
-            widgetDataSource.addWidget(appWidgetId, DEFAULT_HEIGHT_DP)
+            widgetDataSource.addWidget(appWidgetId, DEFAULT_HEIGHT_DP, page)
+        }
+    }
+
+    fun onRemovePage(page: Int) {
+        viewModelScope.launch {
+            widgetDataSource.removePage(page)
         }
     }
 

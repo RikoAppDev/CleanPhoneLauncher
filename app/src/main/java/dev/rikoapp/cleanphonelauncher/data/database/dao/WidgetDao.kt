@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WidgetDao {
-    @Query("SELECT * FROM widgets ORDER BY position ASC")
+    @Query("SELECT * FROM widgets ORDER BY page ASC, position ASC")
     fun getWidgets(): Flow<List<WidgetEntity>>
 
-    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM widgets")
-    suspend fun nextPosition(): Int
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM widgets WHERE page = :page")
+    suspend fun nextPosition(page: Int): Int
 
     @Upsert
     suspend fun upsert(widget: WidgetEntity)
@@ -22,6 +22,9 @@ interface WidgetDao {
 
     @Query("UPDATE widgets SET heightDp = :heightDp, widthPercent = :widthPercent WHERE appWidgetId = :appWidgetId")
     suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int)
+
+    @Query("UPDATE widgets SET page = page - 1 WHERE page > :page")
+    suspend fun shiftPagesAfter(page: Int)
 
     @Query("DELETE FROM widgets WHERE appWidgetId = :appWidgetId")
     suspend fun deleteById(appWidgetId: Int)

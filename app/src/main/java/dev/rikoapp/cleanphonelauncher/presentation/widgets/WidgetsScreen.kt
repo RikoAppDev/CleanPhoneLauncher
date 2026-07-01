@@ -64,11 +64,18 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun WidgetsScreenRoot(
+    pageIndex: Int,
+    pageCount: Int,
     onWidgetFlowActive: (Boolean) -> Unit = {},
     onDoubleTap: () -> Unit = {},
+    onAddPage: () -> Unit = {},
+    onRemovePage: () -> Unit = {},
     viewModel: WidgetsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val pageState = remember(state.widgets, pageIndex) {
+        state.copy(widgets = state.widgets.filter { it.page == pageIndex })
+    }
     val widgetManager: WidgetHostManager = koinInject()
     var pendingWidgetId by remember { mutableStateOf(-1) }
 
@@ -76,7 +83,7 @@ fun WidgetsScreenRoot(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.onWidgetBound(pendingWidgetId)
+            viewModel.onWidgetBound(pendingWidgetId, pageIndex)
         } else {
             viewModel.discardAllocation(pendingWidgetId)
         }
@@ -92,11 +99,11 @@ fun WidgetsScreenRoot(
             }
             runCatching { configureLauncher.launch(intent) }
                 .onFailure {
-                    viewModel.onWidgetBound(id)
+                    viewModel.onWidgetBound(id, pageIndex)
                     onWidgetFlowActive(false)
                 }
         } else {
-            viewModel.onWidgetBound(id)
+            viewModel.onWidgetBound(id, pageIndex)
             onWidgetFlowActive(false)
         }
     }
@@ -160,14 +167,21 @@ fun WidgetsScreenRoot(
     }
 
     WidgetsScreen(
-        state = state,
+        state = pageState,
+        pageIndex = pageIndex,
+        pageCount = pageCount,
         onAddWidget = ::addWidget,
         onRemove = viewModel::onRemove,
         onResize = viewModel::onResize,
         onReorder = viewModel::onReorder,
         onReconfigure = ::reconfigure,
         isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null },
-        onDoubleTap = onDoubleTap
+        onDoubleTap = onDoubleTap,
+        onAddPage = onAddPage,
+        onRemovePage = {
+            viewModel.onRemovePage(pageIndex)
+            onRemovePage()
+        }
     )
 
     if (showPicker) {
@@ -181,13 +195,17 @@ fun WidgetsScreenRoot(
 @Composable
 private fun WidgetsScreen(
     state: WidgetsScreenState,
+    pageIndex: Int,
+    pageCount: Int,
     onAddWidget: () -> Unit,
     onRemove: (Int) -> Unit,
     onResize: (Int, Int, Int) -> Unit,
     onReorder: (List<Int>) -> Unit,
     onReconfigure: (Int) -> Unit,
     isReconfigurable: (Int) -> Boolean,
-    onDoubleTap: () -> Unit = {}
+    onDoubleTap: () -> Unit = {},
+    onAddPage: () -> Unit = {},
+    onRemovePage: () -> Unit = {}
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
     var editMode by remember { mutableStateOf(false) }
@@ -224,6 +242,31 @@ private fun WidgetsScreen(
             TextChip(
                 text = stringResource(R.string.add_widget),
                 onClick = onAddWidget
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.widget_page_label, pageIndex + 1, pageCount),
+                color = fg.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.weight(1f)
+            )
+            if (state.widgets.isEmpty() && pageCount > 1) {
+                TextChip(
+                    text = stringResource(R.string.widget_remove_page),
+                    onClick = onRemovePage
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            TextChip(
+                text = stringResource(R.string.widget_add_page),
+                onClick = onAddPage
             )
         }
 

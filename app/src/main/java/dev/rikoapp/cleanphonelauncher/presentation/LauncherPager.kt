@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,16 +45,18 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-private const val WIDGETS_PAGE = 0
-private const val HOME_PAGE = 1
-private const val DRAWER_PAGE = 2
+private enum class PendingScroll { NEW_PAGE, HOME }
 
 @Composable
 fun LauncherPager() {
-    val pagerState = rememberPagerState(initialPage = HOME_PAGE, pageCount = { 3 })
     val settings: SettingsRepository = koinInject()
     val pageIndicatorEnabled by settings.pageIndicatorEnabled.collectAsState()
     val doubleTapAction by settings.doubleTapAction.collectAsState()
+    // Widget pages live to the left of home; home and drawer always trail them.
+    val widgetPageCount by settings.widgetPageCount.collectAsState()
+    val homePage = widgetPageCount
+    val drawerPage = widgetPageCount + 1
+    val pagerState = rememberPagerState(initialPage = homePage, pageCount = { widgetPageCount + 2 })
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -61,8 +64,10 @@ fun LauncherPager() {
     var showSettings by remember { mutableStateOf(false) }
     var widgetFlowActive by remember { mutableStateOf(false) }
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
+    var pendingScroll by remember { mutableStateOf<PendingScroll?>(null) }
     val settingsOpen by rememberUpdatedState(showSettings)
     val widgetFlow by rememberUpdatedState(widgetFlowActive)
+    val homePageState by rememberUpdatedState(homePage)
 
     // Double-tap handling lives here so the configured action works on every page,
     // not only home. Home keeps its own detector; the drawer/widgets call this.
@@ -70,7 +75,7 @@ fun LauncherPager() {
         when (doubleTapAction) {
             GestureAction.NONE -> {}
             GestureAction.APP_DRAWER ->
-                coroutineScope.launch { pagerState.animateScrollToPage(DRAWER_PAGE) }
+                coroutineScope.launch { pagerState.animateScrollToPage(drawerPage) }
 
             GestureAction.SETTINGS -> showSettings = true
             GestureAction.NOTIFICATIONS -> expandNotificationShade(context)
@@ -104,8 +109,8 @@ fun LauncherPager() {
     }
 
     BackHandler(enabled = !showSettings) {
-        if (pagerState.currentPage != HOME_PAGE) {
-            coroutineScope.launch { pagerState.animateScrollToPage(HOME_PAGE) }
+        if (pagerState.currentPage != homePage) {
+            coroutineScope.launch { pagerState.animateScrollToPage(homePage) }
         }
     }
 
@@ -116,7 +121,7 @@ fun LauncherPager() {
                     isFirstResume = false
                 } else if (!settingsOpen && !widgetFlow) {
                     coroutineScope.launch {
-                        pagerState.scrollToPage(HOME_PAGE)
+                        pagerState.scrollToPage(homePageState)
                     }
                 }
             }
@@ -127,26 +132,54 @@ fun LauncherPager() {
         }
     }
 
+    // A widget page was added or removed: settle the pager on the right page once
+    // the new page count has taken effect.
+    LaunchedEffect(widgetPageCount) {
+        when (pendingScroll) {
+            PendingScroll.NEW_PAGE -> {
+                pagerState.animateScrollToPage(widgetPageCount - 1)
+                pendingScroll = null
+            }
+
+            PendingScroll.HOME -> {
+                pagerState.animateScrollToPage(widgetPageCount)
+                pendingScroll = null
+            }
+
+            null -> {}
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
-            when (page) {
-                WIDGETS_PAGE -> WidgetsScreenRoot(
+            when {
+                page < widgetPageCount -> WidgetsScreenRoot(
+                    pageIndex = page,
+                    pageCount = widgetPageCount,
                     onWidgetFlowActive = { widgetFlowActive = it },
-                    onDoubleTap = { onDoubleTap() }
+                    onDoubleTap = { onDoubleTap() },
+                    onAddPage = {
+                        pendingScroll = PendingScroll.NEW_PAGE
+                        settings.setWidgetPageCount(widgetPageCount + 1)
+                    },
+                    onRemovePage = {
+                        pendingScroll = PendingScroll.HOME
+                        settings.setWidgetPageCount(widgetPageCount - 1)
+                    }
                 )
 
-                HOME_PAGE -> HomeScreenRoot(
+                page == homePage -> HomeScreenRoot(
                     onOpenDrawer = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(DRAWER_PAGE) }
+                        coroutineScope.launch { pagerState.animateScrollToPage(drawerPage) }
                     },
                     onOpenSettings = { showSettings = true }
                 )
 
-                DRAWER_PAGE -> AppListScreenRoot(
-                    isActive = pagerState.currentPage == DRAWER_PAGE,
+                else -> AppListScreenRoot(
+                    isActive = pagerState.currentPage == drawerPage,
                     onOpenSettings = { showSettings = true },
                     onDoubleTap = { onDoubleTap() }
                 )

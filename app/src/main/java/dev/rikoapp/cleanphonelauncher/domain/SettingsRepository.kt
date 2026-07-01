@@ -18,6 +18,7 @@ interface SettingsRepository {
     val quickActions: StateFlow<List<String>>
     val pageIndicatorEnabled: StateFlow<Boolean>
     val notificationDrawerSectionEnabled: StateFlow<Boolean>
+    val widgetPageCount: StateFlow<Int>
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
@@ -30,4 +31,5 @@ interface SettingsRepository {
     fun setQuickActions(packageNames: List<String>)
     fun setPageIndicatorEnabled(enabled: Boolean)
     fun setNotificationDrawerSectionEnabled(enabled: Boolean)
+    fun setWidgetPageCount(count: Int)
 }

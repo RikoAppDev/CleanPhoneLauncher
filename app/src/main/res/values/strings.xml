@@ -56,6 +56,9 @@
     <string name="hidden_apps_section">Hidden apps</string>
     <string name="add_widget">Add widget</string>
     <string name="remove_widget">Remove widget</string>
+    <string name="widget_add_page">Add page</string>
+    <string name="widget_remove_page">Remove page</string>
+    <string name="widget_page_label">Page %1$d/%2$d</string>
     <string name="widgets_title">Widgets</string>
     <string name="widgets_empty">Tap to add a widget</string>
     <string name="widgets_edit">Edit</string>

@@ -56,6 +56,9 @@
     <string name="hidden_apps_section">Skryté aplikácie</string>
     <string name="add_widget">Pridať widget</string>
     <string name="remove_widget">Odobrať widget</string>
+    <string name="widget_add_page">Pridať stránku</string>
+    <string name="widget_remove_page">Odstrániť stránku</string>
+    <string name="widget_page_label">Stránka %1$d/%2$d</string>
     <string name="widgets_title">Widgety</string>
     <string name="widgets_empty">Ťuknutím pridáte widget</string>
     <string name="widgets_edit">Upraviť</string>
