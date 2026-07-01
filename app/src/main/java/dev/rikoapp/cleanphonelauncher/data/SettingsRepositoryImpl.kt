@@ -65,6 +65,11 @@ class SettingsRepositoryImpl(
     )
     override val quickActions = _quickActions.asStateFlow()
 
+    private val _pageIndicatorEnabled = MutableStateFlow(
+        prefs.getBoolean(KEY_PAGE_INDICATOR, false)
+    )
+    override val pageIndicatorEnabled = _pageIndicatorEnabled.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -144,6 +149,13 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setPageIndicatorEnabled(enabled: Boolean) {
+        _pageIndicatorEnabled.value = enabled
+        applicationScope.launch {
+            prefs.edit().putBoolean(KEY_PAGE_INDICATOR, enabled).apply()
+        }
+    }
+
     private fun String?.toPackageList(): List<String> =
         this?.split("\n")?.filter { it.isNotBlank() } ?: emptyList()
 
@@ -167,6 +179,7 @@ class SettingsRepositoryImpl(
         private const val KEY_DOUBLE_TAP = "gesture_double_tap"
         private const val KEY_CONTACTS_SEARCH = "contacts_search_enabled"
         private const val KEY_QUICK_ACTIONS = "quick_actions"
+        private const val KEY_PAGE_INDICATOR = "page_indicator_enabled"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

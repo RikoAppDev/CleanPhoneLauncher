@@ -289,6 +289,33 @@ private fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        SectionLabel(stringResource(R.string.settings_page_indicator))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.settings_page_indicator_title),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_page_indicator_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Switch(
+                checked = state.pageIndicatorEnabled,
+                onCheckedChange = { onAction(SettingsScreenAction.OnPageIndicatorToggled(it)) }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         SectionLabel(stringResource(R.string.settings_search))
         Row(
             modifier = Modifier

@@ -46,8 +46,9 @@ class SettingsViewModel(
                 appearanceFlow,
                 gestureFlow,
                 installedAppsRepository.apps,
-                localAppOverrideDataSource.getOverrides()
-            ) { appearance, gestures, apps, overrides ->
+                localAppOverrideDataSource.getOverrides(),
+                settingsRepository.pageIndicatorEnabled
+            ) { appearance, gestures, apps, overrides, pageIndicator ->
                 val nameMap = overrides
                     .mapNotNull { o -> o.customName?.let { o.packageName to it } }
                     .toMap()
@@ -66,6 +67,7 @@ class SettingsViewModel(
                     swipeDownAction = gestures.swipeDown,
                     doubleTapAction = gestures.doubleTap,
                     contactsSearchEnabled = appearance.contactsSearch,
+                    pageIndicatorEnabled = pageIndicator,
                     hiddenApps = hiddenApps
                 )
             }.collect { _state.value = it }
@@ -120,6 +122,9 @@ class SettingsViewModel(
 
             is SettingsScreenAction.OnContactsSearchToggled ->
                 settingsRepository.setContactsSearchEnabled(action.enabled)
+
+            is SettingsScreenAction.OnPageIndicatorToggled ->
+                settingsRepository.setPageIndicatorEnabled(action.enabled)
         }
     }
 }

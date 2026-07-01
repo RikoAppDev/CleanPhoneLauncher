@@ -43,6 +43,9 @@
     <string name="quick_action_remove">Remove quick action</string>
     <string name="settings_quick_actions">Quick actions</string>
     <string name="settings_quick_actions_desc">Shortcut buttons at the bottom of the home screen. Long-press one on the home screen to edit.</string>
+    <string name="settings_page_indicator">Page indicator</string>
+    <string name="settings_page_indicator_title">Show page dots</string>
+    <string name="settings_page_indicator_desc">A liquid dot indicator showing which of the widgets / home / drawer pages you are on.</string>
     <string name="hidden_apps_section">Hidden apps</string>
     <string name="add_widget">Add widget</string>
     <string name="remove_widget">Remove widget</string>

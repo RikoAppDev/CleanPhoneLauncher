@@ -14,5 +14,6 @@ data class SettingsScreenState(
     val swipeDownAction: GestureAction = GestureAction.NOTIFICATIONS,
     val doubleTapAction: GestureAction = GestureAction.LOCK_SCREEN,
     val contactsSearchEnabled: Boolean = false,
+    val pageIndicatorEnabled: Boolean = false,
     val hiddenApps: List<AppData> = emptyList()
 )

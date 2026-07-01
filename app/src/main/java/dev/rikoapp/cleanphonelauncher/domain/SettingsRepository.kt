@@ -16,6 +16,7 @@ interface SettingsRepository {
     val doubleTapAction: StateFlow<GestureAction>
     val contactsSearchEnabled: StateFlow<Boolean>
     val quickActions: StateFlow<List<String>>
+    val pageIndicatorEnabled: StateFlow<Boolean>
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
@@ -26,4 +27,5 @@ interface SettingsRepository {
     fun setDoubleTapAction(action: GestureAction)
     fun setContactsSearchEnabled(enabled: Boolean)
     fun setQuickActions(packageNames: List<String>)
+    fun setPageIndicatorEnabled(enabled: Boolean)
 }
