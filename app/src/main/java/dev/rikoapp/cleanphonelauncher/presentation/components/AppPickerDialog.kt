@@ -28,7 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.rikoapp.cleanphonelauncher.R
+import dev.rikoapp.cleanphonelauncher.data.RecommendedAppsProvider
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import org.koin.compose.koinInject
 
 @Composable
 fun AppPickerDialog(
@@ -37,11 +39,17 @@ fun AppPickerDialog(
     onPick: (AppData) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val provider = koinInject<RecommendedAppsProvider>()
     var query by remember { mutableStateOf("") }
+    val recommended = remember(apps) {
+        val byPackage = apps.associateBy { it.packageName }
+        provider.recommended().mapNotNull { byPackage[it.packageName] }
+    }
     val filtered = remember(apps, query) {
         if (query.isBlank()) apps
         else apps.filter { it.name.contains(query, ignoreCase = true) }
     }
+    val showRecommended = query.isBlank() && recommended.isNotEmpty()
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -75,28 +83,55 @@ fun AppPickerDialog(
                 )
             )
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(filtered, key = { it.packageName }) { app ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPick(app) }
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AppIcon(
-                            packageName = app.packageName,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
+                if (showRecommended) {
+                    item {
                         Text(
-                            text = app.name,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyLarge
+                            text = stringResource(R.string.picker_recommended),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                        )
+                    }
+                    items(recommended, key = { "rec_${it.packageName}" }) { app ->
+                        PickerRow(app = app, onPick = onPick)
+                    }
+                    item {
+                        Text(
+                            text = stringResource(R.string.picker_all_apps),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                         )
                     }
                 }
+                items(filtered, key = { it.packageName }) { app ->
+                    PickerRow(app = app, onPick = onPick)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun PickerRow(app: AppData, onPick: (AppData) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onPick(app) }
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AppIcon(
+            packageName = app.packageName,
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = app.name,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }

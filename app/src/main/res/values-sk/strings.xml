@@ -44,6 +44,8 @@
     <string name="notification_badges_desc">Zobrazí počet neprečítaných upozornení na aplikáciách. Vyžaduje prístup k upozorneniam.</string>
     <string name="grant_access">Udeliť prístup</string>
     <string name="quick_action_pick_title">Vyberte aplikáciu</string>
+    <string name="picker_recommended">Odporúčané</string>
+    <string name="picker_all_apps">Všetky aplikácie</string>
     <string name="quick_action_add">Pridať rýchlu akciu</string>
     <string name="quick_action_remove">Odstrániť rýchlu akciu</string>
     <string name="settings_quick_actions">Rýchle akcie</string>

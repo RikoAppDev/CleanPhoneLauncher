@@ -44,6 +44,8 @@
     <string name="notification_badges_desc">Show unread notification counts on apps. Requires notification access.</string>
     <string name="grant_access">Grant access</string>
     <string name="quick_action_pick_title">Choose an app</string>
+    <string name="picker_recommended">Recommended</string>
+    <string name="picker_all_apps">All apps</string>
     <string name="quick_action_add">Add quick action</string>
     <string name="quick_action_remove">Remove quick action</string>
     <string name="settings_quick_actions">Quick actions</string>
