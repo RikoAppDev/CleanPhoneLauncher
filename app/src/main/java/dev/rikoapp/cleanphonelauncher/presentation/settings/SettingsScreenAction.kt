@@ -14,4 +14,5 @@ sealed class SettingsScreenAction {
     data class OnSwipeUpActionSelected(val action: GestureAction) : SettingsScreenAction()
     data class OnSwipeDownActionSelected(val action: GestureAction) : SettingsScreenAction()
     data class OnDoubleTapActionSelected(val action: GestureAction) : SettingsScreenAction()
+    data class OnContactsSearchToggled(val enabled: Boolean) : SettingsScreenAction()
 }

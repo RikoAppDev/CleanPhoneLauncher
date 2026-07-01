@@ -53,3 +53,7 @@ val PaletteIcon: ImageVector
 val StarIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.ic_star)
+
+val PersonIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_person)

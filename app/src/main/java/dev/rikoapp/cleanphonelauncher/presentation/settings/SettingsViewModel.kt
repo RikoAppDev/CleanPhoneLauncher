@@ -28,9 +28,10 @@ class SettingsViewModel(
                 settingsRepository.themeMode,
                 settingsRepository.colorStyle,
                 settingsRepository.accentColor,
-                settingsRepository.crashReportingEnabled
-            ) { themeMode, colorStyle, accentColor, crashReporting ->
-                Appearance(themeMode, colorStyle, accentColor, crashReporting)
+                settingsRepository.crashReportingEnabled,
+                settingsRepository.contactsSearchEnabled
+            ) { themeMode, colorStyle, accentColor, crashReporting, contactsSearch ->
+                Appearance(themeMode, colorStyle, accentColor, crashReporting, contactsSearch)
             }
 
             val gestureFlow = combine(
@@ -64,6 +65,7 @@ class SettingsViewModel(
                     swipeUpAction = gestures.swipeUp,
                     swipeDownAction = gestures.swipeDown,
                     doubleTapAction = gestures.doubleTap,
+                    contactsSearchEnabled = appearance.contactsSearch,
                     hiddenApps = hiddenApps
                 )
             }.collect { _state.value = it }
@@ -74,7 +76,8 @@ class SettingsViewModel(
         val themeMode: ThemeMode,
         val colorStyle: AppColorStyle,
         val accentColor: Int,
-        val crashReporting: Boolean
+        val crashReporting: Boolean,
+        val contactsSearch: Boolean
     )
 
     private data class Gestures(
@@ -114,6 +117,9 @@ class SettingsViewModel(
 
             is SettingsScreenAction.OnDoubleTapActionSelected ->
                 settingsRepository.setDoubleTapAction(action.action)
+
+            is SettingsScreenAction.OnContactsSearchToggled ->
+                settingsRepository.setContactsSearchEnabled(action.enabled)
         }
     }
 }

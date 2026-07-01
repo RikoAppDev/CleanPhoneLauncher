@@ -55,6 +55,11 @@ class SettingsRepositoryImpl(
     )
     override val doubleTapAction = _doubleTapAction.asStateFlow()
 
+    private val _contactsSearchEnabled = MutableStateFlow(
+        prefs.getBoolean(KEY_CONTACTS_SEARCH, false)
+    )
+    override val contactsSearchEnabled = _contactsSearchEnabled.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -120,6 +125,13 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setContactsSearchEnabled(enabled: Boolean) {
+        _contactsSearchEnabled.value = enabled
+        applicationScope.launch {
+            prefs.edit().putBoolean(KEY_CONTACTS_SEARCH, enabled).apply()
+        }
+    }
+
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
@@ -138,6 +150,7 @@ class SettingsRepositoryImpl(
         private const val KEY_SWIPE_UP = "gesture_swipe_up"
         private const val KEY_SWIPE_DOWN = "gesture_swipe_down"
         private const val KEY_DOUBLE_TAP = "gesture_double_tap"
+        private const val KEY_CONTACTS_SEARCH = "contacts_search_enabled"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

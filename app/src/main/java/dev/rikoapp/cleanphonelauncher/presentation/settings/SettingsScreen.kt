@@ -1,10 +1,15 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color as AndroidColor
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -88,6 +93,12 @@ private fun SettingsScreen(
     val fg = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
     var gestureDialogSlot by remember { mutableStateOf<GestureSlot?>(null) }
+
+    val contactsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        onAction(SettingsScreenAction.OnContactsSearchToggled(granted))
+    }
 
     gestureDialogSlot?.let { slot ->
         val current = when (slot) {
@@ -223,6 +234,45 @@ private fun SettingsScreen(
             current = state.doubleTapAction,
             onClick = { gestureDialogSlot = GestureSlot.DOUBLE_TAP }
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SectionLabel(stringResource(R.string.settings_search))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.search_contacts),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.search_contacts_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Switch(
+                checked = state.contactsSearchEnabled,
+                onCheckedChange = { enabled ->
+                    if (enabled) {
+                        val granted = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_CONTACTS
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (granted) {
+                            onAction(SettingsScreenAction.OnContactsSearchToggled(true))
+                        } else {
+                            contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                        }
+                    } else {
+                        onAction(SettingsScreenAction.OnContactsSearchToggled(false))
+                    }
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

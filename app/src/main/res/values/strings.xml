@@ -123,4 +123,10 @@
     <string name="gesture_notifications">Notification shade</string>
     <string name="gesture_lock_screen">Lock screen</string>
     <string name="gesture_settings">Open settings</string>
+
+    <!-- Contacts search -->
+    <string name="settings_search">Search</string>
+    <string name="search_contacts">Search contacts</string>
+    <string name="search_contacts_desc">Show matching contacts in the drawer search. Requires contacts access.</string>
+    <string name="contacts_section">Contacts</string>
 </resources>

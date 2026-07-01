@@ -12,8 +12,10 @@ import dev.rikoapp.cleanphonelauncher.domain.AppActions
 import dev.rikoapp.cleanphonelauncher.domain.InstalledAppsRepository
 import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
+import dev.rikoapp.cleanphonelauncher.domain.ContactRepository
 import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
+import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.domain.ShortcutRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.model.FavoriteApp
@@ -34,6 +36,8 @@ class AppListViewModel(
     private val localAppOverrideDataSource: LocalAppOverrideDataSource,
     private val notificationCountRepository: NotificationCountRepository,
     private val shortcutRepository: ShortcutRepository,
+    private val contactRepository: ContactRepository,
+    private val settingsRepository: SettingsRepository,
     private val appActions: AppActions
 ) : ViewModel() {
 
@@ -106,6 +110,14 @@ class AppListViewModel(
             is AppListScreenAction.OnShortcutClick -> {
                 shortcutRepository.launchShortcut(action.shortcut)
                 _state.update { it.copy(showDialogApp = null, dialogShortcuts = emptyList()) }
+            }
+
+            is AppListScreenAction.OnSearchQueryChanged -> {
+                searchContacts(action.query)
+            }
+
+            is AppListScreenAction.OnContactClick -> {
+                contactRepository.openContact(action.contact)
             }
 
             is AppListScreenAction.OnFavoriteAction -> {
@@ -206,6 +218,25 @@ class AppListViewModel(
             AppListScreenAction.OnResume -> {
                 recentAppsRepository.checkUsageStatsPermission()
                 _state.update { it.copy(searchText = TextFieldState("")) }
+            }
+        }
+    }
+
+    private fun searchContacts(query: String) {
+        if (query.isBlank() || !settingsRepository.contactsSearchEnabled.value) {
+            if (_state.value.searchContacts.isNotEmpty()) {
+                _state.update { it.copy(searchContacts = emptyList()) }
+            }
+            return
+        }
+        viewModelScope.launch {
+            val contacts = withContext(Dispatchers.IO) { contactRepository.search(query) }
+            _state.update { current ->
+                if (current.searchText.text.toString() == query) {
+                    current.copy(searchContacts = contacts)
+                } else {
+                    current
+                }
             }
         }
     }

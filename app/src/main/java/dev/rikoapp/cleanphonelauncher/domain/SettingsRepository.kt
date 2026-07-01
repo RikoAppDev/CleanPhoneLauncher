@@ -14,6 +14,7 @@ interface SettingsRepository {
     val swipeUpAction: StateFlow<GestureAction>
     val swipeDownAction: StateFlow<GestureAction>
     val doubleTapAction: StateFlow<GestureAction>
+    val contactsSearchEnabled: StateFlow<Boolean>
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
@@ -22,4 +23,5 @@ interface SettingsRepository {
     fun setSwipeUpAction(action: GestureAction)
     fun setSwipeDownAction(action: GestureAction)
     fun setDoubleTapAction(action: GestureAction)
+    fun setContactsSearchEnabled(enabled: Boolean)
 }

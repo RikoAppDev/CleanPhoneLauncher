@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.20.0]
+
+### Added
+- **Contacts search (opt-in).** Turn on **Settings → Search → Search contacts** (grants `READ_CONTACTS`) and the drawer search lists matching contacts beneath your app results; tap one to open its contact card. Off by default — no contacts are read unless you enable it and grant permission.
+
 ## [1.19.0]
 
 ### Added

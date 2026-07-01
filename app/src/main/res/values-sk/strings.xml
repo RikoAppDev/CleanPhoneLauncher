@@ -123,4 +123,10 @@
     <string name="gesture_notifications">Panel upozornení</string>
     <string name="gesture_lock_screen">Uzamknúť obrazovku</string>
     <string name="gesture_settings">Otvoriť nastavenia</string>
+
+    <!-- Contacts search -->
+    <string name="settings_search">Vyhľadávanie</string>
+    <string name="search_contacts">Vyhľadávať kontakty</string>
+    <string name="search_contacts_desc">Zobrazovať zhodné kontakty vo vyhľadávaní v zásuvke. Vyžaduje prístup ku kontaktom.</string>
+    <string name="contacts_section">Kontakty</string>
 </resources>

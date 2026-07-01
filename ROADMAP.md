@@ -21,6 +21,7 @@
 - **First-run onboarding:** guided setup wizard (welcome → set as default home → optional permissions → theme/colour → done) with live per-permission status pills, skip/do-later on every step, and a re-openable **Settings → Setup** entry.
 - **Configurable gestures:** a **Gestures** section in Settings to choose what swipe-up / swipe-down / double-tap on home do (drawer, notification shade, lock, settings, or nothing).
 - **App shortcuts:** long-press an app in the drawer to see its static/dynamic/pinned shortcuts (via `LauncherApps`), shown above the options menu; available when set as the default home app. *(shipped; still wants on-device verification across OEMs)*
+- **Contacts search (opt-in):** enable it in Settings → Search (grants `READ_CONTACTS`) to surface matching contacts under the app results in the drawer search; tap to open the contact. Off by default. *(shipped; wants on-device verification)*
 
 ## 🎯 Near term (next few releases)
 
@@ -30,9 +31,6 @@ The core first-run wizard shipped (see *Recently shipped*). Remaining polish:
 - [ ] **Reduced-motion** — skip the step slide/fade transitions when the system animation scale is 0.
 - [ ] **Existing-user gating** — currently the wizard shows once for everyone on update (one-tap skippable); consider suppressing it for installs that already look set up.
 - [ ] **Onboarding in the accessibility/TalkBack pass** (tracked under *Polish → Accessibility pass*).
-
-### Search & launch
-- [ ] **Contacts search** in the drawer (opt-in `READ_CONTACTS`, surface matching contacts alongside apps). *(needs on-device testing)*
 
 ### Polish
 - [ ] **Accessibility pass** — verify TalkBack labels / focus order across drawer, home, settings, onboarding.
@@ -55,7 +53,7 @@ The core first-run wizard shipped (see *Recently shipped*). Remaining polish:
 
 The signed build → GitHub release → Play **internal** deploy is automated on every push to `main`. Remaining steps need the Play Console or a product decision and can't be done from code:
 
-- [ ] **Update the Data Safety form** for crash diagnostics (opt-in Crashlytics) and the notification-listener access used for badges.
+- [ ] **Update the Data Safety form** for crash diagnostics (opt-in Crashlytics), the notification-listener access used for badges, and the new opt-in `READ_CONTACTS` used for contacts search.
 - [ ] **Declare accessibility-service use.** Double-tap-to-lock now uses an `AccessibilityService` (`GLOBAL_ACTION_LOCK_SCREEN`). Play scrutinises accessibility use — provide the prominent-disclosure / declaration before promoting beyond internal testing, or gate the feature.
 - [ ] **Promote the track** (`internal` → `beta` / `production` in `release.yml`, or in the Console) when ready; consider a **closed beta** first.
 

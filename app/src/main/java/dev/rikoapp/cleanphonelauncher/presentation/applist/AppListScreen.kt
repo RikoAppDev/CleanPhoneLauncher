@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -40,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -59,13 +61,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.Contact
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.RenameDialog
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PersonIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
@@ -179,6 +184,11 @@ private fun AppListScreen(
     }
 
     var showHidden by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.searchText) {
+        snapshotFlow { state.searchText.text.toString() }
+            .collectLatest { query -> onAction(AppListScreenAction.OnSearchQueryChanged(query)) }
+    }
 
     Column(
         modifier = Modifier
@@ -314,6 +324,27 @@ private fun AppListScreen(
                     )
                 }
 
+                if (state.searchText.text.isNotBlank() && state.searchContacts.isNotEmpty()) {
+                    item {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                        )
+                        Text(
+                            text = stringResource(R.string.contacts_section),
+                            modifier = Modifier.padding(bottom = 8.dp, start = 16.dp),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    items(state.searchContacts, key = { "contact_${it.id}" }) { contact ->
+                        ContactListItem(
+                            contact = contact,
+                            onClick = { onAction(AppListScreenAction.OnContactClick(contact)) }
+                        )
+                    }
+                }
+
                 if (state.searchText.text.isBlank() && state.hiddenApps.isNotEmpty()) {
                     item {
                         Text(
@@ -428,6 +459,30 @@ private fun AppListScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ContactListItem(contact: Contact, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = PersonIcon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = contact.name,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 
