@@ -67,14 +67,22 @@ class HomeViewModel(
                 appFlows,
                 otherFlows,
                 notificationCountRepository.counts,
-                gestureFlows
-            ) { appData, otherData, notificationCounts, gestures ->
+                gestureFlows,
+                settingsRepository.quickActions
+            ) { appData, otherData, notificationCounts, gestures, quickActionPackages ->
                 val (allApps, phoneApp, cameraApp) = appData
                 val (clockType, batteryLevel, favoriteApps) = otherData
                 val (swipeUp, swipeDown, doubleTap) = gestures
 
                 val favoriteAppsData = favoriteApps.mapNotNull { favoriteApp ->
                     allApps.find { it.packageName == favoriteApp.packageName }
+                }
+
+                val quickPackages = quickActionPackages.ifEmpty {
+                    listOfNotNull(phoneApp?.packageName, cameraApp?.packageName)
+                }
+                val quickActions = quickPackages.mapNotNull { pkg ->
+                    allApps.find { it.packageName == pkg }
                 }
 
                 _state.update {
@@ -88,7 +96,8 @@ class HomeViewModel(
                         notificationCounts = notificationCounts,
                         swipeUpAction = swipeUp,
                         swipeDownAction = swipeDown,
-                        doubleTapAction = doubleTap
+                        doubleTapAction = doubleTap,
+                        quickActions = quickActions
                     )
                 }
             }.collect()
@@ -177,6 +186,33 @@ class HomeViewModel(
                 launchApp(action.app)
             }
 
+            is HomeScreenAction.OnQuickActionClick -> {
+                launchApp(action.app)
+            }
+
+            is HomeScreenAction.OnQuickActionSet -> {
+                val current = currentQuickPackages().toMutableList()
+                if (action.index in current.indices) {
+                    current[action.index] = action.packageName
+                    settingsRepository.setQuickActions(current)
+                }
+            }
+
+            is HomeScreenAction.OnQuickActionAdd -> {
+                val current = currentQuickPackages()
+                if (current.size < MAX_QUICK_ACTIONS && action.packageName !in current) {
+                    settingsRepository.setQuickActions(current + action.packageName)
+                }
+            }
+
+            is HomeScreenAction.OnQuickActionRemove -> {
+                val current = currentQuickPackages().toMutableList()
+                if (current.size > MIN_QUICK_ACTIONS && action.index in current.indices) {
+                    current.removeAt(action.index)
+                    settingsRepository.setQuickActions(current)
+                }
+            }
+
             HomeScreenAction.OnLockScreen -> {
                 lockScreen()
             }
@@ -205,9 +241,17 @@ class HomeViewModel(
         }
     }
 
+    private fun currentQuickPackages(): List<String> =
+        _state.value.quickActions.map { it.packageName }
+
     private fun launchApp(app: AppData) {
         if (!appActions.launch(app.packageName)) {
             installedAppsRepository.getInstalledApps()
         }
+    }
+
+    companion object {
+        const val MIN_QUICK_ACTIONS = 2
+        const val MAX_QUICK_ACTIONS = 5
     }
 }

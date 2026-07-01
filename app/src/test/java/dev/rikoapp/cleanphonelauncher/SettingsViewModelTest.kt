@@ -37,6 +37,7 @@ class SettingsViewModelTest {
         override val swipeDownAction = MutableStateFlow(GestureAction.NOTIFICATIONS)
         override val doubleTapAction = MutableStateFlow(GestureAction.LOCK_SCREEN)
         override val contactsSearchEnabled = MutableStateFlow(false)
+        override val quickActions = MutableStateFlow<List<String>>(emptyList())
         override fun setThemeMode(mode: ThemeMode) { themeMode.value = mode }
         override fun setColorStyle(style: AppColorStyle) { colorStyle.value = style }
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
@@ -46,6 +47,7 @@ class SettingsViewModelTest {
         override fun setSwipeDownAction(action: GestureAction) { swipeDownAction.value = action }
         override fun setDoubleTapAction(action: GestureAction) { doubleTapAction.value = action }
         override fun setContactsSearchEnabled(enabled: Boolean) { contactsSearchEnabled.value = enabled }
+        override fun setQuickActions(packageNames: List<String>) { quickActions.value = packageNames }
     }
 
     private class FakeInstalledAppsRepository : InstalledAppsRepository {

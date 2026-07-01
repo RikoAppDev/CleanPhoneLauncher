@@ -3,8 +3,16 @@ package dev.rikoapp.cleanphonelauncher.presentation.home
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -23,6 +31,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +49,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -50,16 +61,18 @@ import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
+import dev.rikoapp.cleanphonelauncher.presentation.components.AppIcon
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
+import dev.rikoapp.cleanphonelauncher.presentation.components.AppPickerDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.ClockTypeDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppOptionsDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.DigitalClock
 import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ClockType
-import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CameraIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.DragHandleIcon
-import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PhoneIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.PlusIcon
 import org.koin.androidx.compose.koinViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -88,6 +101,8 @@ private fun HomeScreen(
     onOpenSettings: () -> Unit = {},
 ) {
     var reorderMode by remember { mutableStateOf(false) }
+    var quickEditMode by remember { mutableStateOf(false) }
+    var quickPickerTarget by remember { mutableStateOf<Int?>(null) }
     val context = LocalContext.current
 
     val runGesture by rememberUpdatedState<(GestureAction) -> Unit>({ action ->
@@ -103,7 +118,10 @@ private fun HomeScreen(
     val swipeDownAction by rememberUpdatedState(state.swipeDownAction)
     val doubleTapAction by rememberUpdatedState(state.doubleTapAction)
 
-    BackHandler(enabled = reorderMode) { reorderMode = false }
+    BackHandler(enabled = reorderMode || quickEditMode) {
+        reorderMode = false
+        quickEditMode = false
+    }
 
     if (state.showAccessibilityDisclosure) {
         AlertDialog(
@@ -160,7 +178,10 @@ private fun HomeScreen(
                 detectTapGestures(
                     onLongPress = { reorderMode = true },
                     onDoubleTap = { runGesture(doubleTapAction) },
-                    onTap = { if (reorderMode) reorderMode = false }
+                    onTap = {
+                        if (reorderMode) reorderMode = false
+                        if (quickEditMode) quickEditMode = false
+                    }
                 )
             }
             .pointerInput(Unit) {
@@ -297,36 +318,145 @@ private fun HomeScreen(
                 }
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        QuickActionsRow(
+            quickActions = state.quickActions,
+            editMode = quickEditMode,
+            onClick = { onAction(HomeScreenAction.OnQuickActionClick(it)) },
+            onEnterEdit = { quickEditMode = true },
+            onReassign = { index -> quickPickerTarget = index },
+            onRemove = { index -> onAction(HomeScreenAction.OnQuickActionRemove(index)) },
+            onAdd = { quickPickerTarget = ADD_QUICK_ACTION }
+        )
+    }
+
+    quickPickerTarget?.let { target ->
+        AppPickerDialog(
+            apps = state.allApps,
+            title = stringResource(R.string.quick_action_pick_title),
+            onPick = { app ->
+                if (target == ADD_QUICK_ACTION) {
+                    onAction(HomeScreenAction.OnQuickActionAdd(app.packageName))
+                } else {
+                    onAction(HomeScreenAction.OnQuickActionSet(target, app.packageName))
+                }
+                quickPickerTarget = null
+            },
+            onDismiss = { quickPickerTarget = null }
+        )
+    }
+}
+
+private const val ADD_QUICK_ACTION = -1
+private const val MIN_QUICK_ACTIONS = 2
+private const val MAX_QUICK_ACTIONS = 5
+
+@Composable
+private fun QuickActionsRow(
+    quickActions: List<AppData>,
+    editMode: Boolean,
+    onClick: (AppData) -> Unit,
+    onEnterEdit: () -> Unit,
+    onReassign: (Int) -> Unit,
+    onRemove: (Int) -> Unit,
+    onAdd: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        quickActions.forEachIndexed { index, app ->
+            QuickActionButton(
+                app = app,
+                editMode = editMode,
+                canRemove = quickActions.size > MIN_QUICK_ACTIONS,
+                onClick = {
+                    if (editMode) onReassign(index) else onClick(app)
+                },
+                onLongClick = onEnterEdit,
+                onRemove = { onRemove(index) }
+            )
+        }
+        if (editMode && quickActions.size < MAX_QUICK_ACTIONS) {
+            AddQuickActionButton(onClick = onAdd)
+        }
+    }
+}
+
+@Composable
+private fun QuickActionButton(
+    app: AppData,
+    editMode: Boolean,
+    canRemove: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onRemove: () -> Unit
+) {
+    val wiggle by rememberInfiniteTransition(label = "wiggle").animateFloat(
+        initialValue = -2.5f,
+        targetValue = 2.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 160, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "wiggle-angle"
+    )
+    Box(contentAlignment = Alignment.TopEnd) {
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    rotationZ = if (editMode) wiggle else 0f
+                }
+                .size(48.dp)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            state.phoneApp?.let { app ->
-                IconButton(
-                    onClick = { onAction(HomeScreenAction.OnPhoneAppClick(app)) },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = PhoneIcon,
-                        contentDescription = app.name,
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
-            state.cameraApp?.let { app ->
-                IconButton(
-                    onClick = { onAction(HomeScreenAction.OnCameraAppClick(app)) },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = CameraIcon,
-                        contentDescription = app.name,
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
+            AppIcon(
+                packageName = app.packageName,
+                contentDescription = app.name,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        if (editMode && canRemove) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground)
+                    .clickable(onClick = onRemove),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = CloseIcon,
+                    contentDescription = stringResource(R.string.quick_action_remove),
+                    tint = MaterialTheme.colorScheme.background,
+                    modifier = Modifier.size(14.dp)
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun AddQuickActionButton(onClick: () -> Unit) {
+    val fg = MaterialTheme.colorScheme.onBackground
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .border(1.dp, fg.copy(alpha = 0.4f), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = PlusIcon,
+            contentDescription = stringResource(R.string.quick_action_add),
+            tint = fg,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 

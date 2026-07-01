@@ -279,6 +279,16 @@ private fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        SectionLabel(stringResource(R.string.settings_quick_actions))
+        Text(
+            text = stringResource(R.string.settings_quick_actions_desc),
+            color = fg.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         SectionLabel(stringResource(R.string.settings_search))
         Row(
             modifier = Modifier

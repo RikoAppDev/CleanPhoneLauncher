@@ -65,3 +65,7 @@ val BackIcon: ImageVector
 val SearchIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.ic_search)
+
+val PlusIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_add)

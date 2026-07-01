@@ -60,6 +60,11 @@ class SettingsRepositoryImpl(
     )
     override val contactsSearchEnabled = _contactsSearchEnabled.asStateFlow()
 
+    private val _quickActions = MutableStateFlow(
+        prefs.getString(KEY_QUICK_ACTIONS, null).toPackageList()
+    )
+    override val quickActions = _quickActions.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -132,6 +137,16 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setQuickActions(packageNames: List<String>) {
+        _quickActions.value = packageNames
+        applicationScope.launch {
+            prefs.edit().putString(KEY_QUICK_ACTIONS, packageNames.joinToString("\n")).apply()
+        }
+    }
+
+    private fun String?.toPackageList(): List<String> =
+        this?.split("\n")?.filter { it.isNotBlank() } ?: emptyList()
+
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
@@ -151,6 +166,7 @@ class SettingsRepositoryImpl(
         private const val KEY_SWIPE_DOWN = "gesture_swipe_down"
         private const val KEY_DOUBLE_TAP = "gesture_double_tap"
         private const val KEY_CONTACTS_SEARCH = "contacts_search_enabled"
+        private const val KEY_QUICK_ACTIONS = "quick_actions"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

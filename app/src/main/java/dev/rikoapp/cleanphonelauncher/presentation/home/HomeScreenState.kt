@@ -17,5 +17,6 @@ data class HomeScreenState(
     val showAccessibilityDisclosure: Boolean = false,
     val swipeUpAction: GestureAction = GestureAction.APP_DRAWER,
     val swipeDownAction: GestureAction = GestureAction.NOTIFICATIONS,
-    val doubleTapAction: GestureAction = GestureAction.LOCK_SCREEN
+    val doubleTapAction: GestureAction = GestureAction.LOCK_SCREEN,
+    val quickActions: List<AppData> = emptyList()
 )

@@ -38,6 +38,11 @@
     <string name="notification_badges">Notification badges</string>
     <string name="notification_badges_desc">Show unread notification counts on apps. Requires notification access.</string>
     <string name="grant_access">Grant access</string>
+    <string name="quick_action_pick_title">Choose an app</string>
+    <string name="quick_action_add">Add quick action</string>
+    <string name="quick_action_remove">Remove quick action</string>
+    <string name="settings_quick_actions">Quick actions</string>
+    <string name="settings_quick_actions_desc">Shortcut buttons at the bottom of the home screen. Long-press one on the home screen to edit.</string>
     <string name="hidden_apps_section">Hidden apps</string>
     <string name="add_widget">Add widget</string>
     <string name="remove_widget">Remove widget</string>
