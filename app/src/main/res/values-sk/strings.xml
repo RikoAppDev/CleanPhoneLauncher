@@ -29,6 +29,7 @@
     <string name="open_settings">Nastavenia</string>
     <string name="settings_title">Nastavenia</string>
     <string name="settings_back">Späť</string>
+    <string name="settings_source_link">Zdrojový kód na GitHube</string>
     <string name="settings_theme">Téma</string>
     <string name="settings_color">Farba</string>
     <string name="settings_privacy">Súkromie</string>

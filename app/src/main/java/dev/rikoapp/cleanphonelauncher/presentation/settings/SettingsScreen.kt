@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -51,6 +52,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +64,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -67,11 +72,13 @@ import androidx.compose.ui.window.Dialog
 import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
+import dev.rikoapp.cleanphonelauncher.data.SetupStatusChecker
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
-import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BackIcon
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun SettingsScreenRoot(
@@ -98,6 +105,26 @@ private fun SettingsScreen(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         onAction(SettingsScreenAction.OnContactsSearchToggled(granted))
+    }
+
+    val setupStatusChecker = koinInject<SetupStatusChecker>()
+    var notificationAccess by remember {
+        mutableStateOf(setupStatusChecker.isNotificationListenerEnabled())
+    }
+    val notificationSettingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        notificationAccess = setupStatusChecker.isNotificationListenerEnabled()
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                notificationAccess = setupStatusChecker.isNotificationListenerEnabled()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     gestureDialogSlot?.let { slot ->
@@ -129,12 +156,15 @@ private fun SettingsScreen(
             .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = onClose) {
                 Icon(
-                    imageVector = CloseIcon,
+                    imageVector = BackIcon,
                     contentDescription = stringResource(R.string.settings_back),
                     tint = fg
                 )
@@ -151,7 +181,9 @@ private fun SettingsScreen(
 
         SectionLabel(stringResource(R.string.settings_setup))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -176,7 +208,10 @@ private fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionLabel(stringResource(R.string.settings_theme))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             ThemeMode.entries.forEach { mode ->
                 SelectableChip(
                     text = stringResource(mode.displayName),
@@ -190,9 +225,12 @@ private fun SettingsScreen(
 
         SectionLabel(stringResource(R.string.settings_color))
         Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Spacer(modifier = Modifier.width(4.dp))
             AppColorStyle.entries.forEach { style ->
                 ColorCircle(
                     color = swatchColor(style, state.accentColor),
@@ -200,20 +238,24 @@ private fun SettingsScreen(
                     onClick = { onAction(SettingsScreenAction.OnColorStyleSelected(style)) }
                 )
             }
+            Spacer(modifier = Modifier.width(4.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(state.colorStyle.displayName),
             color = fg.copy(alpha = 0.7f),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
         if (state.colorStyle == AppColorStyle.CUSTOM) {
             Spacer(modifier = Modifier.height(16.dp))
-            CustomColorPicker(
-                color = state.accentColor,
-                onColorChange = { onAction(SettingsScreenAction.OnAccentColorSelected(it)) }
-            )
+            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                CustomColorPicker(
+                    color = state.accentColor,
+                    onColorChange = { onAction(SettingsScreenAction.OnAccentColorSelected(it)) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -239,7 +281,9 @@ private fun SettingsScreen(
 
         SectionLabel(stringResource(R.string.settings_search))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -278,7 +322,9 @@ private fun SettingsScreen(
 
         SectionLabel(stringResource(R.string.settings_privacy))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -303,7 +349,9 @@ private fun SettingsScreen(
 
         SectionLabel(stringResource(R.string.settings_notifications))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -318,18 +366,21 @@ private fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            SelectableChip(
-                text = stringResource(R.string.grant_access),
-                selected = false,
-                onClick = {
-                    runCatching {
-                        context.startActivity(
-                            Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        )
+            if (notificationAccess) {
+                StatusPill(text = stringResource(R.string.onboarding_status_granted))
+            } else {
+                SelectableChip(
+                    text = stringResource(R.string.grant_access),
+                    selected = false,
+                    onClick = {
+                        runCatching {
+                            notificationSettingsLauncher.launch(
+                                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
         if (state.hiddenApps.isNotEmpty()) {
@@ -339,7 +390,7 @@ private fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp),
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -364,23 +415,43 @@ private fun SettingsScreen(
                 color = Color(0xFFE5639B),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .clickable { throw RuntimeException("Test Crash") }
                     .padding(vertical = 8.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = if (BuildConfig.DEBUG) {
-                "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
-            } else {
-                "v${BuildConfig.VERSION_NAME}"
-            },
-            color = fg.copy(alpha = 0.5f),
-            style = MaterialTheme.typography.bodySmall
-        )
+        val uriHandler = LocalUriHandler.current
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = if (BuildConfig.DEBUG) {
+                    "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+                } else {
+                    "v${BuildConfig.VERSION_NAME}"
+                },
+                color = fg.copy(alpha = 0.5f),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.settings_source_link),
+                color = fg.copy(alpha = 0.5f),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.clickable {
+                    runCatching { uriHandler.openUri(REPO_URL) }
+                }
+            )
+        }
     }
 }
+
+private const val REPO_URL = "https://github.com/RikoAppDev/CleanPhoneLauncher"
 
 @Composable
 private fun SectionLabel(text: String) {
@@ -388,8 +459,26 @@ private fun SectionLabel(text: String) {
         text = text,
         color = MaterialTheme.colorScheme.onBackground,
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
     )
+}
+
+private val GrantedGreen = Color(0xFF4CAF82)
+
+@Composable
+private fun StatusPill(text: String) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(GrantedGreen.copy(alpha = 0.15f))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = text,
+            color = GrantedGreen,
+            style = MaterialTheme.typography.labelMedium
+        )
+    }
 }
 
 @Composable
@@ -466,7 +555,7 @@ private fun CustomColorPicker(
     var saturation by rememberSaveable { mutableFloatStateOf(seed[1].coerceIn(0f, 1f)) }
     var brightness by rememberSaveable { mutableFloatStateOf(seed[2].coerceIn(0.15f, 1f)) }
 
-    fun emit() {
+    fun commit() {
         onColorChange(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, brightness)))
     }
 
@@ -494,7 +583,8 @@ private fun CustomColorPicker(
                 label = stringResource(R.string.color_custom_hue),
                 fraction = hue / 360f,
                 trackBrush = Brush.horizontalGradient(HueColors),
-                onFraction = { hue = (it * 360f).coerceIn(0f, 360f); emit() }
+                onFraction = { hue = (it * 360f).coerceIn(0f, 360f) },
+                onCommit = { commit() }
             )
             ColorSlider(
                 label = stringResource(R.string.color_custom_saturation),
@@ -505,7 +595,8 @@ private fun CustomColorPicker(
                         Color(AndroidColor.HSVToColor(floatArrayOf(hue, 1f, brightness)))
                     )
                 ),
-                onFraction = { saturation = it; emit() }
+                onFraction = { saturation = it },
+                onCommit = { commit() }
             )
             ColorSlider(
                 label = stringResource(R.string.color_custom_brightness),
@@ -516,7 +607,8 @@ private fun CustomColorPicker(
                         Color(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, 1f)))
                     )
                 ),
-                onFraction = { brightness = it; emit() }
+                onFraction = { brightness = it },
+                onCommit = { commit() }
             )
         }
     }
@@ -527,7 +619,8 @@ private fun ColorSlider(
     label: String,
     fraction: Float,
     trackBrush: Brush,
-    onFraction: (Float) -> Unit
+    onFraction: (Float) -> Unit,
+    onCommit: () -> Unit
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
     var trackWidth by remember { mutableFloatStateOf(0f) }
@@ -550,11 +643,16 @@ private fun ColorSlider(
                 .background(trackBrush)
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
-                        if (trackWidth > 0f) onFraction((offset.x / trackWidth).coerceIn(0f, 1f))
+                        if (trackWidth > 0f) {
+                            onFraction((offset.x / trackWidth).coerceIn(0f, 1f))
+                            onCommit()
+                        }
                     }
                 }
                 .pointerInput(Unit) {
-                    detectHorizontalDragGestures { change, _ ->
+                    detectHorizontalDragGestures(
+                        onDragEnd = { onCommit() }
+                    ) { change, _ ->
                         if (trackWidth > 0f) onFraction((change.position.x / trackWidth).coerceIn(0f, 1f))
                     }
                 }
@@ -593,7 +691,7 @@ private fun GestureRow(label: String, current: GestureAction, onClick: () -> Uni
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

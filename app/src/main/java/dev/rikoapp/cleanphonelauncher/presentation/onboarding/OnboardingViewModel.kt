@@ -21,6 +21,14 @@ class OnboardingViewModel(
     init {
         refreshStatuses()
         viewModelScope.launch {
+            settingsRepository.onboardingCompleted.collect { completed ->
+                if (!completed) {
+                    refreshStatuses()
+                    _state.update { it.copy(stepIndex = 0) }
+                }
+            }
+        }
+        viewModelScope.launch {
             combine(
                 settingsRepository.themeMode,
                 settingsRepository.colorStyle,

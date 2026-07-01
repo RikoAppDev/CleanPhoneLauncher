@@ -57,3 +57,11 @@ val StarIcon: ImageVector
 val PersonIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.ic_person)
+
+val BackIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_arrow_back)
+
+val SearchIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.ic_search)

@@ -38,6 +38,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
+import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BackIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BarsIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BellIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CheckIcon
@@ -144,6 +146,21 @@ private fun OnboardingScreen(
             .padding(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (!state.isFirstStep) {
+                IconButton(
+                    onClick = { onAction(OnboardingScreenAction.OnBack) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = BackIcon,
+                        contentDescription = stringResource(R.string.settings_back),
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+            } else {
+                Spacer(Modifier.width(44.dp))
+            }
             ProgressSegments(
                 current = state.stepIndex,
                 total = state.steps.size,
