@@ -175,7 +175,8 @@ fun LauncherPager() {
                     onOpenDrawer = {
                         coroutineScope.launch { pagerState.animateScrollToPage(drawerPage) }
                     },
-                    onOpenSettings = { showSettings = true }
+                    onOpenSettings = { showSettings = true },
+                    pageIndicatorEnabled = pageIndicatorEnabled
                 )
 
                 else -> AppListScreenRoot(
@@ -198,7 +199,7 @@ fun LauncherPager() {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 6.dp)
             )
         }
 

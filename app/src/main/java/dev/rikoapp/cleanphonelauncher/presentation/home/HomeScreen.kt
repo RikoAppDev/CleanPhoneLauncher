@@ -81,6 +81,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 fun HomeScreenRoot(
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    pageIndicatorEnabled: Boolean = false,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -89,7 +90,8 @@ fun HomeScreenRoot(
         state = state,
         onAction = viewModel::onAction,
         onOpenDrawer = onOpenDrawer,
-        onOpenSettings = onOpenSettings
+        onOpenSettings = onOpenSettings,
+        pageIndicatorEnabled = pageIndicatorEnabled
     )
 }
 
@@ -99,6 +101,7 @@ private fun HomeScreen(
     onAction: (HomeScreenAction) -> Unit,
     onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    pageIndicatorEnabled: Boolean = false,
 ) {
     var reorderMode by remember { mutableStateOf(false) }
     var quickEditMode by remember { mutableStateOf(false) }
@@ -321,6 +324,11 @@ private fun HomeScreen(
             }
         }
         QuickActionsRow(
+            // Lift the buttons above the liquid page dots so a centered button
+            // doesn't collide with them (only an issue with 3+ quick actions).
+            modifier = Modifier.padding(
+                bottom = if (pageIndicatorEnabled && state.quickActions.size > 2) 28.dp else 0.dp
+            ),
             quickActions = state.quickActions,
             editMode = quickEditMode,
             onClick = { onAction(HomeScreenAction.OnQuickActionClick(it)) },
@@ -360,10 +368,11 @@ private fun QuickActionsRow(
     onEnterEdit: () -> Unit,
     onReassign: (Int) -> Unit,
     onRemove: (Int) -> Unit,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (quickActions.isEmpty()) Arrangement.Center else Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
