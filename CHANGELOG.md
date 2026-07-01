@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.19.0]
+
+### Added
+- **App shortcuts.** Long-pressing an app in the drawer now lists its shortcuts (static, dynamic and pinned) above the options menu, so you can jump straight to an action such as "New message" or "Take selfie". Shortcuts show when CleanPhoneLauncher is set as the default home app.
+
 ## [1.18.0]
 
 ### Added

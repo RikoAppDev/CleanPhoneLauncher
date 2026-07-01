@@ -1,11 +1,13 @@
 package dev.rikoapp.cleanphonelauncher.presentation.applist
 
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppShortcut
 
 sealed class AppListScreenAction {
     data class OnAppClick(val app: AppData) : AppListScreenAction()
     data class OnAppLongClick(val app: AppData) : AppListScreenAction()
     object OnDialogDismiss : AppListScreenAction()
+    data class OnShortcutClick(val shortcut: AppShortcut) : AppListScreenAction()
     data class OnFavoriteAction(val app: AppData, val isFavorite: Boolean) : AppListScreenAction()
     data class OnAppInfoClick(val app: AppData) : AppListScreenAction()
     data class OnUninstallClick(val app: AppData) : AppListScreenAction()

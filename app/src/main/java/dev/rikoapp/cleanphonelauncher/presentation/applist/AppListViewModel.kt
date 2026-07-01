@@ -14,14 +14,17 @@ import dev.rikoapp.cleanphonelauncher.domain.LocalAppOverrideDataSource
 import dev.rikoapp.cleanphonelauncher.domain.LocalFavoriteAppDataSource
 import dev.rikoapp.cleanphonelauncher.domain.NotificationCountRepository
 import dev.rikoapp.cleanphonelauncher.domain.RecentAppsRepository
+import dev.rikoapp.cleanphonelauncher.domain.ShortcutRepository
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
 import dev.rikoapp.cleanphonelauncher.domain.model.FavoriteApp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AppListViewModel(
     private val context: Application,
@@ -30,6 +33,7 @@ class AppListViewModel(
     private val localFavoriteAppDataSource: LocalFavoriteAppDataSource,
     private val localAppOverrideDataSource: LocalAppOverrideDataSource,
     private val notificationCountRepository: NotificationCountRepository,
+    private val shortcutRepository: ShortcutRepository,
     private val appActions: AppActions
 ) : ViewModel() {
 
@@ -91,11 +95,17 @@ class AppListViewModel(
             }
 
             is AppListScreenAction.OnAppLongClick -> {
-                _state.update { it.copy(showDialogApp = action.app) }
+                _state.update { it.copy(showDialogApp = action.app, dialogShortcuts = emptyList()) }
+                loadShortcuts(action.app.packageName)
             }
 
             AppListScreenAction.OnDialogDismiss -> {
-                _state.update { it.copy(showDialogApp = null) }
+                _state.update { it.copy(showDialogApp = null, dialogShortcuts = emptyList()) }
+            }
+
+            is AppListScreenAction.OnShortcutClick -> {
+                shortcutRepository.launchShortcut(action.shortcut)
+                _state.update { it.copy(showDialogApp = null, dialogShortcuts = emptyList()) }
             }
 
             is AppListScreenAction.OnFavoriteAction -> {
@@ -196,6 +206,21 @@ class AppListViewModel(
             AppListScreenAction.OnResume -> {
                 recentAppsRepository.checkUsageStatsPermission()
                 _state.update { it.copy(searchText = TextFieldState("")) }
+            }
+        }
+    }
+
+    private fun loadShortcuts(packageName: String) {
+        viewModelScope.launch {
+            val shortcuts = withContext(Dispatchers.IO) {
+                shortcutRepository.getShortcuts(packageName)
+            }
+            _state.update { current ->
+                if (current.showDialogApp?.packageName == packageName) {
+                    current.copy(dialogShortcuts = shortcuts)
+                } else {
+                    current
+                }
             }
         }
     }

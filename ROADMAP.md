@@ -20,6 +20,7 @@
 - **Custom accent colour:** a **Custom** colour style with a free HSV colour picker (hue / saturation / brightness sliders + live preview), not just the preset swatches.
 - **First-run onboarding:** guided setup wizard (welcome → set as default home → optional permissions → theme/colour → done) with live per-permission status pills, skip/do-later on every step, and a re-openable **Settings → Setup** entry.
 - **Configurable gestures:** a **Gestures** section in Settings to choose what swipe-up / swipe-down / double-tap on home do (drawer, notification shade, lock, settings, or nothing).
+- **App shortcuts:** long-press an app in the drawer to see its static/dynamic/pinned shortcuts (via `LauncherApps`), shown above the options menu; available when set as the default home app. *(shipped; still wants on-device verification across OEMs)*
 
 ## 🎯 Near term (next few releases)
 
@@ -31,7 +32,6 @@ The core first-run wizard shipped (see *Recently shipped*). Remaining polish:
 - [ ] **Onboarding in the accessibility/TalkBack pass** (tracked under *Polish → Accessibility pass*).
 
 ### Search & launch
-- [ ] **App shortcuts** (long-press an app → static/dynamic shortcuts via `LauncherApps` / `ShortcutManager`). *(needs on-device testing)*
 - [ ] **Contacts search** in the drawer (opt-in `READ_CONTACTS`, surface matching contacts alongside apps). *(needs on-device testing)*
 
 ### Polish

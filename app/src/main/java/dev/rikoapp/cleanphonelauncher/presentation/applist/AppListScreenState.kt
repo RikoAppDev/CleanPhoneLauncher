@@ -2,6 +2,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.applist
 
 import androidx.compose.foundation.text.input.TextFieldState
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppShortcut
 import kotlin.text.indexOf
 
 data class AppListScreenState(
@@ -9,6 +10,7 @@ data class AppListScreenState(
     val hiddenApps: List<AppData> = emptyList(),
     val searchText: TextFieldState = TextFieldState(),
     val showDialogApp: AppData? = null,
+    val dialogShortcuts: List<AppShortcut> = emptyList(),
     val showRenameApp: AppData? = null,
     val favoriteAppPackageNames: Set<String> = emptySet(),
     val recentApps: List<AppData> = emptyList(),

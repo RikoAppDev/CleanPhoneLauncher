@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -16,6 +17,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.domain.model.AppShortcut
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
 
 @Composable
@@ -28,13 +30,27 @@ fun AppOptionsDialog(
     onUninstall: () -> Unit,
     isHidden: Boolean = false,
     onRename: (() -> Unit)? = null,
-    onToggleHidden: (() -> Unit)? = null
+    onToggleHidden: (() -> Unit)? = null,
+    shortcuts: List<AppShortcut> = emptyList(),
+    onShortcutClick: (AppShortcut) -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(app.name) },
         text = {
             Column {
+                if (shortcuts.isNotEmpty()) {
+                    shortcuts.forEach { shortcut ->
+                        OptionRow(
+                            text = shortcut.label,
+                            onClick = { onShortcutClick(shortcut) }
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f)
+                    )
+                }
                 OptionRow(
                     text = stringResource(
                         if (isFavorite) R.string.remove_from_favorites

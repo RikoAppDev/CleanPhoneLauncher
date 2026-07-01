@@ -156,6 +156,8 @@ private fun AppListScreen(
             },
             onAppInfo = { onAction(AppListScreenAction.OnAppInfoClick(app)) },
             onUninstall = { onAction(AppListScreenAction.OnUninstallClick(app)) },
+            shortcuts = state.dialogShortcuts,
+            onShortcutClick = { onAction(AppListScreenAction.OnShortcutClick(it)) },
             isHidden = state.isHidden(app),
             onRename = { onAction(AppListScreenAction.OnRenameClick(app)) },
             onToggleHidden = {
