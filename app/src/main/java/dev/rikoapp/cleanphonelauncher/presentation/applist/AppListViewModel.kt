@@ -53,10 +53,11 @@ class AppListViewModel(
                 recentAppsRepository.hasUsageStatsPermission,
                 combine(
                     localAppOverrideDataSource.getOverrides(),
-                    notificationCountRepository.counts
-                ) { overrides, counts -> overrides to counts }
-            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission, overridesAndCounts ->
-                val (overrides, notificationCounts) = overridesAndCounts
+                    notificationCountRepository.counts,
+                    settingsRepository.notificationDrawerSectionEnabled
+                ) { overrides, counts, notifSection -> Triple(overrides, counts, notifSection) }
+            ) { allApps, favoriteApps, recentApps, hasUsageStatsPermission, overridesCountsSection ->
+                val (overrides, notificationCounts, notifSectionEnabled) = overridesCountsSection
                 val hiddenSet = overrides.filter { it.hidden }.map { it.packageName }.toSet()
                 val nameMap = overrides.mapNotNull { o -> o.customName?.let { o.packageName to it } }.toMap()
                 fun applyName(app: AppData) =
@@ -76,7 +77,8 @@ class AppListViewModel(
                         recentApps = recentApps.map(::applyName)
                             .filter { app -> app.packageName !in hiddenSet },
                         hasUsageStatsPermission = hasUsageStatsPermission,
-                        notificationCounts = notificationCounts
+                        notificationCounts = notificationCounts,
+                        notificationSectionEnabled = notifSectionEnabled
                     )
                 }
             }.collect()

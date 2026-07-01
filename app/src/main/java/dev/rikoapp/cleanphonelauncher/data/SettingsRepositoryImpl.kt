@@ -70,6 +70,11 @@ class SettingsRepositoryImpl(
     )
     override val pageIndicatorEnabled = _pageIndicatorEnabled.asStateFlow()
 
+    private val _notificationDrawerSectionEnabled = MutableStateFlow(
+        prefs.getBoolean(KEY_NOTIFICATION_DRAWER_SECTION, false)
+    )
+    override val notificationDrawerSectionEnabled = _notificationDrawerSectionEnabled.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -156,6 +161,13 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override fun setNotificationDrawerSectionEnabled(enabled: Boolean) {
+        _notificationDrawerSectionEnabled.value = enabled
+        applicationScope.launch {
+            prefs.edit().putBoolean(KEY_NOTIFICATION_DRAWER_SECTION, enabled).apply()
+        }
+    }
+
     private fun String?.toPackageList(): List<String> =
         this?.split("\n")?.filter { it.isNotBlank() } ?: emptyList()
 
@@ -180,6 +192,7 @@ class SettingsRepositoryImpl(
         private const val KEY_CONTACTS_SEARCH = "contacts_search_enabled"
         private const val KEY_QUICK_ACTIONS = "quick_actions"
         private const val KEY_PAGE_INDICATOR = "page_indicator_enabled"
+        private const val KEY_NOTIFICATION_DRAWER_SECTION = "notification_drawer_section_enabled"
         private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

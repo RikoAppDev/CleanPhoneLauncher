@@ -42,13 +42,19 @@ class SettingsViewModel(
                 Gestures(swipeUp, swipeDown, doubleTap)
             }
 
+            val togglesFlow = combine(
+                settingsRepository.pageIndicatorEnabled,
+                settingsRepository.notificationDrawerSectionEnabled
+            ) { pageIndicator, notifSection -> pageIndicator to notifSection }
+
             combine(
                 appearanceFlow,
                 gestureFlow,
                 installedAppsRepository.apps,
                 localAppOverrideDataSource.getOverrides(),
-                settingsRepository.pageIndicatorEnabled
-            ) { appearance, gestures, apps, overrides, pageIndicator ->
+                togglesFlow
+            ) { appearance, gestures, apps, overrides, toggles ->
+                val (pageIndicator, notifSection) = toggles
                 val nameMap = overrides
                     .mapNotNull { o -> o.customName?.let { o.packageName to it } }
                     .toMap()
@@ -68,6 +74,7 @@ class SettingsViewModel(
                     doubleTapAction = gestures.doubleTap,
                     contactsSearchEnabled = appearance.contactsSearch,
                     pageIndicatorEnabled = pageIndicator,
+                    notificationDrawerSectionEnabled = notifSection,
                     hiddenApps = hiddenApps
                 )
             }.collect { _state.value = it }
@@ -125,6 +132,9 @@ class SettingsViewModel(
 
             is SettingsScreenAction.OnPageIndicatorToggled ->
                 settingsRepository.setPageIndicatorEnabled(action.enabled)
+
+            is SettingsScreenAction.OnNotificationDrawerSectionToggled ->
+                settingsRepository.setNotificationDrawerSectionEnabled(action.enabled)
         }
     }
 }

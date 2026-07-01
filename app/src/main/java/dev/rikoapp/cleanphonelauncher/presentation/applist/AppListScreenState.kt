@@ -18,11 +18,19 @@ data class AppListScreenState(
     val recentApps: List<AppData> = emptyList(),
     val hasUsageStatsPermission: Boolean = false,
     val isActive: Boolean = false,
-    val notificationCounts: Map<String, Int> = emptyMap()
+    val notificationCounts: Map<String, Int> = emptyMap(),
+    val notificationSectionEnabled: Boolean = false
 ) {
     fun isHidden(app: AppData): Boolean = hiddenApps.any { it.packageName == app.packageName }
 
     fun badgeCount(app: AppData): Int = notificationCounts[app.packageName] ?: 0
+
+    val notifiedApps: List<AppData>
+        get() = if (notificationSectionEnabled) {
+            allApps.filter { badgeCount(it) > 0 }.sortedByDescending { badgeCount(it) }
+        } else {
+            emptyList()
+        }
 
     val filteredApps: List<AppData>
         get() = if (searchText.text.isBlank()) {

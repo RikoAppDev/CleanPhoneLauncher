@@ -420,6 +420,35 @@ private fun SettingsScreen(
             }
         }
 
+        if (notificationAccess) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.notification_drawer_section),
+                        color = fg,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = stringResource(R.string.notification_drawer_section_desc),
+                        color = fg.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Switch(
+                    checked = state.notificationDrawerSectionEnabled,
+                    onCheckedChange = {
+                        onAction(SettingsScreenAction.OnNotificationDrawerSectionToggled(it))
+                    }
+                )
+            }
+        }
+
         if (state.hiddenApps.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
             SectionLabel(stringResource(R.string.hidden_apps_section))

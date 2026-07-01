@@ -139,4 +139,7 @@
     <string name="search_contacts">Vyhľadávať kontakty</string>
     <string name="search_contacts_desc">Zobrazovať zhodné kontakty vo vyhľadávaní v zásuvke. Vyžaduje prístup ku kontaktom.</string>
     <string name="contacts_section">Kontakty</string>
+    <string name="notifications_section">Notifikácie</string>
+    <string name="notification_drawer_section">Zobraziť v zozname aplikácií</string>
+    <string name="notification_drawer_section_desc">Zobrazí aplikácie s neprečítanými notifikáciami v sekcii navrchu zásuvky.</string>
 </resources>

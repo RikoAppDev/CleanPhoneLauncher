@@ -39,6 +39,7 @@ class SettingsViewModelTest {
         override val contactsSearchEnabled = MutableStateFlow(false)
         override val quickActions = MutableStateFlow<List<String>>(emptyList())
         override val pageIndicatorEnabled = MutableStateFlow(false)
+        override val notificationDrawerSectionEnabled = MutableStateFlow(false)
         override fun setThemeMode(mode: ThemeMode) { themeMode.value = mode }
         override fun setColorStyle(style: AppColorStyle) { colorStyle.value = style }
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
@@ -50,6 +51,7 @@ class SettingsViewModelTest {
         override fun setContactsSearchEnabled(enabled: Boolean) { contactsSearchEnabled.value = enabled }
         override fun setQuickActions(packageNames: List<String>) { quickActions.value = packageNames }
         override fun setPageIndicatorEnabled(enabled: Boolean) { pageIndicatorEnabled.value = enabled }
+        override fun setNotificationDrawerSectionEnabled(enabled: Boolean) { notificationDrawerSectionEnabled.value = enabled }
     }
 
     private class FakeInstalledAppsRepository : InstalledAppsRepository {

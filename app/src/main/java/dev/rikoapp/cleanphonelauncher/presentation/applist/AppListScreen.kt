@@ -137,11 +137,13 @@ private fun AppListScreen(
     val alphabet = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     val leadingItemCount = if (state.searchText.text.isBlank()) {
-        if (state.hasUsageStatsPermission) {
+        val notifLeading = if (state.notifiedApps.isNotEmpty()) state.notifiedApps.size + 2 else 0
+        val recentLeading = if (state.hasUsageStatsPermission) {
             if (state.recentApps.isNotEmpty()) state.recentApps.size + 2 else 0
         } else {
             1
         }
+        notifLeading + recentLeading
     } else {
         0
     }
@@ -285,6 +287,30 @@ private fun AppListScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 if (state.searchText.text.isBlank()) {
+                    if (state.notifiedApps.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.notifications_section),
+                                modifier = Modifier.padding(bottom = 8.dp, start = 16.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        items(state.notifiedApps, key = { "notif_${it.packageName}" }) { app ->
+                            AppListItem(
+                                app = app,
+                                onAppClick = { onAction(AppListScreenAction.OnAppClick(app)) },
+                                onAppLongClick = { onAction(AppListScreenAction.OnAppLongClick(app)) },
+                                badgeCount = state.badgeCount(app)
+                            )
+                        }
+                        item {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
                     if (state.hasUsageStatsPermission) {
                         if (state.recentApps.isNotEmpty()) {
                             item {

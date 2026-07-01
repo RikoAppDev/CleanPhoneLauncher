@@ -17,6 +17,7 @@ interface SettingsRepository {
     val contactsSearchEnabled: StateFlow<Boolean>
     val quickActions: StateFlow<List<String>>
     val pageIndicatorEnabled: StateFlow<Boolean>
+    val notificationDrawerSectionEnabled: StateFlow<Boolean>
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
@@ -28,4 +29,5 @@ interface SettingsRepository {
     fun setContactsSearchEnabled(enabled: Boolean)
     fun setQuickActions(packageNames: List<String>)
     fun setPageIndicatorEnabled(enabled: Boolean)
+    fun setNotificationDrawerSectionEnabled(enabled: Boolean)
 }
