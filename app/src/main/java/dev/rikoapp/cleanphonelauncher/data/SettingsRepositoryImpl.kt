@@ -33,6 +33,9 @@ class SettingsRepositoryImpl(
     )
     override val crashReportingEnabled = _crashReportingEnabled.asStateFlow()
 
+    private val _accentColor = MutableStateFlow(prefs.getInt(KEY_ACCENT_COLOR, DEFAULT_ACCENT))
+    override val accentColor = _accentColor.asStateFlow()
+
     init {
         applyCrashReporting(_crashReportingEnabled.value)
     }
@@ -63,6 +66,13 @@ class SettingsRepositoryImpl(
         FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = enabled
     }
 
+    override fun setAccentColor(color: Int) {
+        _accentColor.value = color
+        applicationScope.launch {
+            prefs.edit().putInt(KEY_ACCENT_COLOR, color).apply()
+        }
+    }
+
     private fun String?.toThemeMode() =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SYSTEM
 
@@ -73,5 +83,7 @@ class SettingsRepositoryImpl(
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_COLOR_STYLE = "color_style"
         private const val KEY_CRASH_REPORTING = "crash_reporting"
+        private const val KEY_ACCENT_COLOR = "accent_color"
+        private const val DEFAULT_ACCENT = 0xFF5B8DEF.toInt()
     }
 }

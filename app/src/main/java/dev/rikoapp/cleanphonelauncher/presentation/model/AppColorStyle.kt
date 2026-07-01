@@ -14,5 +14,6 @@ enum class AppColorStyle(
     GREEN(R.string.color_green, Color(0xFF4CAF82)),
     AMBER(R.string.color_amber, Color(0xFFE0A33E)),
     PINK(R.string.color_pink, Color(0xFFE5639B)),
-    PURPLE(R.string.color_purple, Color(0xFF9B7BE5))
+    PURPLE(R.string.color_purple, Color(0xFF9B7BE5)),
+    CUSTOM(R.string.color_custom, null)
 }

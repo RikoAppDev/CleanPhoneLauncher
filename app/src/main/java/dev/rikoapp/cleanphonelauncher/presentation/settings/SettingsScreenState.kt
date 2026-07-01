@@ -8,5 +8,6 @@ data class SettingsScreenState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val colorStyle: AppColorStyle = AppColorStyle.DYNAMIC,
     val crashReportingEnabled: Boolean = false,
+    val accentColor: Int = 0,
     val hiddenApps: List<AppData> = emptyList()
 )

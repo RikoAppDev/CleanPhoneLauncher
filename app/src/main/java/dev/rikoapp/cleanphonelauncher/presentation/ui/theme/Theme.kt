@@ -43,6 +43,7 @@ private val LightColorScheme = lightColorScheme(
 fun CleanPhoneLauncherTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     colorStyle: AppColorStyle = AppColorStyle.DYNAMIC,
+    customAccent: Color? = null,
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {
@@ -65,7 +66,11 @@ fun CleanPhoneLauncherTheme(
         AppColorStyle.MONO -> base
 
         else -> {
-            val accent = colorStyle.accent ?: base.onBackground
+            val accent = if (colorStyle == AppColorStyle.CUSTOM) {
+                customAccent ?: base.onBackground
+            } else {
+                colorStyle.accent ?: base.onBackground
+            }
             base.copy(
                 primary = accent,
                 secondary = accent,

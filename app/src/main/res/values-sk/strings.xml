@@ -60,6 +60,10 @@
     <string name="color_amber">Jantárová</string>
     <string name="color_pink">Ružová</string>
     <string name="color_purple">Fialová</string>
+    <string name="color_custom">Vlastná</string>
+    <string name="color_custom_hue">Odtieň</string>
+    <string name="color_custom_saturation">Sýtosť</string>
+    <string name="color_custom_brightness">Jas</string>
     <string name="yes">Áno</string>
     <string name="no">Nie</string>
     <string name="ok">OK</string>

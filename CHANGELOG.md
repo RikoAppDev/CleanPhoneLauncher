@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.16.0]
+
+### Added
+- **Custom accent colour.** A new **Custom** colour style with a free colour picker — hue, saturation and brightness sliders and a live preview — lets you set any accent colour instead of only the preset swatches. The choice is persisted and applied across the launcher.
+
+### Build
+- Bumped KSP (2.3.9), Firebase BoM (34.15.0) and kotlinx-coroutines-test (1.11.0).
+
 ## [1.15.0]
 
 ### Added

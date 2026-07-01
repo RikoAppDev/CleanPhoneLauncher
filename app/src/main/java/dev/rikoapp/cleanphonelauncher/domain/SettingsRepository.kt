@@ -8,7 +8,9 @@ interface SettingsRepository {
     val themeMode: StateFlow<ThemeMode>
     val colorStyle: StateFlow<AppColorStyle>
     val crashReportingEnabled: StateFlow<Boolean>
+    val accentColor: StateFlow<Int>
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
+    fun setAccentColor(color: Int)
 }

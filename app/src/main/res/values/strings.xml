@@ -60,6 +60,10 @@
     <string name="color_amber">Amber</string>
     <string name="color_pink">Pink</string>
     <string name="color_purple">Purple</string>
+    <string name="color_custom">Custom</string>
+    <string name="color_custom_hue">Hue</string>
+    <string name="color_custom_saturation">Saturation</string>
+    <string name="color_custom_brightness">Brightness</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>

@@ -1,12 +1,15 @@
 package dev.rikoapp.cleanphonelauncher.presentation.settings
 
 import android.content.Intent
+import android.graphics.Color as AndroidColor
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -34,14 +38,23 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
@@ -115,7 +128,7 @@ private fun SettingsScreen(
         ) {
             AppColorStyle.entries.forEach { style ->
                 ColorCircle(
-                    color = swatchColor(style),
+                    color = swatchColor(style, state.accentColor),
                     selected = state.colorStyle == style,
                     onClick = { onAction(SettingsScreenAction.OnColorStyleSelected(style)) }
                 )
@@ -127,6 +140,14 @@ private fun SettingsScreen(
             color = fg.copy(alpha = 0.7f),
             style = MaterialTheme.typography.bodyMedium
         )
+
+        if (state.colorStyle == AppColorStyle.CUSTOM) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CustomColorPicker(
+                color = state.accentColor,
+                onColorChange = { onAction(SettingsScreenAction.OnAccentColorSelected(it)) }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -292,7 +313,7 @@ private fun ColorCircle(
 }
 
 @Composable
-private fun swatchColor(style: AppColorStyle): Color {
+private fun swatchColor(style: AppColorStyle, accentColor: Int): Color {
     return when (style) {
         AppColorStyle.DYNAMIC -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -305,6 +326,132 @@ private fun swatchColor(style: AppColorStyle): Color {
         }
 
         AppColorStyle.MONO -> MaterialTheme.colorScheme.onBackground
+        AppColorStyle.CUSTOM -> Color(accentColor)
         else -> style.accent ?: MaterialTheme.colorScheme.onBackground
     }
 }
+
+@Composable
+private fun CustomColorPicker(
+    color: Int,
+    onColorChange: (Int) -> Unit
+) {
+    val seed = remember { FloatArray(3).also { AndroidColor.colorToHSV(color, it) } }
+    var hue by rememberSaveable { mutableFloatStateOf(seed[0]) }
+    var saturation by rememberSaveable { mutableFloatStateOf(seed[1].coerceIn(0f, 1f)) }
+    var brightness by rememberSaveable { mutableFloatStateOf(seed[2].coerceIn(0.15f, 1f)) }
+
+    fun emit() {
+        onColorChange(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, brightness)))
+    }
+
+    val current = Color(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, brightness)))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f), CircleShape)
+                .padding(3.dp)
+                .clip(CircleShape)
+                .background(current)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ColorSlider(
+                label = stringResource(R.string.color_custom_hue),
+                fraction = hue / 360f,
+                trackBrush = Brush.horizontalGradient(HueColors),
+                onFraction = { hue = (it * 360f).coerceIn(0f, 360f); emit() }
+            )
+            ColorSlider(
+                label = stringResource(R.string.color_custom_saturation),
+                fraction = saturation,
+                trackBrush = Brush.horizontalGradient(
+                    listOf(
+                        Color(AndroidColor.HSVToColor(floatArrayOf(hue, 0f, brightness))),
+                        Color(AndroidColor.HSVToColor(floatArrayOf(hue, 1f, brightness)))
+                    )
+                ),
+                onFraction = { saturation = it; emit() }
+            )
+            ColorSlider(
+                label = stringResource(R.string.color_custom_brightness),
+                fraction = brightness,
+                trackBrush = Brush.horizontalGradient(
+                    listOf(
+                        Color.Black,
+                        Color(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, 1f)))
+                    )
+                ),
+                onFraction = { brightness = it; emit() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorSlider(
+    label: String,
+    fraction: Float,
+    trackBrush: Brush,
+    onFraction: (Float) -> Unit
+) {
+    val fg = MaterialTheme.colorScheme.onBackground
+    var trackWidth by remember { mutableFloatStateOf(0f) }
+    val thumbPx = with(LocalDensity.current) { 22.dp.toPx() }
+
+    Column {
+        Text(
+            text = label,
+            color = fg.copy(alpha = 0.7f),
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(28.dp)
+                .onSizeChanged { trackWidth = it.width.toFloat() }
+                .clip(CircleShape)
+                .background(trackBrush)
+                .pointerInput(Unit) {
+                    detectTapGestures { offset ->
+                        if (trackWidth > 0f) onFraction((offset.x / trackWidth).coerceIn(0f, 1f))
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, _ ->
+                        if (trackWidth > 0f) onFraction((change.position.x / trackWidth).coerceIn(0f, 1f))
+                    }
+                }
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset((fraction * (trackWidth - thumbPx)).roundToInt(), 0) }
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(1.5.dp, fg.copy(alpha = 0.5f), CircleShape)
+            )
+        }
+    }
+}
+
+private val HueColors = listOf(
+    Color(0xFFFF0000),
+    Color(0xFFFFFF00),
+    Color(0xFF00FF00),
+    Color(0xFF00FFFF),
+    Color(0xFF0000FF),
+    Color(0xFFFF00FF),
+    Color(0xFFFF0000)
+)

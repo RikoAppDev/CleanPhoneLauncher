@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.presentation.LauncherPager
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CleanPhoneLauncherTheme
@@ -25,11 +26,16 @@ class MainActivity : ComponentActivity() {
             val settings: SettingsRepository = koinInject()
             val themeMode by settings.themeMode.collectAsState()
             val colorStyle by settings.colorStyle.collectAsState()
+            val accentColor by settings.accentColor.collectAsState()
 
             val appViewModel: AppViewModel = koinViewModel()
             val versionState by appViewModel.versionState.collectAsState()
 
-            CleanPhoneLauncherTheme(themeMode = themeMode, colorStyle = colorStyle) {
+            CleanPhoneLauncherTheme(
+                themeMode = themeMode,
+                colorStyle = colorStyle,
+                customAccent = Color(accentColor)
+            ) {
                 when (val state = versionState) {
                     is VersionState.ForceUpgrade -> ForceUpgradeScreen(storeUrl = state.storeUrl)
                     else -> {
