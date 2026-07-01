@@ -5,6 +5,38 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+## [1.23.0]
+
+### Changed
+- **Reworked widget management.** Widgets on the screen left of home now support **2-dimensional resizing** — a bottom-right corner handle resizes width *and* height together, and widths can be narrower than full width (stored as 25–100% of the screen). **Resizing is much smoother**: the widget's size is reported to its provider only after the drag settles instead of on every frame, removing the jank. You can also **long-press a widget to enter edit mode** (the Edit/Done button remains as a fallback).
+
+## [1.22.0]
+
+### Added
+- **Opt-in page indicator.** Turn on **Settings → Page indicator** to show a "liquid" dot indicator for the widgets / home / drawer pager — the active pill stretches toward the next dot as you swipe. Off by default.
+
+## [1.21.0]
+
+### Added
+- **Configurable home quick actions.** The two fixed phone/camera buttons at the bottom of the home screen are now **user-configurable quick actions** — between **2 and 5** slots, each mapped to any installed app. **Long-press** a button to enter an inline edit mode (the buttons wiggle) where you can remove, add, or reassign apps from a searchable picker. Defaults to the detected phone + camera apps.
+
+## [1.20.2]
+
+### Fixed
+- Home **swipe up/down gestures now work over the favorites list** (the list only scrolls in reorder mode, so gestures pass through otherwise).
+- The **reorder hint no longer shifts the favorites layout** when you enter reorder mode.
+- Drawer search gained a **web-search (magnifier) button** next to the clear button.
+- **App shortcuts that fail to launch** (e.g. some Messenger conversation shortcuts) now **fall back to opening the app** instead of doing nothing.
+
+## [1.20.1]
+
+### Fixed
+- Settings uses a **back caret** instead of a close (×) in the header.
+- The **custom accent colour** now applies only when you release a slider, so the palette swatch no longer flickers while dragging.
+- The **notification-badge access** shows a live **Granted** state and re-checks when you return to Settings.
+- The colour palette **scrolls edge-to-edge**; the version is **centred** with a **GitHub source link**.
+- Onboarding gained a visible **Back** button and now **resets to the first step** when re-run from Settings.
+
 ## [1.20.0]
 
 ### Added

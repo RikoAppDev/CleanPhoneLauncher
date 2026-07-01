@@ -22,6 +22,10 @@
 - **Configurable gestures:** a **Gestures** section in Settings to choose what swipe-up / swipe-down / double-tap on home do (drawer, notification shade, lock, settings, or nothing).
 - **App shortcuts:** long-press an app in the drawer to see its static/dynamic/pinned shortcuts (via `LauncherApps`), shown above the options menu; available when set as the default home app. *(shipped; still wants on-device verification across OEMs)*
 - **Contacts search (opt-in):** enable it in Settings → Search (grants `READ_CONTACTS`) to surface matching contacts under the app results in the drawer search; tap to open the contact. Off by default. *(shipped; wants on-device verification)*
+- **Configurable home quick actions:** the bottom-of-home shortcut buttons are now 2–5 user-chosen apps with an inline long-press edit mode (wiggle, add/remove/reassign via a searchable picker); defaults to the detected phone + camera. *(shipped; wants on-device verification)*
+- **Opt-in liquid page indicator:** a worm-style dot indicator for the widgets / home / drawer pager, toggled in Settings → Page indicator. Off by default.
+- **Reworked widgets:** 2-D corner resize (width 25–100% + height), long-press to edit, and smoother resizing (size reported to the provider only after the drag settles). *(shipped; wants on-device verification across OEMs)*
+- **Bug-fix wave:** settings back caret, commit-on-release accent picker, live notification-badge status, edge-to-edge palette, centred version + source link, onboarding back button & re-run reset, home swipe-over-favorites, non-shifting reorder hint, drawer web-search button, and a shortcut-launch fallback.
 
 ## 🎯 Near term (next few releases)
 
