@@ -45,8 +45,6 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-private enum class PendingScroll { NEW_PAGE, HOME }
-
 @Composable
 fun LauncherPager() {
     val settings: SettingsRepository = koinInject()
@@ -64,7 +62,7 @@ fun LauncherPager() {
     var showSettings by remember { mutableStateOf(false) }
     var widgetFlowActive by remember { mutableStateOf(false) }
     var showAccessibilityDisclosure by remember { mutableStateOf(false) }
-    var pendingScroll by remember { mutableStateOf<PendingScroll?>(null) }
+    var pendingScrollTarget by remember { mutableStateOf<Int?>(null) }
     val settingsOpen by rememberUpdatedState(showSettings)
     val widgetFlow by rememberUpdatedState(widgetFlowActive)
     val homePageState by rememberUpdatedState(homePage)
@@ -132,22 +130,12 @@ fun LauncherPager() {
         }
     }
 
-    // A widget page was added or removed: settle the pager on the right page once
+    // A widget page was added or removed: settle the pager on the target page once
     // the new page count has taken effect.
     LaunchedEffect(widgetPageCount) {
-        when (pendingScroll) {
-            PendingScroll.NEW_PAGE -> {
-                // The new page was inserted at the far left (index 0).
-                pagerState.animateScrollToPage(0)
-                pendingScroll = null
-            }
-
-            PendingScroll.HOME -> {
-                pagerState.animateScrollToPage(widgetPageCount)
-                pendingScroll = null
-            }
-
-            null -> {}
+        pendingScrollTarget?.let { target ->
+            pagerState.animateScrollToPage(target.coerceIn(0, widgetPageCount + 1))
+            pendingScrollTarget = null
         }
     }
 
@@ -163,11 +151,13 @@ fun LauncherPager() {
                     onWidgetFlowActive = { widgetFlowActive = it },
                     onDoubleTap = { onDoubleTap() },
                     onAddPage = {
-                        pendingScroll = PendingScroll.NEW_PAGE
+                        // New page is inserted at the far left (index 0).
+                        pendingScrollTarget = 0
                         settings.setWidgetPageCount(widgetPageCount + 1)
                     },
                     onRemovePage = {
-                        pendingScroll = PendingScroll.HOME
+                        // Land on the widget page to the left; edit mode is shared so it stays on.
+                        pendingScrollTarget = (page - 1).coerceAtLeast(0)
                         settings.setWidgetPageCount(widgetPageCount - 1)
                     }
                 )

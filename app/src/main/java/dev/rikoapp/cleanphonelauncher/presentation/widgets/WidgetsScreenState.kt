@@ -5,5 +5,6 @@ import dev.rikoapp.cleanphonelauncher.domain.model.HomeWidget
 
 @Stable
 data class WidgetsScreenState(
-    val widgets: List<HomeWidget> = emptyList()
+    val widgets: List<HomeWidget> = emptyList(),
+    val editMode: Boolean = false
 )

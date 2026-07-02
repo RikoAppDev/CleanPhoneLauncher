@@ -50,6 +50,12 @@ class WidgetsViewModel(
         }
     }
 
+    // Edit mode is shared across all widget pages so it survives page navigation
+    // (e.g. removing a page and landing on the one to the left keeps you editing).
+    fun setEditMode(enabled: Boolean) {
+        _state.update { it.copy(editMode = enabled) }
+    }
+
     fun discardAllocation(appWidgetId: Int) {
         if (appWidgetId != -1) widgetHost.deleteId(appWidgetId)
     }

@@ -79,7 +79,7 @@ class SettingsRepositoryImpl(
     override val notificationDrawerSectionEnabled = _notificationDrawerSectionEnabled.asStateFlow()
 
     private val _widgetPageCount = MutableStateFlow(
-        prefs.getInt(KEY_WIDGET_PAGE_COUNT, 1).coerceAtLeast(1)
+        prefs.getInt(KEY_WIDGET_PAGE_COUNT, 1).coerceAtLeast(0)
     )
     override val widgetPageCount = _widgetPageCount.asStateFlow()
 
@@ -178,7 +178,7 @@ class SettingsRepositoryImpl(
     }
 
     override fun setWidgetPageCount(count: Int) {
-        val safe = count.coerceAtLeast(1)
+        val safe = count.coerceAtLeast(0)
         _widgetPageCount.value = safe
         applicationScope.launch {
             prefs.edit().putInt(KEY_WIDGET_PAGE_COUNT, safe).apply()

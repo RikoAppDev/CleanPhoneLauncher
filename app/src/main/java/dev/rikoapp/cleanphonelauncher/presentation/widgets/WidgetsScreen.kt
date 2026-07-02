@@ -173,6 +173,8 @@ fun WidgetsScreenRoot(
         state = pageState,
         pageIndex = pageIndex,
         pageCount = pageCount,
+        editMode = pageState.editMode,
+        onSetEditMode = viewModel::setEditMode,
         onAddWidget = ::addWidget,
         onRemove = viewModel::onRemove,
         onResize = viewModel::onResize,
@@ -204,6 +206,8 @@ private fun WidgetsScreen(
     state: WidgetsScreenState,
     pageIndex: Int,
     pageCount: Int,
+    editMode: Boolean,
+    onSetEditMode: (Boolean) -> Unit,
     onAddWidget: () -> Unit,
     onRemove: (Int) -> Unit,
     onResize: (Int, Int, Int) -> Unit,
@@ -215,9 +219,8 @@ private fun WidgetsScreen(
     onRemovePage: () -> Unit = {}
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
-    var editMode by remember { mutableStateOf(false) }
     val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
-    BackHandler(enabled = editMode) { editMode = false }
+    BackHandler(enabled = editMode) { onSetEditMode(false) }
 
     Column(
         modifier = Modifier
@@ -227,10 +230,8 @@ private fun WidgetsScreen(
                 detectDoubleTapNonConsuming { currentOnDoubleTap() }
             }
             .pointerInput(Unit) {
-                // Long-press anywhere on the page enters edit mode. Non-consuming so
-                // it works even over widgets (whose host view swallows touches) while
-                // leaving the widget itself tappable.
-                detectLongPressNonConsuming { editMode = true }
+                // Long-press empty areas of the page to enter edit mode.
+                detectLongPressNonConsuming { onSetEditMode(true) }
             }
             .systemBarsPadding()
             .padding(16.dp)
@@ -250,7 +251,7 @@ private fun WidgetsScreen(
                 )
                 TextChip(
                     text = stringResource(R.string.widgets_done),
-                    onClick = { editMode = false }
+                    onClick = { onSetEditMode(false) }
                 )
             }
 
@@ -269,7 +270,7 @@ private fun WidgetsScreen(
                     text = stringResource(R.string.widget_add_page),
                     onClick = onAddPage
                 )
-                if (state.widgets.isEmpty() && pageCount > 1) {
+                if (state.widgets.isEmpty()) {
                     TextChip(
                         text = stringResource(R.string.widget_remove_page),
                         onClick = onRemovePage
@@ -294,7 +295,7 @@ private fun WidgetsScreen(
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = { onAddWidget() },
-                                onLongPress = { editMode = true }
+                                onLongPress = { onSetEditMode(true) }
                             )
                         }
                         .padding(16.dp)
@@ -352,6 +353,20 @@ private fun WidgetsScreen(
                                     appWidgetId = widget.appWidgetId,
                                     modifier = Modifier.matchParentSize()
                                 )
+
+                                if (!editMode) {
+                                    // Overlay on top of the widget so a tap can't reach the
+                                    // host view and launch the app; a long-press here enters
+                                    // edit mode instead. Sitting above the widget, it gets the
+                                    // touch first and consumes it.
+                                    Box(
+                                        modifier = Modifier
+                                            .matchParentSize()
+                                            .pointerInput(widget.appWidgetId) {
+                                                detectTapGestures(onLongPress = { onSetEditMode(true) })
+                                            }
+                                    )
+                                }
 
                                 if (editMode) {
                                     Box(

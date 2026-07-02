@@ -59,6 +59,9 @@
     <string name="widget_add_page">Add page</string>
     <string name="widget_remove_page">Remove page</string>
     <string name="widget_page_label">Page %1$d/%2$d</string>
+    <string name="settings_widgets">Widgets</string>
+    <string name="settings_widgets_none_desc">You have no widget pages. Create one to add widgets to the left of the home screen.</string>
+    <string name="settings_widgets_add_page">Add widget page</string>
     <string name="widgets_title">Widgets</string>
     <string name="widgets_empty">Tap to add a widget</string>
     <string name="widgets_edit">Edit</string>

@@ -75,6 +75,7 @@ import kotlin.math.roundToInt
 import dev.rikoapp.cleanphonelauncher.BuildConfig
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.data.SetupStatusChecker
+import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.domain.UpdateCheckResult
 import dev.rikoapp.cleanphonelauncher.domain.VersionCheckRepository
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
@@ -317,6 +318,28 @@ private fun SettingsScreen(
                 checked = state.pageIndicatorEnabled,
                 onCheckedChange = { onAction(SettingsScreenAction.OnPageIndicatorToggled(it)) }
             )
+        }
+
+        val widgetSettings = koinInject<SettingsRepository>()
+        val widgetPageCount by widgetSettings.widgetPageCount.collectAsState()
+        if (widgetPageCount == 0) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SectionLabel(stringResource(R.string.settings_widgets))
+            Text(
+                text = stringResource(R.string.settings_widgets_none_desc),
+                color = fg.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                SelectableChip(
+                    text = stringResource(R.string.settings_widgets_add_page),
+                    selected = false,
+                    onClick = { widgetSettings.setWidgetPageCount(1) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
