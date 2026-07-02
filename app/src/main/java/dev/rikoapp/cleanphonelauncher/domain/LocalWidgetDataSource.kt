@@ -10,4 +10,5 @@ interface LocalWidgetDataSource {
     suspend fun reorder(orderedIds: List<Int>)
     suspend fun remove(appWidgetId: Int)
     suspend fun removePage(page: Int)
+    suspend fun addPageAtStart()
 }

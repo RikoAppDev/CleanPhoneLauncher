@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -179,7 +180,11 @@ fun WidgetsScreenRoot(
         onReconfigure = ::reconfigure,
         isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null },
         onDoubleTap = onDoubleTap,
-        onAddPage = onAddPage,
+        onAddPage = {
+            // New page goes to the far left; shift existing widgets one page right.
+            viewModel.onAddPageAtStart()
+            onAddPage()
+        },
         onRemovePage = {
             viewModel.onRemovePage(pageIndex)
             onRemovePage()
@@ -315,6 +320,13 @@ private fun WidgetsScreen(
                         var liveWidthPercent by remember(widget.widthPercent) {
                             mutableIntStateOf(widget.widthPercent)
                         }
+                        // Raw (unsnapped) accumulators so small drags aren't lost between snaps.
+                        var rawHeight by remember(widget.heightDp) {
+                            mutableFloatStateOf(widget.heightDp.toFloat())
+                        }
+                        var rawWidthPercent by remember(widget.widthPercent) {
+                            mutableFloatStateOf(widget.widthPercent.toFloat())
+                        }
                         var containerWidthPx by remember { mutableIntStateOf(0) }
 
                         // Full-width track so the corner handle can map horizontal drag to a width fraction.
@@ -405,8 +417,12 @@ private fun WidgetsScreen(
                                                 ) { change, dragAmount ->
                                                     change.consume()
                                                     val deltaHeightDp = with(density) { dragAmount.y.toDp().value }
-                                                    liveHeight = (liveHeight + deltaHeightDp)
-                                                        .roundToInt()
+                                                    rawHeight = (rawHeight + deltaHeightDp).coerceIn(
+                                                        WidgetsViewModel.MIN_HEIGHT_DP.toFloat(),
+                                                        WidgetsViewModel.MAX_HEIGHT_DP.toFloat()
+                                                    )
+                                                    liveHeight = ((rawHeight / WidgetsViewModel.ROW_STEP_DP)
+                                                        .roundToInt() * WidgetsViewModel.ROW_STEP_DP)
                                                         .coerceIn(
                                                             WidgetsViewModel.MIN_HEIGHT_DP,
                                                             WidgetsViewModel.MAX_HEIGHT_DP
@@ -414,8 +430,12 @@ private fun WidgetsScreen(
                                                     if (containerWidthPx > 0) {
                                                         val deltaPercent =
                                                             dragAmount.x / containerWidthPx * 100f
-                                                        liveWidthPercent = (liveWidthPercent + deltaPercent)
-                                                            .roundToInt()
+                                                        rawWidthPercent = (rawWidthPercent + deltaPercent).coerceIn(
+                                                            WidgetsViewModel.MIN_WIDTH_PERCENT.toFloat(),
+                                                            WidgetsViewModel.MAX_WIDTH_PERCENT.toFloat()
+                                                        )
+                                                        liveWidthPercent = ((rawWidthPercent / WidgetsViewModel.COLUMN_STEP_PERCENT)
+                                                            .roundToInt() * WidgetsViewModel.COLUMN_STEP_PERCENT)
                                                             .coerceIn(
                                                                 WidgetsViewModel.MIN_WIDTH_PERCENT,
                                                                 WidgetsViewModel.MAX_WIDTH_PERCENT

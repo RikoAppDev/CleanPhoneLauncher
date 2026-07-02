@@ -44,6 +44,12 @@ class WidgetsViewModel(
         }
     }
 
+    fun onAddPageAtStart() {
+        viewModelScope.launch {
+            widgetDataSource.addPageAtStart()
+        }
+    }
+
     fun discardAllocation(appWidgetId: Int) {
         if (appWidgetId != -1) widgetHost.deleteId(appWidgetId)
     }
@@ -75,5 +81,9 @@ class WidgetsViewModel(
         const val DEFAULT_HEIGHT_DP = 180
         const val MIN_WIDTH_PERCENT = 25
         const val MAX_WIDTH_PERCENT = 100
+
+        // Resizing snaps to a grid: 4 columns wide and fixed row-height steps tall.
+        const val ROW_STEP_DP = 88
+        const val COLUMN_STEP_PERCENT = 25
     }
 }

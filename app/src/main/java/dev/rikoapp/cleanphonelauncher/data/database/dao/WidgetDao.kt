@@ -26,6 +26,9 @@ interface WidgetDao {
     @Query("UPDATE widgets SET page = page - 1 WHERE page > :page")
     suspend fun shiftPagesAfter(page: Int)
 
+    @Query("UPDATE widgets SET page = page + 1")
+    suspend fun shiftAllPagesForward()
+
     @Query("DELETE FROM widgets WHERE appWidgetId = :appWidgetId")
     suspend fun deleteById(appWidgetId: Int)
 }

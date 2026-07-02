@@ -37,9 +37,16 @@ suspend fun PointerInputScope.detectLongPressNonConsuming(onLongPress: () -> Uni
             withTimeout(viewConfiguration.longPressTimeoutMillis) {
                 waitForUpOrCancellation()
             }
-            // Released (or cancelled) before the timeout — not a long press.
+            // Released (or cancelled) before the timeout — not a long press, so the
+            // widget under the finger keeps its own tap.
         } catch (_: PointerEventTimeoutCancellationException) {
             onLongPress()
+            // Now consume the rest of the gesture so the widget below doesn't also
+            // receive the release and launch its app.
+            do {
+                val event = awaitPointerEvent()
+                event.changes.forEach { it.consume() }
+            } while (event.changes.any { it.pressed })
         }
     }
 }

@@ -137,7 +137,8 @@ fun LauncherPager() {
     LaunchedEffect(widgetPageCount) {
         when (pendingScroll) {
             PendingScroll.NEW_PAGE -> {
-                pagerState.animateScrollToPage(widgetPageCount - 1)
+                // The new page was inserted at the far left (index 0).
+                pagerState.animateScrollToPage(0)
                 pendingScroll = null
             }
 
