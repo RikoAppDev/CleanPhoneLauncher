@@ -58,6 +58,7 @@ import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.CloseIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.DragHandleIcon
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.SettingsIcon
 import dev.rikoapp.cleanphonelauncher.presentation.util.detectDoubleTapNonConsuming
+import dev.rikoapp.cleanphonelauncher.presentation.util.detectLongPressNonConsuming
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
@@ -220,6 +221,12 @@ private fun WidgetsScreen(
             .pointerInput(Unit) {
                 detectDoubleTapNonConsuming { currentOnDoubleTap() }
             }
+            .pointerInput(Unit) {
+                // Long-press anywhere on the page enters edit mode. Non-consuming so
+                // it works even over widgets (whose host view swallows touches) while
+                // leaving the widget itself tappable.
+                detectLongPressNonConsuming { editMode = true }
+            }
             .systemBarsPadding()
             .padding(16.dp)
     ) {
@@ -327,11 +334,6 @@ private fun WidgetsScreen(
                                             color = fg.copy(alpha = 0.4f),
                                             shape = RoundedCornerShape(12.dp)
                                         ) else Modifier
-                                    )
-                                    .then(
-                                        if (!editMode) Modifier.pointerInput(widget.appWidgetId) {
-                                            detectTapGestures(onLongPress = { editMode = true })
-                                        } else Modifier
                                     )
                             ) {
                                 WidgetSlot(

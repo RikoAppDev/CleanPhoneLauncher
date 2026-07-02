@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -259,12 +260,18 @@ private fun HomeScreen(
                 favorites = favorites.toMutableList().apply { add(to.index, removeAt(from.index)) }
                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             }
+            // Only take over vertical drags when the list actually overflows; otherwise
+            // the swipe up/down gestures keep working. When scrolled to an edge the list
+            // stops consuming, so a further swipe still triggers the gesture.
+            val favoritesScrollable by remember {
+                derivedStateOf { lazyListState.canScrollForward || lazyListState.canScrollBackward }
+            }
 
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
-                userScrollEnabled = reorderMode
+                userScrollEnabled = reorderMode || favoritesScrollable
             ) {
                 items(favorites, key = { it.packageName }) { app ->
                     ReorderableItem(reorderState, key = app.packageName) { isDragging ->
