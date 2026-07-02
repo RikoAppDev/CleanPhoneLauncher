@@ -23,6 +23,9 @@ interface WidgetDao {
     @Query("UPDATE widgets SET heightDp = :heightDp, widthPercent = :widthPercent WHERE appWidgetId = :appWidgetId")
     suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int)
 
+    @Query("DELETE FROM widgets WHERE page = :page")
+    suspend fun deleteWidgetsOnPage(page: Int)
+
     @Query("UPDATE widgets SET page = page - 1 WHERE page > :page")
     suspend fun shiftPagesAfter(page: Int)
 

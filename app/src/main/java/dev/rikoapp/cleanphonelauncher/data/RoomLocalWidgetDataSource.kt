@@ -44,6 +44,7 @@ class RoomLocalWidgetDataSource(
     }
 
     override suspend fun removePage(page: Int) {
+        widgetDao.deleteWidgetsOnPage(page)
         widgetDao.shiftPagesAfter(page)
     }
 

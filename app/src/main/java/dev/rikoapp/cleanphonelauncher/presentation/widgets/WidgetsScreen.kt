@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -173,7 +174,9 @@ fun WidgetsScreenRoot(
         state = pageState,
         pageIndex = pageIndex,
         pageCount = pageCount,
-        editMode = pageState.editMode,
+        // Read editMode from the live state, not the (widgets-keyed) pageState cache,
+        // so toggling it refreshes the visible page immediately.
+        editMode = state.editMode,
         onSetEditMode = viewModel::setEditMode,
         onAddWidget = ::addWidget,
         onRemove = viewModel::onRemove,
@@ -257,10 +260,10 @@ private fun WidgetsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextChip(
                     text = stringResource(R.string.add_widget),
@@ -270,12 +273,10 @@ private fun WidgetsScreen(
                     text = stringResource(R.string.widget_add_page),
                     onClick = onAddPage
                 )
-                if (state.widgets.isEmpty()) {
-                    TextChip(
-                        text = stringResource(R.string.widget_remove_page),
-                        onClick = onRemovePage
-                    )
-                }
+                TextChip(
+                    text = stringResource(R.string.widget_remove_page),
+                    onClick = onRemovePage
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

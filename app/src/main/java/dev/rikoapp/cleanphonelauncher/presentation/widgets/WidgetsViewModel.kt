@@ -40,6 +40,10 @@ class WidgetsViewModel(
 
     fun onRemovePage(page: Int) {
         viewModelScope.launch {
+            // Free any widgets living on this page before it's deleted.
+            _state.value.widgets
+                .filter { it.page == page }
+                .forEach { widgetHost.deleteId(it.appWidgetId) }
             widgetDataSource.removePage(page)
         }
     }
