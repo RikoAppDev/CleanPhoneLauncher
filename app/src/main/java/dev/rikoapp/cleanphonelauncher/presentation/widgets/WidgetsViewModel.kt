@@ -86,6 +86,21 @@ class WidgetsViewModel(
         }
     }
 
+    /**
+     * Move a widget to an adjacent page, dropping it into the first free cell there
+     * (keeping its size). No-op if the target page has no room for it.
+     */
+    fun onMoveWidgetToPage(appWidgetId: Int, targetPage: Int) {
+        viewModelScope.launch {
+            val widget = _state.value.widgets.find { it.appWidgetId == appWidgetId } ?: return@launch
+            if (widget.page == targetPage) return@launch
+            val onTarget = _state.value.widgets.filter { it.page == targetPage }
+            val free = WidgetGrid.findFree(WidgetGrid.occupancy(onTarget), widget.colSpan, widget.rowSpan)
+                ?: return@launch
+            widgetDataSource.updatePlacement(appWidgetId, targetPage, free.first, free.second, widget.colSpan, widget.rowSpan)
+        }
+    }
+
     /** Resize a widget, clamped to the free space around it. */
     fun onResizeWidget(appWidgetId: Int, colSpan: Int, rowSpan: Int) {
         viewModelScope.launch {

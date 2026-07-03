@@ -74,6 +74,7 @@ fun WidgetsScreenRoot(
     onDoubleTap: () -> Unit = {},
     onAddPage: () -> Unit = {},
     onRemovePage: () -> Unit = {},
+    onMoveToPage: (Int) -> Unit = {},
     viewModel: WidgetsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -181,6 +182,13 @@ fun WidgetsScreenRoot(
         onReconfigure = ::reconfigure,
         isReconfigurable = { id -> widgetManager.getInfo(id)?.configure != null },
         onMove = { id, col, row -> viewModel.onMoveWidget(id, pageIndex, col, row) },
+        onMoveToAdjacentPage = { id, delta ->
+            val target = pageIndex + delta
+            if (target in 0 until pageCount) {
+                viewModel.onMoveWidgetToPage(id, target)
+                onMoveToPage(delta)
+            }
+        },
         onResize = { id, colSpan, rowSpan -> viewModel.onResizeWidget(id, colSpan, rowSpan) },
         onDoubleTap = onDoubleTap,
         onAddPage = {
@@ -213,6 +221,7 @@ private fun WidgetsScreen(
     onReconfigure: (Int) -> Unit,
     isReconfigurable: (Int) -> Boolean,
     onMove: (Int, Int, Int) -> Unit,
+    onMoveToAdjacentPage: (Int, Int) -> Unit,
     onResize: (Int, Int, Int) -> Unit,
     onDoubleTap: () -> Unit = {},
     onAddPage: () -> Unit = {},
@@ -302,6 +311,7 @@ private fun WidgetsScreen(
                         onReconfigure = onReconfigure,
                         isReconfigurable = isReconfigurable,
                         onMove = onMove,
+                        onMoveToAdjacentPage = onMoveToAdjacentPage,
                         onResize = onResize
                     )
                 }
@@ -349,6 +359,7 @@ private fun WidgetCell(
     onReconfigure: (Int) -> Unit,
     isReconfigurable: (Int) -> Boolean,
     onMove: (Int, Int, Int) -> Unit,
+    onMoveToAdjacentPage: (Int, Int) -> Unit,
     onResize: (Int, Int, Int) -> Unit
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
@@ -364,6 +375,8 @@ private fun WidgetCell(
     var accX by remember { mutableFloatStateOf(0f) }
     var accY by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
+    // +1/-1 when the widget is dragged past the right/left edge (transfer to that page).
+    var pendingPageDelta by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier
@@ -413,15 +426,28 @@ private fun WidgetCell(
                                     dragging = false
                                     accX = 0f
                                     accY = 0f
-                                    onMove(widget.appWidgetId, liveCol, liveRow)
+                                    if (pendingPageDelta != 0) {
+                                        onMoveToAdjacentPage(widget.appWidgetId, pendingPageDelta)
+                                        // Snap back here; if the transfer lands, this cell leaves the page.
+                                        liveCol = widget.col
+                                        liveRow = widget.row
+                                    } else {
+                                        onMove(widget.appWidgetId, liveCol, liveRow)
+                                    }
+                                    pendingPageDelta = 0
                                 },
-                                onDragCancel = { dragging = false; accX = 0f; accY = 0f }
+                                onDragCancel = { dragging = false; accX = 0f; accY = 0f; pendingPageDelta = 0 }
                             ) { change, dragAmount ->
                                 change.consume()
                                 accX += dragAmount.x
                                 accY += dragAmount.y
-                                val targetCol = (widget.col + (accX / cellWpx).roundToInt())
-                                    .coerceIn(0, WidgetGrid.COLUMNS - liveColSpan)
+                                val rawCol = widget.col + (accX / cellWpx).roundToInt()
+                                pendingPageDelta = when {
+                                    rawCol > WidgetGrid.COLUMNS - liveColSpan -> 1
+                                    rawCol < 0 -> -1
+                                    else -> 0
+                                }
+                                val targetCol = rawCol.coerceIn(0, WidgetGrid.COLUMNS - liveColSpan)
                                 val targetRow = (widget.row + (accY / cellHpx).roundToInt())
                                     .coerceIn(0, WidgetGrid.ROWS - liveRowSpan)
                                 val grid = WidgetGrid.occupancy(pageWidgets, excludeId = widget.appWidgetId)

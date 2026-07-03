@@ -159,6 +159,12 @@ fun LauncherPager() {
                         // Land on the widget page to the left; edit mode is shared so it stays on.
                         pendingScrollTarget = (page - 1).coerceAtLeast(0)
                         settings.setWidgetPageCount(widgetPageCount - 1)
+                    },
+                    onMoveToPage = { delta ->
+                        // A widget was dragged onto the adjacent page — follow it there.
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage((page + delta).coerceIn(0, widgetPageCount + 1))
+                        }
                     }
                 )
 
