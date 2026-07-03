@@ -11,17 +11,24 @@ interface WidgetDao {
     @Query("SELECT * FROM widgets ORDER BY page ASC, position ASC")
     fun getWidgets(): Flow<List<WidgetEntity>>
 
-    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM widgets WHERE page = :page")
-    suspend fun nextPosition(page: Int): Int
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM widgets")
+    suspend fun nextPosition(): Int
 
     @Upsert
     suspend fun upsert(widget: WidgetEntity)
 
-    @Query("UPDATE widgets SET position = :position WHERE appWidgetId = :appWidgetId")
-    suspend fun updatePosition(appWidgetId: Int, position: Int)
-
-    @Query("UPDATE widgets SET heightDp = :heightDp, widthPercent = :widthPercent WHERE appWidgetId = :appWidgetId")
-    suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int)
+    @Query(
+        "UPDATE widgets SET page = :page, col = :col, row = :row, " +
+            "colSpan = :colSpan, rowSpan = :rowSpan WHERE appWidgetId = :appWidgetId"
+    )
+    suspend fun updatePlacement(
+        appWidgetId: Int,
+        page: Int,
+        col: Int,
+        row: Int,
+        colSpan: Int,
+        rowSpan: Int,
+    )
 
     @Query("DELETE FROM widgets WHERE page = :page")
     suspend fun deleteWidgetsOnPage(page: Int)

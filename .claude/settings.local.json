@@ -1,0 +1,10 @@
+{
+  "disabledMcpjsonServers": [
+    "supabase"
+  ],
+  "permissions": {
+    "allow": [
+      "mcp__context7__resolve-library-id"
+    ]
+  }
+}

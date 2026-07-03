@@ -14,29 +14,34 @@ class RoomLocalWidgetDataSource(
     override fun getWidgets(): Flow<List<HomeWidget>> =
         widgetDao.getWidgets().map { entities ->
             entities.map {
-                HomeWidget(it.appWidgetId, it.position, it.heightDp, it.widthPercent, it.page)
+                HomeWidget(
+                    appWidgetId = it.appWidgetId,
+                    page = it.page,
+                    col = it.col,
+                    row = it.row,
+                    colSpan = it.colSpan,
+                    rowSpan = it.rowSpan,
+                    position = it.position,
+                )
             }
         }
 
-    override suspend fun addWidget(appWidgetId: Int, heightDp: Int, page: Int) {
+    override suspend fun addWidget(appWidgetId: Int, page: Int, col: Int, row: Int, colSpan: Int, rowSpan: Int) {
         widgetDao.upsert(
             WidgetEntity(
                 appWidgetId = appWidgetId,
-                position = widgetDao.nextPosition(page),
-                heightDp = heightDp,
-                page = page
+                position = widgetDao.nextPosition(),
+                page = page,
+                col = col,
+                row = row,
+                colSpan = colSpan,
+                rowSpan = rowSpan,
             )
         )
     }
 
-    override suspend fun updateSize(appWidgetId: Int, widthPercent: Int, heightDp: Int) {
-        widgetDao.updateSize(appWidgetId, widthPercent, heightDp)
-    }
-
-    override suspend fun reorder(orderedIds: List<Int>) {
-        orderedIds.forEachIndexed { index, id ->
-            widgetDao.updatePosition(id, index)
-        }
+    override suspend fun updatePlacement(appWidgetId: Int, page: Int, col: Int, row: Int, colSpan: Int, rowSpan: Int) {
+        widgetDao.updatePlacement(appWidgetId, page, col, row, colSpan, rowSpan)
     }
 
     override suspend fun remove(appWidgetId: Int) {
