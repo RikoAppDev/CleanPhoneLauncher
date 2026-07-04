@@ -16,6 +16,11 @@ on:
           - patch
           - minor
           - major
+      force_upgrade:
+        description: 'Also raise min_required_version_code to this release (forces every older version to update)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -359,4 +364,74 @@ jobs:
       - name: Play deploy skipped notice
         if: env.PLAY_SERVICE_ACCOUNT_JSON == ''
         run: echo "⏭️  PLAY_STORE_SERVICE_ACCOUNT_JSON secret not set — skipping Play Store upload."
+
+  # ===========================================
+  # UPDATE FIREBASE REMOTE CONFIG
+  # ===========================================
+  # Points the launcher's in-app update check at the version just released.
+  # `latest_version_code` is bumped on every release (drives the "update
+  # available" warning); `min_required_version_code` (the force-upgrade floor)
+  # is only touched when the run is manually dispatched with force_upgrade=true.
+  # Self-skips until FIREBASE_SERVICE_ACCOUNT_JSON is configured (a service
+  # account JSON key with the "Firebase Remote Config Admin" role).
+  update-remote-config:
+    name: Update Remote Config
+    runs-on: ubuntu-latest
+    needs: [version, github-release, deploy-play-store]
+    if: needs.version.outputs.should_release == 'true'
+    env:
+      FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Checkout code
+        if: env.FIREBASE_SA != ''
+        uses: actions/checkout@v4
+
+      - name: Decode google-services.json
+        if: env.FIREBASE_SA != ''
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" | tr -cd 'A-Za-z0-9+/=' | base64 -d > app/google-services.json
+
+      - name: Authenticate to Google Cloud
+        if: env.FIREBASE_SA != ''
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/firebase.remoteconfig
+
+      - name: Set latest_version_code (and optional force upgrade)
+        if: env.FIREBASE_SA != ''
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          VERSION_CODE: ${{ needs.version.outputs.version_code }}
+          FORCE_UPGRADE: ${{ github.event.inputs.force_upgrade }}
+        run: |
+          set -euo pipefail
+          PROJECT_ID=$(jq -r '.project_info.project_id' app/google-services.json)
+          BASE="https://firebaseremoteconfig.googleapis.com/v1/projects/${PROJECT_ID}/remoteConfig"
+
+          # RC requires the whole template back on PUT, guarded by the GET's ETag.
+          ETAG=$(curl -fsS -D - -o template.json \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" "$BASE" \
+            | awk 'tolower($1) == "etag:" { print $2 }' | tr -d '\r')
+
+          FILTER='.parameters.latest_version_code.defaultValue.value = $vc | .parameters.latest_version_code.valueType = "NUMBER"'
+          if [ "${FORCE_UPGRADE}" = "true" ]; then
+            FILTER="${FILTER} | .parameters.min_required_version_code.defaultValue.value = \$vc | .parameters.min_required_version_code.valueType = \"NUMBER\""
+          fi
+
+          jq --arg vc "${VERSION_CODE}" "${FILTER}" template.json > updated.json
+
+          curl -fsS -X PUT "$BASE" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "Content-Type: application/json; charset=UTF-8" \
+            -H "If-Match: ${ETAG}" \
+            --data @updated.json > /dev/null
+          echo "✅ latest_version_code → ${VERSION_CODE} (force_upgrade=${FORCE_UPGRADE:-false})"
+
+      - name: Remote Config update skipped notice
+        if: env.FIREBASE_SA == ''
+        run: echo "⏭️  FIREBASE_SERVICE_ACCOUNT_JSON secret not set — skipping Remote Config update."
 
