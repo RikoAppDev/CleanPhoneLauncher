@@ -408,27 +408,35 @@ jobs:
           VERSION_CODE: ${{ needs.version.outputs.version_code }}
           FORCE_UPGRADE: ${{ github.event.inputs.force_upgrade }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           PROJECT_ID=$(jq -r '.project_info.project_id' app/google-services.json)
           BASE="https://firebaseremoteconfig.googleapis.com/v1/projects/${PROJECT_ID}/remoteConfig"
+          echo "Project: ${PROJECT_ID}"
 
-          # RC requires the whole template back on PUT, guarded by the GET's ETag.
-          ETAG=$(curl -fsS -D - -o template.json \
-            -H "Authorization: Bearer ${ACCESS_TOKEN}" "$BASE" \
-            | awk 'tolower($1) == "etag:" { print $2 }' | tr -d '\r')
+          # RC requires the whole template back on PUT.
+          GET_CODE=$(curl -sS -o template.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" "$BASE")
+          if [ "$GET_CODE" != "200" ]; then
+            echo "::error::GET remoteConfig failed (HTTP $GET_CODE)"; cat template.json; exit 1
+          fi
 
           FILTER='.parameters.latest_version_code.defaultValue.value = $vc | .parameters.latest_version_code.valueType = "NUMBER"'
-          if [ "${FORCE_UPGRADE}" = "true" ]; then
+          if [ "${FORCE_UPGRADE:-}" = "true" ]; then
             FILTER="${FILTER} | .parameters.min_required_version_code.defaultValue.value = \$vc | .parameters.min_required_version_code.valueType = \"NUMBER\""
           fi
 
           jq --arg vc "${VERSION_CODE}" "${FILTER}" template.json > updated.json
 
-          curl -fsS -X PUT "$BASE" \
+          # If-Match: * force-updates; the release pipeline is serialized, so we
+          # don't need ETag-based optimistic concurrency.
+          PUT_CODE=$(curl -sS -X PUT "$BASE" -o put_response.json -w '%{http_code}' \
             -H "Authorization: Bearer ${ACCESS_TOKEN}" \
             -H "Content-Type: application/json; charset=UTF-8" \
-            -H "If-Match: ${ETAG}" \
-            --data @updated.json > /dev/null
+            -H "If-Match: *" \
+            --data @updated.json)
+          if [ "$PUT_CODE" != "200" ]; then
+            echo "::error::PUT remoteConfig failed (HTTP $PUT_CODE)"; cat put_response.json; exit 1
+          fi
           echo "✅ latest_version_code → ${VERSION_CODE} (force_upgrade=${FORCE_UPGRADE:-false})"
 
       - name: Remote Config update skipped notice
