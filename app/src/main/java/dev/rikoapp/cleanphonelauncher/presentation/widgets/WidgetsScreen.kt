@@ -403,12 +403,14 @@ private fun WidgetCell(
             )
 
             if (!editMode) {
-                // Intercept touches so a tap can't launch the app; long-press edits.
+                // A non-consuming long-press enters edit mode; normal taps and scrolls
+                // fall through to the hosted widget so it stays interactive. The built-in
+                // detectTapGestures would consume the down and make the widget dead.
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .pointerInput(widget.appWidgetId) {
-                            detectTapGestures(onLongPress = { onSetEditMode(true) })
+                            detectLongPressNonConsuming { onSetEditMode(true) }
                         }
                 )
             }
