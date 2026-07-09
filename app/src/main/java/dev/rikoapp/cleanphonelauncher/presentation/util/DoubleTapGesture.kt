@@ -3,6 +3,7 @@ package dev.rikoapp.cleanphonelauncher.presentation.util
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.PointerInputScope
 import kotlinx.coroutines.withTimeout
@@ -26,27 +27,47 @@ suspend fun PointerInputScope.detectDoubleTapNonConsuming(onDoubleTap: () -> Uni
 }
 
 /**
- * Detects a long press without consuming pointer events, so children (e.g. an
- * app-widget host view) keep receiving touches. Fires when the pointer stays down
- * past the long-press timeout without being released or moved out.
+ * Detects a long press from an *ancestor* of the content it guards, leaving every touch
+ * free to reach that content — including interop views such as an app-widget host.
+ *
+ * Such views consume the events they handle, so consumption is deliberately ignored while
+ * waiting; bailing out on it (as [waitForUpOrCancellation] does) would mean the long press
+ * never fires over an interactive widget.
+ *
+ * Once the long press fires, the rest of the gesture is consumed on the Initial pass. The
+ * pass matters: an interop view forwards to Android on the Main pass, which reaches the leaf
+ * before any ancestor, so consuming on Main would arrive after the release already landed as
+ * a click. Consuming on Initial turns it into an ACTION_CANCEL instead.
+ *
+ * [enabled] is re-checked per gesture, so callers can switch the detector off without
+ * restarting the `pointerInput` coroutine — restarting it would cancel the consuming loop
+ * below the moment [onLongPress] flips the caller's state.
  */
-suspend fun PointerInputScope.detectLongPressNonConsuming(onLongPress: () -> Unit) {
+suspend fun PointerInputScope.detectLongPressNonConsuming(
+    enabled: () -> Boolean = { true },
+    onLongPress: () -> Unit
+) {
     awaitEachGesture {
-        awaitFirstDown(requireUnconsumed = false)
+        val down = awaitFirstDown(requireUnconsumed = false)
+        if (!enabled()) return@awaitEachGesture
+        var longPressed = false
         try {
             withTimeout(viewConfiguration.longPressTimeoutMillis) {
-                waitForUpOrCancellation()
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+                    if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) break
+                }
             }
-            // Released (or cancelled) before the timeout — not a long press, so the
-            // widget under the finger keeps its own tap.
         } catch (_: PointerEventTimeoutCancellationException) {
-            onLongPress()
-            // Now consume the rest of the gesture so the widget below doesn't also
-            // receive the release and launch its app.
-            do {
-                val event = awaitPointerEvent()
-                event.changes.forEach { it.consume() }
-            } while (event.changes.any { it.pressed })
+            longPressed = true
         }
+        if (!longPressed) return@awaitEachGesture
+        onLongPress()
+        do {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            event.changes.forEach { it.consume() }
+        } while (event.changes.any { it.pressed })
     }
 }

@@ -229,6 +229,8 @@ private fun WidgetsScreen(
 ) {
     val fg = MaterialTheme.colorScheme.onBackground
     val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
+    val currentOnSetEditMode by rememberUpdatedState(onSetEditMode)
+    val currentEditMode by rememberUpdatedState(editMode)
     BackHandler(enabled = editMode) { onSetEditMode(false) }
 
     Column(
@@ -239,7 +241,12 @@ private fun WidgetsScreen(
                 detectDoubleTapNonConsuming { currentOnDoubleTap() }
             }
             .pointerInput(Unit) {
-                detectLongPressNonConsuming { onSetEditMode(true) }
+                // Guards the whole page, widgets included: it sits above them, so it sees
+                // the gesture even when a hosted widget consumes it. Off in edit mode so it
+                // cannot swallow a widget drag that begins with a pause.
+                detectLongPressNonConsuming(enabled = { !currentEditMode }) {
+                    currentOnSetEditMode(true)
+                }
             }
             .systemBarsPadding()
             .padding(12.dp)
@@ -306,7 +313,6 @@ private fun WidgetsScreen(
                         cellW = cellW,
                         cellH = cellH,
                         editMode = editMode,
-                        onSetEditMode = onSetEditMode,
                         onRemove = onRemove,
                         onReconfigure = onReconfigure,
                         isReconfigurable = isReconfigurable,
@@ -354,7 +360,6 @@ private fun WidgetCell(
     cellW: Dp,
     cellH: Dp,
     editMode: Boolean,
-    onSetEditMode: (Boolean) -> Unit,
     onRemove: (Int) -> Unit,
     onReconfigure: (Int) -> Unit,
     isReconfigurable: (Int) -> Boolean,
@@ -401,19 +406,6 @@ private fun WidgetCell(
                 appWidgetId = widget.appWidgetId,
                 modifier = Modifier.matchParentSize()
             )
-
-            if (!editMode) {
-                // A non-consuming long-press enters edit mode; normal taps and scrolls
-                // fall through to the hosted widget so it stays interactive. The built-in
-                // detectTapGestures would consume the down and make the widget dead.
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .pointerInput(widget.appWidgetId) {
-                            detectLongPressNonConsuming { onSetEditMode(true) }
-                        }
-                )
-            }
 
             if (editMode) {
                 // Drag the body to move the widget cell-by-cell.
