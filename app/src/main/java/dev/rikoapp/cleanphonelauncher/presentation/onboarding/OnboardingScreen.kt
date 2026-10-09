@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +59,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.R
+import dev.rikoapp.cleanphonelauncher.presentation.components.AccessibilityDisclosureDialog
 import dev.rikoapp.cleanphonelauncher.presentation.model.AppColorStyle
 import dev.rikoapp.cleanphonelauncher.presentation.model.ThemeMode
 import dev.rikoapp.cleanphonelauncher.presentation.ui.theme.BackIcon
@@ -120,21 +120,12 @@ private fun OnboardingScreen(
     }
 
     if (showAccessibilityDisclosure) {
-        AlertDialog(
-            onDismissRequest = { showAccessibilityDisclosure = false },
-            title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
-            text = { Text(stringResource(R.string.accessibility_disclosure_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showAccessibilityDisclosure = false
-                    open(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                }) { Text(stringResource(R.string.accessibility_disclosure_continue)) }
+        AccessibilityDisclosureDialog(
+            onAgree = { intent ->
+                showAccessibilityDisclosure = false
+                open(intent)
             },
-            dismissButton = {
-                TextButton(onClick = { showAccessibilityDisclosure = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onDecline = { showAccessibilityDisclosure = false }
         )
     }
 

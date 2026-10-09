@@ -24,8 +24,9 @@
     <string name="accessibility_lock_label">Zámok obrazovky CleanPhoneLauncher</string>
     <string name="accessibility_lock_description">Umožní aplikácii CleanPhoneLauncher zamknúť obrazovku dvojitým ťuknutím na domovskú obrazovku. Zamyká ako tlačidlo napájania, takže odomknutie odtlačkom prsta naďalej funguje.</string>
     <string name="accessibility_disclosure_title">Zamknutie obrazovky dvojitým ťuknutím</string>
-    <string name="accessibility_disclosure_message">Na zamknutie obrazovky pri dvojitom ťuknutí na domovskú obrazovku používa CleanPhoneLauncher službu dostupnosti (accessibility) systému Android, ktorá spustí uzamknutie — rovnako ako tlačidlo napájania. Nečíta obsah obrazovky a nezbiera, neukladá ani nezdieľa žiadne osobné ani citlivé údaje. Na ďalšej obrazovke zapnite „Zámok obrazovky CleanPhoneLauncher“.</string>
-    <string name="accessibility_disclosure_continue">Pokračovať</string>
+    <string name="accessibility_disclosure_message">CleanPhoneLauncher používa rozhranie Android AccessibilityService API (služba dostupnosti) len na jednu funkciu: zamknutie obrazovky dvojitým ťuknutím na domovskú obrazovku, rovnako ako tlačidlo napájania.\n\nSlužba nečíta obsah obrazovky, nesleduje, čo robíte v iných aplikáciách, a nezbiera, neukladá ani nezdieľa žiadne osobné ani citlivé údaje.\n\nAk súhlasíte, otvoria sa nastavenia dostupnosti. Zapnite tam „Zámok obrazovky CleanPhoneLauncher“. Kedykoľvek ho môžete vypnúť.</string>
+    <string name="accessibility_disclosure_agree">Súhlasím</string>
+    <string name="accessibility_disclosure_decline">Nie, ďakujem</string>
     <string name="reorder_hint">Ťahaním zmeníte poradie · ťuknutím dokončíte</string>
     <string name="open_settings">Nastavenia</string>
     <string name="settings_title">Nastavenia</string>

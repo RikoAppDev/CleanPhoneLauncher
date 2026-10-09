@@ -5,6 +5,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+### Changed
+- **Clearer double-tap-to-lock consent.** The explanation shown before Accessibility settings now names the Android AccessibilityService API, says how to turn the feature off, and asks for explicit consent with **Agree** / **No thanks**. The lock service no longer listens to any accessibility events, so it only performs the screen-lock action.
+
 ## [1.23.0]
 
 ### Changed

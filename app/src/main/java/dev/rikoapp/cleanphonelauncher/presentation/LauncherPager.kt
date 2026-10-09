@@ -2,7 +2,6 @@ package dev.rikoapp.cleanphonelauncher.presentation
 
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,9 +9,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,15 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.rikoapp.cleanphonelauncher.LockAccessibilityService
-import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.SettingsRepository
 import dev.rikoapp.cleanphonelauncher.presentation.applist.AppListScreenRoot
+import dev.rikoapp.cleanphonelauncher.presentation.components.AccessibilityDisclosureDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.PageIndicator
 import dev.rikoapp.cleanphonelauncher.presentation.home.HomeScreenRoot
 import dev.rikoapp.cleanphonelauncher.presentation.model.GestureAction
@@ -83,26 +78,12 @@ fun LauncherPager() {
     })
 
     if (showAccessibilityDisclosure) {
-        AlertDialog(
-            onDismissRequest = { showAccessibilityDisclosure = false },
-            title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
-            text = { Text(stringResource(R.string.accessibility_disclosure_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showAccessibilityDisclosure = false
-                    runCatching {
-                        context.startActivity(
-                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        )
-                    }
-                }) { Text(stringResource(R.string.accessibility_disclosure_continue)) }
+        AccessibilityDisclosureDialog(
+            onAgree = { intent ->
+                showAccessibilityDisclosure = false
+                runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             },
-            dismissButton = {
-                TextButton(onClick = { showAccessibilityDisclosure = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onDecline = { showAccessibilityDisclosure = false }
         )
     }
 

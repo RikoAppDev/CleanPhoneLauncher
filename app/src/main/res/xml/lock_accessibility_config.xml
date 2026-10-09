@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Only performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN) is used, so the service subscribes to no
+     events and cannot read window content; keep it that way to match the Play declaration. -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:notificationTimeout="100"
-    android:canPerformGestures="true"
     android:description="@string/accessibility_lock_description" />

@@ -1,7 +1,6 @@
 package dev.rikoapp.cleanphonelauncher.presentation.home
 
 import android.content.Intent
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -32,13 +31,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -61,6 +58,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.rikoapp.cleanphonelauncher.R
 import dev.rikoapp.cleanphonelauncher.domain.model.AppData
+import dev.rikoapp.cleanphonelauncher.presentation.components.AccessibilityDisclosureDialog
 import dev.rikoapp.cleanphonelauncher.presentation.components.AnalogClock
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppIcon
 import dev.rikoapp.cleanphonelauncher.presentation.components.AppListItem
@@ -128,27 +126,12 @@ private fun HomeScreen(
     }
 
     if (state.showAccessibilityDisclosure) {
-        AlertDialog(
-            onDismissRequest = { onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss) },
-            title = { Text(stringResource(R.string.accessibility_disclosure_title)) },
-            text = { Text(stringResource(R.string.accessibility_disclosure_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    runCatching { context.startActivity(intent) }
-                    onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss)
-                }) {
-                    Text(stringResource(R.string.accessibility_disclosure_continue))
-                }
+        AccessibilityDisclosureDialog(
+            onAgree = { intent ->
+                runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss)
             },
-            dismissButton = {
-                TextButton(onClick = {
-                    onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss)
-                }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onDecline = { onAction(HomeScreenAction.OnAccessibilityDisclosureDismiss) }
         )
     }
 
