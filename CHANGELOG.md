@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+### Fixed
+- **App drawer no longer gets extra side margins with gesture navigation.** The drawer reserved Android's back-gesture edge zones as padding, so with swipe gestures the search bar, app list and letter index sat noticeably further from the screen edges than with button navigation. It now uses the same insets as the other screens.
+
+## [1.28.5]
+
 ### Changed
 - **Clearer double-tap-to-lock consent.** The explanation shown before Accessibility settings now names the Android AccessibilityService API, says how to turn the feature off, and asks for explicit consent with **Agree** / **No thanks**. The lock service no longer listens to any accessibility events, so it only performs the screen-lock action.
 
