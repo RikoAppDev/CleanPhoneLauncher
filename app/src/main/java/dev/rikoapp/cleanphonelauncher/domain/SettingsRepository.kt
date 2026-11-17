@@ -9,6 +9,7 @@ interface SettingsRepository {
     val themeMode: StateFlow<ThemeMode>
     val colorStyle: StateFlow<AppColorStyle>
     val crashReportingEnabled: StateFlow<Boolean>
+    val updateCheckEnabled: StateFlow<Boolean>
     val accentColor: StateFlow<Int>
     val onboardingCompleted: StateFlow<Boolean>
     val swipeUpAction: StateFlow<GestureAction>
@@ -23,6 +24,7 @@ interface SettingsRepository {
     fun setThemeMode(mode: ThemeMode)
     fun setColorStyle(style: AppColorStyle)
     fun setCrashReportingEnabled(enabled: Boolean)
+    fun setUpdateCheckEnabled(enabled: Boolean)
     fun setAccentColor(color: Int)
     fun setOnboardingCompleted(completed: Boolean)
     fun setSwipeUpAction(action: GestureAction)

@@ -410,6 +410,31 @@ private fun SettingsScreen(
             )
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.settings_update_check),
+                    color = fg,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_update_check_desc),
+                    color = fg.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Switch(
+                checked = state.updateCheckEnabled,
+                onCheckedChange = { onAction(SettingsScreenAction.OnUpdateCheckToggled(it)) }
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionLabel(stringResource(R.string.settings_notifications))

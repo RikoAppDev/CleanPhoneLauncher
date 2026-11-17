@@ -34,6 +34,10 @@ class SettingsRepositoryImpl(
     )
     override val crashReportingEnabled = _crashReportingEnabled.asStateFlow()
 
+    // Off by default: the check sends a Firebase installation ID, so it waits for the user's opt-in.
+    private val _updateCheckEnabled = MutableStateFlow(prefs.getBoolean(KEY_UPDATE_CHECK, false))
+    override val updateCheckEnabled = _updateCheckEnabled.asStateFlow()
+
     private val _accentColor = MutableStateFlow(prefs.getInt(KEY_ACCENT_COLOR, DEFAULT_ACCENT))
     override val accentColor = _accentColor.asStateFlow()
 
@@ -111,6 +115,13 @@ class SettingsRepositoryImpl(
 
     private fun applyCrashReporting(enabled: Boolean) {
         FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = enabled
+    }
+
+    override fun setUpdateCheckEnabled(enabled: Boolean) {
+        _updateCheckEnabled.value = enabled
+        applicationScope.launch {
+            prefs.edit().putBoolean(KEY_UPDATE_CHECK, enabled).apply()
+        }
     }
 
     override fun setAccentColor(color: Int) {
@@ -201,6 +212,7 @@ class SettingsRepositoryImpl(
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_COLOR_STYLE = "color_style"
         private const val KEY_CRASH_REPORTING = "crash_reporting"
+        private const val KEY_UPDATE_CHECK = "update_check_enabled"
         private const val KEY_ACCENT_COLOR = "accent_color"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val KEY_SWIPE_UP = "gesture_swipe_up"

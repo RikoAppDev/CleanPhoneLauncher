@@ -113,6 +113,9 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
 
+    // Play In-App Updates: only asked whether this install's track has an update
+    implementation(libs.play.app.update)
+
     // Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)

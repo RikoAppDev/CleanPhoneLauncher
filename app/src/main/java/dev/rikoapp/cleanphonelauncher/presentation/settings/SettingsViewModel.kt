@@ -44,8 +44,11 @@ class SettingsViewModel(
 
             val togglesFlow = combine(
                 settingsRepository.pageIndicatorEnabled,
-                settingsRepository.notificationDrawerSectionEnabled
-            ) { pageIndicator, notifSection -> pageIndicator to notifSection }
+                settingsRepository.notificationDrawerSectionEnabled,
+                settingsRepository.updateCheckEnabled
+            ) { pageIndicator, notifSection, updateCheck ->
+                Triple(pageIndicator, notifSection, updateCheck)
+            }
 
             combine(
                 appearanceFlow,
@@ -54,7 +57,7 @@ class SettingsViewModel(
                 localAppOverrideDataSource.getOverrides(),
                 togglesFlow
             ) { appearance, gestures, apps, overrides, toggles ->
-                val (pageIndicator, notifSection) = toggles
+                val (pageIndicator, notifSection, updateCheck) = toggles
                 val nameMap = overrides
                     .mapNotNull { o -> o.customName?.let { o.packageName to it } }
                     .toMap()
@@ -68,6 +71,7 @@ class SettingsViewModel(
                     themeMode = appearance.themeMode,
                     colorStyle = appearance.colorStyle,
                     crashReportingEnabled = appearance.crashReporting,
+                    updateCheckEnabled = updateCheck,
                     accentColor = appearance.accentColor,
                     swipeUpAction = gestures.swipeUp,
                     swipeDownAction = gestures.swipeDown,
@@ -108,6 +112,9 @@ class SettingsViewModel(
 
             is SettingsScreenAction.OnCrashReportingToggled ->
                 settingsRepository.setCrashReportingEnabled(action.enabled)
+
+            is SettingsScreenAction.OnUpdateCheckToggled ->
+                settingsRepository.setUpdateCheckEnabled(action.enabled)
 
             is SettingsScreenAction.OnUnhideApp -> {
                 viewModelScope.launch {

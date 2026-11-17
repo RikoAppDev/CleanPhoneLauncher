@@ -9,6 +9,7 @@ data class SettingsScreenState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val colorStyle: AppColorStyle = AppColorStyle.DYNAMIC,
     val crashReportingEnabled: Boolean = false,
+    val updateCheckEnabled: Boolean = false,
     val accentColor: Int = 0,
     val swipeUpAction: GestureAction = GestureAction.APP_DRAWER,
     val swipeDownAction: GestureAction = GestureAction.NOTIFICATIONS,

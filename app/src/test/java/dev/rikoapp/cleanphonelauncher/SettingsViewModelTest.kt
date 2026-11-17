@@ -31,6 +31,7 @@ class SettingsViewModelTest {
         override val themeMode = MutableStateFlow(ThemeMode.SYSTEM)
         override val colorStyle = MutableStateFlow(AppColorStyle.DYNAMIC)
         override val crashReportingEnabled = MutableStateFlow(false)
+        override val updateCheckEnabled = MutableStateFlow(false)
         override val accentColor = MutableStateFlow(0)
         override val onboardingCompleted = MutableStateFlow(true)
         override val swipeUpAction = MutableStateFlow(GestureAction.APP_DRAWER)
@@ -45,6 +46,7 @@ class SettingsViewModelTest {
         override fun setThemeMode(mode: ThemeMode) { themeMode.value = mode }
         override fun setColorStyle(style: AppColorStyle) { colorStyle.value = style }
         override fun setCrashReportingEnabled(enabled: Boolean) { crashReportingEnabled.value = enabled }
+        override fun setUpdateCheckEnabled(enabled: Boolean) { updateCheckEnabled.value = enabled }
         override fun setAccentColor(color: Int) { accentColor.value = color }
         override fun setOnboardingCompleted(completed: Boolean) { onboardingCompleted.value = completed }
         override fun setSwipeUpAction(action: GestureAction) { swipeUpAction.value = action }
@@ -115,5 +117,15 @@ class SettingsViewModelTest {
         vm.onAction(SettingsScreenAction.OnCrashReportingToggled(true))
         advanceUntilIdle()
         assertEquals(true, vm.state.value.crashReportingEnabled)
+    }
+
+    @Test
+    fun updateCheck_isOffUntilToggled() = runTest(dispatcher) {
+        val vm = viewModel()
+        advanceUntilIdle()
+        assertEquals(false, vm.state.value.updateCheckEnabled)
+        vm.onAction(SettingsScreenAction.OnUpdateCheckToggled(true))
+        advanceUntilIdle()
+        assertEquals(true, vm.state.value.updateCheckEnabled)
     }
 }

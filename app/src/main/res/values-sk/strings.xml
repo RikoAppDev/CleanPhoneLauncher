@@ -74,6 +74,8 @@
     <string name="widget_search">Hľadať widgety</string>
     <string name="settings_crash_reporting">Odosielať správy o páde</string>
     <string name="settings_crash_reporting_desc">Predvolene vypnuté. Odosiela anonymné diagnostické údaje o pádoch cez Firebase na opravu chýb.</string>
+    <string name="settings_update_check">Automaticky hľadať aktualizácie</string>
+    <string name="settings_update_check_desc">Predvolene vypnuté. Pri spustení sa cez Firebase (Google) overí, či vyšla novšia verzia; použije sa náhodné ID inštalácie. Ručne to môžeš skontrolovať vždy nižšie.</string>
     <string name="settings_test_crash">Vynútiť testovací pád (debug)</string>
     <string name="theme_system">Systémová</string>
     <string name="theme_light">Svetlá</string>

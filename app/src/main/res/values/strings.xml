@@ -74,6 +74,8 @@
     <string name="widget_search">Search widgets</string>
     <string name="settings_crash_reporting">Send crash reports</string>
     <string name="settings_crash_reporting_desc">Off by default. Sends anonymous crash diagnostics via Firebase to help fix bugs.</string>
+    <string name="settings_update_check">Check for updates automatically</string>
+    <string name="settings_update_check_desc">Off by default. At startup, asks Firebase (Google) whether a newer version is out, using a random install ID. You can always check by hand below.</string>
     <string name="settings_test_crash">Force test crash (debug)</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>

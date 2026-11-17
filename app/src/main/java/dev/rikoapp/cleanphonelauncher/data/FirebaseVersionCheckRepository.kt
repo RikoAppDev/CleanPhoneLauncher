@@ -3,6 +3,8 @@ package dev.rikoapp.cleanphonelauncher.data
 import android.app.Application
 import android.content.Context
 import com.google.android.gms.tasks.Task
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import dev.rikoapp.cleanphonelauncher.BuildConfig
@@ -18,6 +20,7 @@ class FirebaseVersionCheckRepository(
 ) : VersionCheckRepository {
 
     private val prefs = context.getSharedPreferences("version_check", Context.MODE_PRIVATE)
+    private val appUpdateManager = AppUpdateManagerFactory.create(context)
 
     @Volatile
     private var lastSeenLatest = 0L
@@ -46,11 +49,14 @@ class FirebaseVersionCheckRepository(
         val url = rc.getString(KEY_URL).ifBlank { DEFAULT_STORE_URL }
         lastSeenLatest = latest
 
-        return when {
-            min > current -> VersionState.ForceUpgrade(url)
-            latest > current && prefs.getLong(KEY_WARNED, 0L) < latest -> VersionState.WarnUpgrade(url)
-            else -> VersionState.Ok
-        }
+        return versionState(
+            current = current,
+            min = min,
+            latest = latest,
+            warned = prefs.getLong(KEY_WARNED, 0L),
+            playHasUpdate = if (min > current || latest > current) playHasUpdate() else null,
+            storeUrl = url
+        )
     }
 
     override suspend fun forceCheck(): UpdateCheckResult {
@@ -73,16 +79,28 @@ class FirebaseVersionCheckRepository(
         val latest = rc.getLong(KEY_LATEST)
         val url = rc.getString(KEY_URL).ifBlank { DEFAULT_STORE_URL }
         lastSeenLatest = latest
-        return if (latest > current) {
-            UpdateCheckResult.UpdateAvailable(url)
-        } else {
-            UpdateCheckResult.UpToDate
-        }
+        return updateCheckResult(
+            current = current,
+            latest = latest,
+            playHasUpdate = if (latest > current) playHasUpdate() else null,
+            storeUrl = url
+        )
     }
 
     override fun dismissWarn() {
         prefs.edit().putLong(KEY_WARNED, lastSeenLatest).apply()
     }
+
+    // Remote Config hears about a release as soon as CI uploads it to the internal track, but
+    // closed testers and production users only get it after review and promotion. Play knows what
+    // this install's track offers. null means Play can't tell (e.g. not installed from Play).
+    private suspend fun playHasUpdate(): Boolean? = runCatching {
+        when (appUpdateManager.appUpdateInfo.await().updateAvailability()) {
+            UpdateAvailability.UPDATE_AVAILABLE -> true
+            UpdateAvailability.UPDATE_NOT_AVAILABLE -> false
+            else -> null
+        }
+    }.getOrNull()
 
     private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
         addOnSuccessListener { cont.resume(it) }
@@ -100,3 +118,30 @@ class FirebaseVersionCheckRepository(
             "https://play.google.com/store/apps/details?id=dev.rikoapp.cleanphonelauncher"
     }
 }
+
+internal fun versionState(
+    current: Long,
+    min: Long,
+    latest: Long,
+    warned: Long,
+    playHasUpdate: Boolean?,
+    storeUrl: String
+): VersionState = when {
+    // A forced update the track doesn't offer yet would lock the user out of their home screen.
+    playHasUpdate == false -> VersionState.Ok
+    min > current -> VersionState.ForceUpgrade(storeUrl)
+    latest > current && warned < latest -> VersionState.WarnUpgrade(storeUrl)
+    else -> VersionState.Ok
+}
+
+internal fun updateCheckResult(
+    current: Long,
+    latest: Long,
+    playHasUpdate: Boolean?,
+    storeUrl: String
+): UpdateCheckResult =
+    if (latest > current && playHasUpdate != false) {
+        UpdateCheckResult.UpdateAvailable(storeUrl)
+    } else {
+        UpdateCheckResult.UpToDate
+    }

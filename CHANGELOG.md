@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); versioni
 
 ## [Unreleased]
 
+### Changed
+- **Automatic update check is now opt-in.** The check at startup sends a random Firebase installation ID, so it is off by default and turned on in **Settings → Privacy → Check for updates automatically**. The manual **Check for updates** button works either way.
+
+### Fixed
+- **No more "update available" for builds you can't get yet.** A new release reaches the internal test track first, so closed testers were prompted for an update their Play track didn't offer. The launcher now asks Google Play whether this install can actually update before showing the prompt, and never forces an update that Play doesn't offer.
+
+## [1.28.6]
+
 ### Fixed
 - **App drawer no longer gets extra side margins with gesture navigation.** The drawer reserved Android's back-gesture edge zones as padding, so with swipe gestures the search bar, app list and letter index sat noticeably further from the screen edges than with button navigation. It now uses the same insets as the other screens.
 
